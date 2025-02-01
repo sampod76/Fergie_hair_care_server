@@ -1,6 +1,6 @@
 import { Schema, Types } from 'mongoose';
 import { z } from 'zod';
-import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { I_STATUS } from '../../../global/enum_constant_type';
 import { IFileAfterUpload } from '../../interface/fileUpload';
 import { I_USER_ROLE, IUser, USER_ROLE_ARRAY } from './user/user.interface';
 //
