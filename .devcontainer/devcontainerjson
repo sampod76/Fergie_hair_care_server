@@ -1,0 +1,25 @@
+{
+    "name": "fergie",
+    "image": "node:20",
+    "workspaceFolder": "/app",
+    "mounts": [
+      //build mount for your local project
+      "source=/c/Users/Sampod/Desktop/BdCalling/5_Fergie_hair_care/Fergie_hair_care_server,target=/app,type=bind",
+      //Named volume for logs (similar to: -v ts-docker-logs://app/logger)
+      "source=fergielogger,target=/app/logger,type=volume",
+      // Anonymous volume for node_modules (similar to: -v //app/node_modules)
+      "target=/app/node_modules,type=volume"
+    ],
+    "runArgs": [
+      "--name",
+      "fergiecontainer",
+      "-p",
+      "5007:5007",
+      "-p",
+      "5008:5008",
+      "--rm"
+    ],
+    "postCreateCommand": "yarn install"
+  }
+  
+  //https://web.programming-hero.com/l2-b1-special-consideration-course-part-2/video/l2-b1-special-consideration-course-part-2-3-9-running-a-container-directly-with-vs-code
