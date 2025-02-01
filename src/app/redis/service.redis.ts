@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ENUM_REDIS_KEY, subscribeArray } from './consent.redis';
 import { redisClient, subRedis } from './redis';
-import { deleteAllKeys } from './utls.redis';
 
 export const findAllSocketsIdsFromUserId = async (userId: string) => {
   let cursor = '0';
@@ -91,15 +90,15 @@ export const findDataByUserIdAndSocketId = async (
 
 export const RedisRunFunction = async () => {
   //------------------------redis to all old user key remove---------------
-  deleteAllKeys(ENUM_REDIS_KEY.socket_user + '*')
-    .then(() => {
-      console.log('All Redis keys deleted');
-    })
-    .catch(err => {
-      console.error('Error deleting keys:', err);
-    });
-  // const res = await redisClient.flushall('ASYNC');
-  // console.log('🚀 ~ RedisRunFunction ~ res:'.red, res);
+  // deleteAllKeys(ENUM_REDIS_KEY.socket_user + '*')
+  //   .then(() => {
+  //     console.log('All Redis keys deleted');
+  //   })
+  //   .catch(err => {
+  //     console.error('Error deleting keys:', err);
+  //   });
+  const res = await redisClient.flushall('ASYNC');
+  console.log('🚀 ~ Redis flushall:'.red, res);
   //------------------------- delete all keys-----------------------
   const sub = await subRedis.subscribe(...subscribeArray);
 

@@ -10,13 +10,14 @@ import { ILocation } from '../../app/modules/allUser/typesAndConst';
 export const mongooseFileSchema = new Schema<IFileAfterUpload>(
   {
     url: String,
+    originalUrl: String,
     durl: String,
     mimetype: String,
     filename: String,
-    fieldname: String,
     server_url: String,
     path: String,
     cdn: String,
+    uid: String,
     platform: {
       type: String,
       enum: I_IMAGE_PLATFORM_ARRAY,
@@ -31,12 +32,14 @@ export const mongooseFileSchema = new Schema<IFileAfterUpload>(
 export const zodFileAfterUploadSchema = z.object(
   {
     mimetype: z.string(),
+    originalUrl: z.string().optional(),
     server_url: z.string().optional(),
+    modifyFileName: z.string().optional(),
+
     path: z.string().optional(),
     filename: z.string().optional(),
-    fieldname: z.string().optional(),
-    // url: z.string().optional(),
-    url: z.string().optional(),
+    uid: z.string().optional(),
+    url: z.string(),
     cdn: z.string().optional(),
     durl: z.string().optional(),
     platform: z.string(), // Assuming IImagePlatform is a string type

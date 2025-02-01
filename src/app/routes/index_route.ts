@@ -15,11 +15,7 @@ import { AdminSettingRoute } from '../modules/adminSetting/route.adminSetting';
 
 import { EmployeeUserRoutes } from '../modules/allUser/employee/route.employee';
 import { HrAdminRoutes } from '../modules/allUser/hrAdmin/route.hrAdmin';
-import { CheckInOutRoute } from '../modules/checkInOut/route.checkInOut';
 
-import { LeaveManagementRoute } from '../modules/leaveManagment/route.leaveManagement';
-import { ProjectRoute } from '../modules/project/route.project';
-import { TaskManagementRoute } from '../modules/taskManagement/route.taskManagement';
 import { FriendShipsRoute } from '../modules/messageing/friendship/friendship.route';
 import { ChatMessageRoute } from '../modules/messageing/message/messages.route';
 
@@ -46,22 +42,6 @@ const moduleRoutes = [
   {
     path: '/employee',
     route: EmployeeUserRoutes,
-  },
-  {
-    path: '/projects',
-    route: ProjectRoute,
-  },
-  {
-    path: '/task-management',
-    route: TaskManagementRoute,
-  },
-  {
-    path: '/checkin-checkout',
-    route: CheckInOutRoute,
-  },
-  {
-    path: '/leaves',
-    route: LeaveManagementRoute,
   },
 
   {
