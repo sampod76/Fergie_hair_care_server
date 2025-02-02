@@ -25,7 +25,7 @@ const ProductCategorySchema = new Schema<
     },
 
     image: mongooseFileSchema,
-    files: [mongooseFileSchema],
+
     serialNumber: {
       type: Number,
       default: 0,

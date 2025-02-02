@@ -9,7 +9,7 @@ const createProductCategoryBodyData = z.object({
   image: zodFileAfterUploadSchema
     .or(z.array(zodFileAfterUploadSchema))
     .optional(),
-  files: z.array(zodFileAfterUploadSchema),
+
   status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
   serialNumber: z.number().optional(),
 });

@@ -2,10 +2,44 @@ import { Schema, model } from 'mongoose';
 
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../global/schema/global.schema';
+import { UuidBuilder } from '../../../utils/uuidGenerator';
 import ApiError from '../../errors/ApiError';
 import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
 import { redisClient } from '../../redis/redis';
 import { CategoryModel, ICategory } from './interface.category';
+const childCategorySchema = new Schema(
+  {
+    title: {
+      type: String,
+    },
+    subTitle: {
+      type: String,
+    },
+    uid: {
+      type: String,
+    },
+    serialNumber: {
+      type: Number,
+    },
+    children: [
+      {
+        title: {
+          type: String,
+        },
+        subTitle: {
+          type: String,
+        },
+        uid: {
+          type: String,
+        },
+        serialNumber: {
+          type: Number,
+        },
+      },
+    ],
+  },
+  { _id: false },
+);
 const CategorySchema = new Schema<ICategory, CategoryModel>(
   {
     title: {
@@ -17,9 +51,18 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
     subTitle: {
       type: String,
     },
-
+    children: [childCategorySchema],
+    uid: {
+      type: String,
+      trim: true,
+      index: true,
+      default: function () {
+        const uuidGenerate = new UuidBuilder();
+        return uuidGenerate.generateUuid();
+      },
+    },
     image: mongooseFileSchema,
-    files: [mongooseFileSchema],
+
     serialNumber: {
       type: Number,
       default: 0,
