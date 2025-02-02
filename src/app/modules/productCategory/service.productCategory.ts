@@ -8,42 +8,45 @@ import { IPaginationOption } from '../../interface/pagination';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
-import { CATEGORY_SEARCHABLE_FIELDS } from './consent.category';
-import { ICategory, ICategoryFilters } from './interface.category';
-import { Category } from './model.category';
+import { productCategory_SEARCHABLE_FIELDS } from './consent.productCategory';
+import {
+  IProductCategory,
+  IProductCategoryFilters,
+} from './interface.productCategory';
+import { ProductCategory } from './model.productCategory';
 
-const createCategoryByDb = async (
-  payload: ICategory,
+const createProductCategoryByDb = async (
+  payload: IProductCategory,
   req: Request,
-): Promise<ICategory> => {
+): Promise<IProductCategory> => {
   const [findAlreadyExists, findIndex] = await Promise.all([
-    Category.findOne({
+    ProductCategory.findOne({
       title: { $regex: new RegExp(`^${payload.title}$`, 'i') },
 
       isDelete: false,
     }),
-    Category.findOne({
+    ProductCategory.findOne({
       isDelete: false,
     }).sort({ serialNumber: -1 }),
   ]);
 
   if (findAlreadyExists) {
-    throw new ApiError(400, 'This Category already Exist');
+    throw new ApiError(400, 'This ProductCategory already Exist');
   }
   payload.serialNumber = findIndex?.serialNumber
     ? findIndex?.serialNumber + 1
     : 1;
 
-  const result = await Category.create(payload);
+  const result = await ProductCategory.create(payload);
   return result;
 };
 
-//getAllCategoryFromDb
-const getAllCategoryFromDb = async (
-  filters: ICategoryFilters,
+//getAllProductCategoryFromDb
+const getAllProductCategoryFromDb = async (
+  filters: IProductCategoryFilters,
   paginationOptions: IPaginationOption,
   req: Request,
-): Promise<IGenericResponse<ICategory[]>> => {
+): Promise<IGenericResponse<IProductCategory[]>> => {
   //****************search and filters start************/
   const { searchTerm, ...filtersData } = filters;
 
@@ -55,7 +58,7 @@ const getAllCategoryFromDb = async (
   const andConditions = [];
   if (searchTerm) {
     andConditions.push({
-      $or: CATEGORY_SEARCHABLE_FIELDS.map(field => ({
+      $or: productCategory_SEARCHABLE_FIELDS.map(field => ({
         [field]: {
           $regex: searchTerm,
           $options: 'i',
@@ -87,7 +90,7 @@ const getAllCategoryFromDb = async (
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  // const result = await Category.find(whereConditions)
+  // const result = await ProductCategory.find(whereConditions)
   //   .populate('thumbnail')
   //   .sort(sortConditions)
   //   .skip(Number(skip))
@@ -99,8 +102,8 @@ const getAllCategoryFromDb = async (
     { $limit: Number(limit) || 10 },
   ];
 
-  // const result = await Category.aggregate(pipeline);
-  // const total = await Category.countDocuments(whereConditions);
+  // const result = await ProductCategory.aggregate(pipeline);
+  // const total = await ProductCategory.countDocuments(whereConditions);
   // const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_Categories);
   // if (getRedis) {
   //   const redisData = JSON.parse(getRedis);
@@ -114,7 +117,7 @@ const getAllCategoryFromDb = async (
   //   };
   // }
   //!-- alternatively and faster
-  const pipeLineResult = await Category.aggregate([
+  const pipeLineResult = await ProductCategory.aggregate([
     {
       $facet: {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -144,18 +147,18 @@ const getAllCategoryFromDb = async (
   };
 };
 
-// get single Categorye form db
-const getSingleCategoryFromDb = async (
+// get single ProductCategorye form db
+const getSingleProductCategoryFromDb = async (
   id: string,
-  filters: ICategoryFilters,
+  filters: IProductCategoryFilters,
   req: Request,
-): Promise<ICategory | null> => {
+): Promise<IProductCategory | null> => {
   const pipeline: PipelineStage[] = [
     { $match: { _id: new Types.ObjectId(id) } },
     ///***************** */ images field ******start
   ];
 
-  const result = await Category.aggregate(pipeline);
+  const result = await ProductCategory.aggregate(pipeline);
   if (result.length) {
     if (result[0].isDelete === true) {
       result[0] = [];
@@ -164,14 +167,14 @@ const getSingleCategoryFromDb = async (
   return result[0];
 };
 
-// update Categorye form db
-const updateCategoryFromDb = async (
+// update ProductCategorye form db
+const updateProductCategoryFromDb = async (
   id: string,
-  payload: Partial<ICategory>,
+  payload: Partial<IProductCategory>,
   req: Request,
-): Promise<ICategory | null> => {
+): Promise<IProductCategory | null> => {
   if (payload.serialNumber) {
-    const updateAnotherSerialNumber = await Category.updateMany(
+    const updateAnotherSerialNumber = await ProductCategory.updateMany(
       {
         serialNumber: { $gte: payload.serialNumber },
       },
@@ -180,27 +183,27 @@ const updateCategoryFromDb = async (
       },
     );
   }
-  const result = await Category.findOneAndUpdate({ _id: id }, payload, {
+  const result = await ProductCategory.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
 
   return result;
 };
 
-// delete Categorye form db
-const deleteCategoryByIdFromDb = async (
+// delete ProductCategorye form db
+const deleteProductCategoryByIdFromDb = async (
   id: string,
-  query: ICategoryFilters,
+  query: IProductCategoryFilters,
   req: Request,
-): Promise<ICategory | null> => {
-  const isExist = (await Category.findById(id)) as ICategory & {
+): Promise<IProductCategory | null> => {
+  const isExist = (await ProductCategory.findById(id)) as IProductCategory & {
     _id: Schema.Types.ObjectId;
   };
   if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'ProductCategory not found');
   }
 
-  const result = await Category.findOneAndUpdate(
+  const result = await ProductCategory.findOneAndUpdate(
     { _id: id },
     { isDelete: true },
     { new: true, runValidators: true },
@@ -211,13 +214,13 @@ const deleteCategoryByIdFromDb = async (
   return result;
 };
 //
-const updateCategorySerialNumberFromDb = async (
+const updateProductCategorySerialNumberFromDb = async (
   payload: { _id: string; number: number }[],
-): Promise<ICategory[] | null> => {
+): Promise<IProductCategory[] | null> => {
   const premissAll: any = [];
   for (let i = 0; i < payload.length; i++) {
     premissAll.push(
-      Category.findByIdAndUpdate(
+      ProductCategory.findByIdAndUpdate(
         payload[i]._id,
         { serialNumber: payload[i].number },
         { new: true, runValidators: true },
@@ -229,12 +232,12 @@ const updateCategorySerialNumberFromDb = async (
   return result;
 };
 
-export const CategoryService = {
-  createCategoryByDb,
-  getAllCategoryFromDb,
-  getSingleCategoryFromDb,
-  updateCategoryFromDb,
-  deleteCategoryByIdFromDb,
+export const ProductCategoryService = {
+  createProductCategoryByDb,
+  getAllProductCategoryFromDb,
+  getSingleProductCategoryFromDb,
+  updateProductCategoryFromDb,
+  deleteProductCategoryByIdFromDb,
   //
-  updateCategorySerialNumberFromDb,
+  updateProductCategorySerialNumberFromDb,
 };

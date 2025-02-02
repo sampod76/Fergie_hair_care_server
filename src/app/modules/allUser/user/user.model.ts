@@ -135,9 +135,7 @@ userSchema.statics.isUserFindMethod = async function (
   } else if (query.email) {
     match.email = query.email;
   }
-  if (query.company) {
-    match.company = query.company;
-  }
+
   //
   if (option?.isDelete) {
     match.isDelete = option.isDelete;

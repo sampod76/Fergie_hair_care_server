@@ -16,6 +16,7 @@ import { AdminSettingRoute } from '../modules/adminSetting/route.adminSetting';
 import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalUser';
 import { FriendShipsRoute } from '../modules/messageingModules/friendship/friendship.route';
 import { ChatMessageRoute } from '../modules/messageingModules/message/messages.route';
+import { ProductCategoryRoute } from '../modules/productCategory/route.productCategory';
 
 const router = express.Router();
 
@@ -46,6 +47,10 @@ const moduleRoutes = [
   {
     path: '/category',
     route: CategoryRoute,
+  },
+  {
+    path: '/products-category',
+    route: ProductCategoryRoute,
   },
 
   {
