@@ -38,7 +38,6 @@ export const handler = new Worker(
   ENUM_QUEUE_NAME.email,
   async (job: Job) => {
     try {
-      // const {} = job.data;
       const result = await sendMailHelper(job.data);
 
       //  console.log('🚀 ~ process.pid:', process.pid);

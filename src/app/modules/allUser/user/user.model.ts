@@ -9,7 +9,6 @@ import {
   ENUM_STATUS,
   SOCKET_STATUS_ARRAY,
   STATUS_ARRAY,
-  YN_ARRAY,
 } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { mongooseLocationSchema } from '../../../../global/schema/global.schema';
@@ -305,7 +304,7 @@ const tempUserSchema = new Schema(
 
     isEmailVerify: {
       type: String,
-      enum: YN_ARRAY,
+
       default: false,
     },
     authentication: {

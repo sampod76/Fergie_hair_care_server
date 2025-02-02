@@ -111,6 +111,7 @@ export default {
   nodemailer: {
     auth_user: process.env.NODEMAILER_AUTH_EMAIL,
     auth_pass: process.env.NODEMAILER_AUTH_PASS,
+    default_sender_email: process.env.DEFAULT_SENDER_EMAIL,
   },
   aws: {
     s3: {
@@ -119,6 +120,13 @@ export default {
       region: process.env.AWS_S3_REGION,
       bucket: process.env.AWS_S3_BUCKET_NAME,
       cloudfrontCDN: process.env.AWS_S3_CLOUDFRONT_CDN,
+    },
+    ses: {
+      userName: process.env.AWS_SES_USER_NAME,
+      smptUserName: process.env.AWS_SES_SMTP_USER_NAME,
+      smptPassword: process.env.AWS_SMS_SMTP_PASSWORD,
+      host: process.env.AWS_SES_HOST,
+      default_sender_email: process.env.DEFAULT_SENDER_EMAIL,
     },
   },
   api_response_language: process.env.API_RESPONSE_LANGUAGE,
