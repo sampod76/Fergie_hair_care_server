@@ -1,8 +1,10 @@
-import mongoose, { Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../global/schema/global.schema';
 import ApiError from '../../errors/ApiError';
+import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
+import { redisClient } from '../../redis/redis';
 import { CategoryModel, ICategory } from './interface.category';
 const CategorySchema = new Schema<ICategory, CategoryModel>(
   {
@@ -15,20 +17,22 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
     subTitle: {
       type: String,
     },
+
     image: mongooseFileSchema,
+    files: [mongooseFileSchema],
     serialNumber: {
       type: Number,
-      default: 9999,
+      default: 0,
     },
     status: {
       type: String,
       enum: STATUS_ARRAY,
       default: ENUM_STATUS.ACTIVE,
     },
-
     isDelete: {
       type: Boolean,
       default: false,
+      index: true,
     },
     //--- for --TrashCategory---
     oldRecord: {
@@ -45,37 +49,41 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
   },
 );
 
-CategorySchema.pre('findOneAndDelete', async function (next) {
+CategorySchema.post('findOneAndDelete', async function () {
   try {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     const dataId = this.getFilter();
-    //  console.log(dataId); //{ _id: '6607a2b70d0b8a202a1b81b4' }
-    const { _id, ...data } = (await this.model
-      .findOne({ _id: dataId?._id })
-      .lean()) as { _id: mongoose.Schema.Types.ObjectId; data: any };
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    if (!data?.oldRecord?.refId) {
-      if (_id) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { status, isDelete, createdAt, updatedAt, ...otherData } = data;
-        await TrashCategory.create({
-          ...otherData,
-          oldRecord: { refId: _id, collection: 'categories' },
-        });
-        // or
-        // const result = await DeleteCategory.create(data);
-      } else {
-        throw new ApiError(400, 'Not found this item');
-      }
+    // console.log(dataId); // { _id: '6607a2b70d0b8a202a1b81b4' }
+    const res = await Category.findOne({ _id: dataId?._id }).lean();
+    if (res) {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { status, isDelete, createdAt, updatedAt, ...otherData } = res;
+      await TrashCategory.create({
+        ...otherData,
+      });
+    } else {
+      throw new ApiError(400, 'Not found this item');
     }
-    next();
+    await redisClient.del(ENUM_REDIS_KEY.RIS_Categories);
   } catch (error: any) {
-    next(error);
+    // console.log('🚀 ~ error:', error);
   }
 });
+// after findOneAndUpdate then data then call this hook
+CategorySchema.post(
+  'findOneAndUpdate',
+  async function (data: any & { _id: string }, next: any) {
+    try {
+      await redisClient.del(ENUM_REDIS_KEY.RIS_Categories);
+      // console.log('update');
+      next();
+    } catch (error: any) {
+      next(error);
+    }
+  },
+);
 
 export const Category = model<ICategory, CategoryModel>(
   'Category',

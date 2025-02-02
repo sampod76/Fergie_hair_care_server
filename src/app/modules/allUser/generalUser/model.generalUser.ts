@@ -93,7 +93,7 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
 GeneralSchema.statics.isGeneralUserExistMethod = async function (
   id: string,
   option?: Partial<{
-    isDelete: I_YN;
+    isDelete: boolean;
     populate: boolean;
     needProperty?: string[];
   }>,

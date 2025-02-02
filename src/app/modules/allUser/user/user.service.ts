@@ -18,7 +18,6 @@ import { ENUM_QUEUE_NAME } from '../../../queue/consent.queus';
 import { emailQueue } from '../../../queue/jobs/emailQueues';
 
 import { GeneralUser } from '../generalUser/model.generalUser';
-import { IUserRefAndDetails } from '../typesAndConst';
 import { userSearchableFields } from './user.constant';
 import { ITempUser, IUser, IUserFilters } from './user.interface';
 import { TempUser, User } from './user.model';
@@ -111,7 +110,7 @@ const createTempUserFromDb = async (
   req: Request,
 ): Promise<IUser | null> => {
   const previousUser = await User.findOne({ email: user.email?.toLowerCase() });
-  if (previousUser?.isDelete === ENUM_YN.YES) {
+  if (previousUser?.isDelete === true) {
     throw new ApiError(
       400,
       'The account associated with this email is deleted. Please choose another email.',

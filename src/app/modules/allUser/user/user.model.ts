@@ -8,7 +8,6 @@ import {
   ENUM_SOCKET_STATUS,
   ENUM_STATUS,
   ENUM_YN,
-  I_YN,
   SOCKET_STATUS_ARRAY,
   STATUS_ARRAY,
   YN_ARRAY,
@@ -25,9 +24,7 @@ import { redisClient } from '../../../redis/redis';
 
 import { GeneralUser } from '../generalUser/model.generalUser';
 import { ENUM_VERIFY, VERIFY_ARRAY } from '../typesAndConst';
-import { ENUM_COMPANY_TYPE } from './user.constant';
 import { IUser, USER_ROLE_ARRAY, UserModel } from './user.interface';
-import { ROLE_TYPE_ARRAY } from './zod/generalUser.zod';
 
 const userSchema = new Schema<IUser, UserModel>(
   {
@@ -100,9 +97,9 @@ const userSchema = new Schema<IUser, UserModel>(
       },
     },
     isDelete: {
-      type: String,
-      enum: YN_ARRAY,
-      default: ENUM_YN.NO,
+      type: Boolean,
+
+      default: false,
       index: true,
     },
   },
@@ -117,7 +114,7 @@ const userSchema = new Schema<IUser, UserModel>(
 userSchema.statics.isUserFindMethod = async function (
   query: { id?: string; email?: string; company?: string },
   option?: {
-    isDelete?: I_YN;
+    isDelete?: boolean;
     populate?: boolean;
     password?: boolean;
     needProperty?: string[];
@@ -137,7 +134,7 @@ userSchema.statics.isUserFindMethod = async function (
   if (option?.isDelete) {
     match.isDelete = option.isDelete;
   } else {
-    match.isDelete = ENUM_YN.NO;
+    match.isDelete = false;
   }
   const project: any = { __v: 0, password: 0, secret: 0 };
   if (option?.password) {
@@ -296,11 +293,6 @@ const tempUserSchema = new Schema(
       enum: USER_ROLE_ARRAY,
       default: ENUM_USER_ROLE.generalUser,
     },
-    company: {
-      type: String,
-      enum: ROLE_TYPE_ARRAY,
-      default: ENUM_COMPANY_TYPE.companyOne,
-    },
 
     isEmailVerify: {
       type: String,
@@ -325,9 +317,8 @@ const tempUserSchema = new Schema(
       default: ENUM_STATUS.ACTIVE,
     },
     isDelete: {
-      type: String,
-      enum: YN_ARRAY,
-      default: ENUM_YN.NO,
+      type: Boolean,
+      default: false,
       index: true,
     },
   },

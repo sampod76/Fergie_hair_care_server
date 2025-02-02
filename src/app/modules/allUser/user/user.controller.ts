@@ -9,7 +9,7 @@ import { PAGINATION_FIELDS } from '../../../../global/constant/pagination';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { jwtHelpers } from '../../../../helper/jwtHelpers';
 import ApiError from '../../../errors/ApiError';
-import { findAllSocketsIdsFromUserId } from '../../../redis/service.redis';
+import { RedisAllCustomServiceOop } from '../../../redis/service.redis';
 import catchAsync from '../../../share/catchAsync';
 import pick from '../../../share/pick';
 import sendResponse from '../../../share/sendResponse';
@@ -150,7 +150,8 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
 });
 const isOnline = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.userid;
-  const result = await findAllSocketsIdsFromUserId(userId);
+  const redisOop = new RedisAllCustomServiceOop();
+  const result = await redisOop.findAllSocketsIdsFromUserId(userId);
   sendResponse<any>(req, res, {
     statusCode: httpStatus.OK,
     success: true,

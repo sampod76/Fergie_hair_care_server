@@ -16,6 +16,8 @@ export const createAwsUploadFilesTokenBody = z.object({
   documents: z.array(sign_url_property).optional(),
   certificateDocuments: z.array(sign_url_property).optional(),
   nidOrPassportDocuments: z.array(sign_url_property).optional(),
+  video: sign_url_property.optional(),
+  files: z.array(sign_url_property).optional(),
 });
 
 const createAwsUploadFilesToken = z.object({
@@ -39,14 +41,15 @@ const createAwsUploadFilesToken = z.object({
         (data.nidOrPassportDocuments !== undefined &&
           data.nidOrPassportDocuments.length > 0) ||
         (data.certificateDocuments !== undefined &&
-          data.certificateDocuments.length > 0)
+          data.certificateDocuments.length > 0) ||
+        (data.files !== undefined && data.files.length > 0)
       );
       // return true //if any condition to return true then success
       // return false // if any condition to return false then failure and call next error message
     },
     {
       message:
-        'At least one property (image or images or documents ,nidOrPassportDocuments ,certificateDocuments) must be provided',
+        'At least one property (image or images or documents ,nidOrPassportDocuments ,certificateDocuments ,files) must be provided',
       path: ['body'],
     },
   ),

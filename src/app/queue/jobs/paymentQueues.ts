@@ -1,7 +1,7 @@
 import { Job, Queue, QueueEvents, Worker } from 'bullmq';
 
 import { Types } from 'mongoose';
-import { ENUM_STATUS, ENUM_YN } from '../../../global/enum_constant_type';
+import { ENUM_STATUS } from '../../../global/enum_constant_type';
 import { ISellerUser } from '../../modules/allUser/seller/interface.seller';
 import { IUserRef } from '../../modules/allUser/typesAndConst';
 import { IOrder } from '../../modules/order/interface.order';
@@ -82,7 +82,7 @@ export const handler = new Worker(
         await PaidSellerPaymentHistory.findOneAndUpdate(
           {
             orderId: new Types.ObjectId(findOrder?._id),
-            isDelete: ENUM_YN.NO,
+            isDelete: false,
             'queue.jobId': job.id,
           },
           {
@@ -123,7 +123,7 @@ export const handler = new Worker(
       const PaidSeller = await PaidSellerPaymentHistory.findOneAndUpdate(
         {
           orderId: new Types.ObjectId(orderId),
-          isDelete: ENUM_YN.NO,
+          isDelete: false,
           'queue.jobId': job.id,
         },
         {

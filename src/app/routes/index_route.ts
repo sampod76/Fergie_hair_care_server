@@ -14,8 +14,8 @@ import { adminRoutes } from '../modules/allUser/admin/admin.route';
 import { AdminSettingRoute } from '../modules/adminSetting/route.adminSetting';
 
 import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalUser';
-import { FriendShipsRoute } from '../modules/messageing/friendship/friendship.route';
-import { ChatMessageRoute } from '../modules/messageing/message/messages.route';
+import { FriendShipsRoute } from '../modules/messageingModules/friendship/friendship.route';
+import { ChatMessageRoute } from '../modules/messageingModules/message/messages.route';
 
 const router = express.Router();
 

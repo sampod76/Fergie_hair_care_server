@@ -22,7 +22,7 @@ export type IUserFilters = {
   company?: I_ROLE_TYPE;
   multipleRole?: I_USER_ROLE[];
   status?: I_STATUS;
-  isDelete?: I_YN;
+  isDelete?: string | boolean;
   authUserId?: string;
   needProperty?: string;
   verify?: string;
@@ -65,7 +65,7 @@ export type IUser = {
   };
   verify: I_VERIFY;
   socketStatus: I_SOCKET_STATUS;
-  isDelete: I_YN;
+  isDelete: boolean;
 } & TempUserBody;
 
 export type ITempUser = {
@@ -76,7 +76,7 @@ export type UserModel = {
   isUserFindMethod(
     query: { id?: string; email?: string; company?: string },
     option: {
-      isDelete?: I_YN;
+      isDelete?: boolean;
       populate?: boolean;
       password?: boolean;
       needProperty?: string[];

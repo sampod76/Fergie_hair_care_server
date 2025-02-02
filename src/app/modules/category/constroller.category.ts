@@ -14,9 +14,16 @@ import { CategoryService } from './service.category';
 
 // import { z } from 'zod'
 const createCategory = catchAsync(async (req: Request, res: Response) => {
-  // await RequestToFileDecodeAddBodyHandle(req);
-  // console.log(req.body);
-
+  //-----------------------fil--upload--------------------------
+  //when single file upload. image:{} --> in the multer->fields-> in single file max:1
+  if (Array.isArray(req.body?.image) && req.body?.image?.length) {
+    const singleImage = req.body?.image[0];
+    req.body = {
+      ...req.body,
+      image: singleImage,
+    };
+  }
+  //----------------------------------------------------------------
   const result = await CategoryService.createCategoryByDb(req.body, req);
 
   sendResponse<ICategory>(req, res, {
@@ -25,14 +32,6 @@ const createCategory = catchAsync(async (req: Request, res: Response) => {
     message: 'successful create category',
     data: result,
   });
-  // next();
-  /*
-   res.status(200).send({
-      success: true,
-      data: result,
-      message:('successfully create category'),
-    });
-  */
 });
 
 const getAllCategory = catchAsync(async (req: Request, res: Response) => {
@@ -62,11 +61,14 @@ const getSingleCategory = catchAsync(async (req: Request, res: Response) => {
       throw new ApiError(400, 'invalid id sampod');
     } */
 
-  const result = await CategoryService.getSingleCategoryFromDb(id, req);
+  const filters = pick(req.query, CATEGORY_FILTERABLE_FIELDS);
 
-  /* if (!result) {
-      throw new ApiError(400, 'No data found');
-    } */
+  const result = await CategoryService.getSingleCategoryFromDb(
+    id,
+    filters,
+    req,
+  );
+
   sendResponse<ICategory>(req, res, {
     success: true,
     statusCode: httpStatus.OK,
@@ -76,6 +78,16 @@ const getSingleCategory = catchAsync(async (req: Request, res: Response) => {
 });
 const updateCategory = catchAsync(async (req: Request, res: Response) => {
   //  await RequestToFileDecodeAddBodyHandle(req);
+  //-----------------------fil--upload--------------------------
+  //when single file upload. image:{} --> in the multer->fields-> in single file max:1
+  if (Array.isArray(req.body?.image) && req.body?.image?.length) {
+    const singleImage = req.body?.image[0];
+    req.body = {
+      ...req.body,
+      image: singleImage,
+    };
+  }
+  //----------------------------------------------------------------
   const { id } = req.params;
   const updateData = req.body;
 
@@ -92,6 +104,20 @@ const updateCategory = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const updateCategorySerialNumber = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await CategoryService.updateCategorySerialNumberFromDb(
+      req.body,
+    );
+
+    sendResponse<ICategory[]>(req, res, {
+      success: true,
+      statusCode: httpStatus.OK,
+      message: 'successfully update category',
+      data: result,
+    });
+  },
+);
 
 const deleteCategory = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
@@ -113,4 +139,6 @@ export const CategoryController = {
   getSingleCategory,
   updateCategory,
   deleteCategory,
+  //
+  updateCategorySerialNumber,
 };

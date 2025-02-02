@@ -7,6 +7,7 @@ import { IPaginationOption } from '../../interface/pagination';
 
 import { Request } from 'express';
 import httpStatus from 'http-status';
+import { ENUM_YN } from '../../../global/enum_constant_type';
 import ApiError from '../../errors/ApiError';
 import { CATEGORY_SEARCHABLE_FIELDS } from './consent.category';
 import { ICategory, ICategoryFilters } from './interface.category';
@@ -16,15 +17,25 @@ const createCategoryByDb = async (
   payload: ICategory,
   req: Request,
 ): Promise<ICategory> => {
-  const findAlreadyExists = await Category.findOne({
-    title: payload.title,
-    isDelete: false,
-  });
-  //
+  const [findAlreadyExists, findIndex] = await Promise.all([
+    Category.findOne({
+      title: { $regex: new RegExp(`^${payload.title}$`, 'i') },
+      company: payload.company,
+      isDelete: false,
+    }),
+    Category.findOne({
+      company: payload.company,
+      isDelete: false,
+    }).sort({ serialNumber: -1 }),
+  ]);
 
   if (findAlreadyExists) {
     throw new ApiError(400, 'This Category already Exist');
   }
+  payload.serialNumber = findIndex?.serialNumber
+    ? findIndex?.serialNumber + 1
+    : 1;
+
   const result = await Category.create(payload);
   return result;
 };
@@ -39,10 +50,8 @@ const getAllCategoryFromDb = async (
   const { searchTerm, ...filtersData } = filters;
 
   filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete == 'true'
-      ? true
-      : false
-    : false;
+    ? filtersData.isDelete
+    : ENUM_YN.NO;
   const andConditions = [];
   if (searchTerm) {
     andConditions.push({
@@ -92,6 +101,18 @@ const getAllCategoryFromDb = async (
 
   // const result = await Category.aggregate(pipeline);
   // const total = await Category.countDocuments(whereConditions);
+  // const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_Categories);
+  // if (getRedis) {
+  //   const redisData = JSON.parse(getRedis);
+  //   return {
+  //     meta: {
+  //       page: 1,
+  //       limit: 99999,
+  //       total: redisData.length,
+  //     },
+  //     data: redisData,
+  //   };
+  // }
   //!-- alternatively and faster
   const pipeLineResult = await Category.aggregate([
     {
@@ -111,6 +132,8 @@ const getAllCategoryFromDb = async (
   // Extract and format the pipeLineResults
   const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
   const result = pipeLineResult[0]?.data || []; // Extract data
+  // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
+
   return {
     meta: {
       page,
@@ -124,15 +147,19 @@ const getAllCategoryFromDb = async (
 // get single Categorye form db
 const getSingleCategoryFromDb = async (
   id: string,
+  filters: ICategoryFilters,
   req: Request,
 ): Promise<ICategory | null> => {
   const pipeline: PipelineStage[] = [
     { $match: { _id: new Types.ObjectId(id) } },
     ///***************** */ images field ******start
   ];
+
   const result = await Category.aggregate(pipeline);
-  if (!result.length) {
-    throw new ApiError(400, 'Not found category');
+  if (result.length) {
+    if (result[0].isDelete === ENUM_YN.YES) {
+      result[0] = [];
+    }
   }
   return result[0];
 };
@@ -143,9 +170,20 @@ const updateCategoryFromDb = async (
   payload: Partial<ICategory>,
   req: Request,
 ): Promise<ICategory | null> => {
+  if (payload.serialNumber) {
+    const updateAnotherSerialNumber = await Category.updateMany(
+      {
+        serialNumber: { $gte: payload.serialNumber },
+      },
+      {
+        $inc: { serialNumber: 1 },
+      },
+    );
+  }
   const result = await Category.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
+
   return result;
 };
 
@@ -163,14 +201,18 @@ const deleteCategoryByIdFromDb = async (
   }
 
   let result;
-  if (query.delete == 'yes') {
+  if (query.delete == ENUM_YN.YES) {
     result = await Category.findByIdAndDelete(id);
     if (!result) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
     }
     return result;
   } else {
-    result = await Category.findOneAndUpdate({ _id: id }, { isDelete: true });
+    result = await Category.findOneAndUpdate(
+      { _id: id },
+      { isDelete: ENUM_YN.YES },
+      { new: true, runValidators: true },
+    );
     if (!result) {
       throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
     }
@@ -178,6 +220,23 @@ const deleteCategoryByIdFromDb = async (
   }
 };
 //
+const updateCategorySerialNumberFromDb = async (
+  payload: { _id: string; number: number }[],
+): Promise<ICategory[] | null> => {
+  const premissAll: any = [];
+  for (let i = 0; i < payload.length; i++) {
+    premissAll.push(
+      Category.findByIdAndUpdate(
+        payload[i]._id,
+        { serialNumber: payload[i].number },
+        { new: true, runValidators: true },
+      ),
+    );
+  }
+  const result = await Promise.all(premissAll);
+  // console.log('🚀 ~ result:', result);
+  return result;
+};
 
 export const CategoryService = {
   createCategoryByDb,
@@ -185,4 +244,6 @@ export const CategoryService = {
   getSingleCategoryFromDb,
   updateCategoryFromDb,
   deleteCategoryByIdFromDb,
+  //
+  updateCategorySerialNumberFromDb,
 };

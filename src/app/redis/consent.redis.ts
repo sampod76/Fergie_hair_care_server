@@ -13,6 +13,7 @@ export enum ENUM_REDIS_KEY {
   REDIS_IN_SAVE_ALL_TEXT_FIELDS = 'redis:alltextfields:',
   REDIS_IN_SAVE_ALL_USERS = 'redis:users:',
   REDIS_IN_SAVE_OTHER_DATA = 'redis:otherDate:',
+  RIS_Categories = 'redis:Categories:', //redis:Categories:67110262be5233078d7bff3a
   RIS_senderId_receiverId = 'redis:userIdToFriendShip:', //redis:userIdToFriendShip:sfd44sd:sdfsd4
   RIS_Testimonials = 'redis:Testimonials:', //redis:userIdToFriendShip:sfd44sd:sdfsd4
   RIS_Groups = 'redis:Groups:', //redis:userIdToFriendShip:sfd44sd:sdfsd4

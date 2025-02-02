@@ -16,7 +16,7 @@ export type IGeneralUserFilters = {
   dateOfBirth?: string;
   delete?: I_YN;
   status?: I_STATUS;
-  isDelete?: I_YN;
+  isDelete?: string | boolean;
   company?: I_ROLE_TYPE;
   createdAtFrom?: string;
   createdAtTo?: string;
@@ -33,7 +33,7 @@ export type GeneralUserModel = {
   isGeneralUserExistMethod(
     id: string,
     option: Partial<{
-      isDelete: I_YN;
+      isDelete: boolean;
       populate: boolean;
       needProperty?: string[];
     }>,
