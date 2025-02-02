@@ -5,7 +5,7 @@ import { UserValidation } from '../user/user.validation';
 // const combinedBuyerZodData = UserValidation.BuyerZodData.merge(
 //   UserValidation.authData
 // );
-const combinedHrAdminZodData = UserValidation.hradminBodyData.merge(
+const combinedGeneralUserZodData = UserValidation.generalUserZod_BodyData.merge(
   UserValidation.authData.pick({ email: true }),
 );
 const otherProperties = z.object({
@@ -13,11 +13,11 @@ const otherProperties = z.object({
   isDelete: z.boolean().optional().default(false),
 });
 
-const updateHrAdminZodSchema = z.object({
-  body: combinedHrAdminZodData.merge(otherProperties).deepPartial(),
+const updateGeneralUserSchema = z.object({
+  body: combinedGeneralUserZodData.merge(otherProperties).deepPartial(),
 });
 
-export const HrAdminValidation = {
-  updateHrAdminZodSchema,
-  combinedHrAdminZodData,
+export const GeneralUserValidation = {
+  updateGeneralUserSchema,
+  combinedGeneralUserZodData,
 };

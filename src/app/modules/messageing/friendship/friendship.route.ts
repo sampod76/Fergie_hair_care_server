@@ -14,8 +14,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     FriendShipsController.getAllFriendShips,
   )
@@ -23,8 +23,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
 
     validateRequestZod(friendshipValidation.createfriendshipZodSchema),
@@ -35,8 +35,8 @@ router.route('/check-userid-to-exist-friendship/:id').get(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.hrAdmin,
-    ENUM_USER_ROLE.employee,
+    ENUM_USER_ROLE.vendor,
+    ENUM_USER_ROLE.generalUser,
   ),
 
   FriendShipsController.checkUserIdToExistFriendShip,
@@ -48,8 +48,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(friendshipValidation.friendshipListSortDataZodSchema),
     FriendShipsController.updateFriendShipListSort,
@@ -60,8 +60,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(friendshipValidation.friendshipBlockZodSchema),
     FriendShipsController.updateFriendShipBlock,
@@ -74,8 +74,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(friendshipValidation.updatefriendshipZodSchema),
     FriendShipsController.updateFriendShip,
@@ -84,8 +84,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     FriendShipsController.deleteFriendShip,
   );

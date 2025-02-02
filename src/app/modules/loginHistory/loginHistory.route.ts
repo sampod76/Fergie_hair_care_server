@@ -12,8 +12,8 @@ router
   .route('/')
   .get(
     authMiddleware(
-      ENUM_USER_ROLE.employee,
-      ENUM_USER_ROLE.hrAdmin,
+      ENUM_USER_ROLE.generalUser,
+      ENUM_USER_ROLE.vendor,
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),
@@ -24,8 +24,8 @@ router
   .route('/:id')
   .get(
     authMiddleware(
-      ENUM_USER_ROLE.employee,
-      ENUM_USER_ROLE.hrAdmin,
+      ENUM_USER_ROLE.generalUser,
+      ENUM_USER_ROLE.vendor,
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),
@@ -33,8 +33,8 @@ router
   )
   .patch(
     authMiddleware(
-      ENUM_USER_ROLE.employee,
-      ENUM_USER_ROLE.hrAdmin,
+      ENUM_USER_ROLE.generalUser,
+      ENUM_USER_ROLE.vendor,
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),
@@ -45,8 +45,8 @@ router
   )
   .delete(
     authMiddleware(
-      ENUM_USER_ROLE.employee,
-      ENUM_USER_ROLE.hrAdmin,
+      ENUM_USER_ROLE.generalUser,
+      ENUM_USER_ROLE.vendor,
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),

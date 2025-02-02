@@ -12,8 +12,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     ChatMessagesController.getAllChatMessages,
   );
@@ -24,8 +24,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     ChatMessagesController.getChatMessageById,
   );
@@ -33,7 +33,7 @@ router
 //   authMiddleware(
 //     ENUM_USER_ROLE.admin,
 //     ENUM_USER_ROLE.superAdmin,
-//     ENUM_USER_ROLE.hrAdmin,
+//     ENUM_USER_ROLE.vendor,
 //   ),
 //   ChatMessagesController.deleteChatMessage,
 // );

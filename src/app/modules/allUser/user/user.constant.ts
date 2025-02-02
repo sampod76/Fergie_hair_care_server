@@ -2,10 +2,11 @@ export const userSearchableFields = ['email', 'userUniqueId'];
 
 export const userFilterableFields = [
   'role',
-  'gender',
-  'contactNumber',
   'multipleRole',
   'needProperty',
+  'verify',
+  'company',
+  'authUserId',
   //
   'latitude',
   'longitude',
@@ -16,4 +17,11 @@ export const userFilterableFields = [
   'status',
   'socketStatus',
   'isDelete',
+  'createdAtFrom',
+  'createdAtTo',
 ];
+
+export enum ENUM_COMPANY_TYPE {
+  companyOne = 'companyOne',
+  companyTwo = 'companyTwo',
+}

@@ -1,19 +1,22 @@
-export const HrAdminSearchableFields = [
+export const GeneralUserSearchableFields = [
   'email',
   'name.firstName',
   'name.lastName',
   'address',
   'contactNumber',
+  'userUniqueId',
 ];
 
-export const HrAdminFilterableFields = [
+export const GeneralUserFilterableFields = [
   'userUniqueId',
   'userId',
   'gender',
   'countryName',
+  'authUserId',
   'skills',
   'dateOfBirth',
   'needProperty',
+  'company',
   'verify',
   'createdAtFrom',
   'createdAtTo',

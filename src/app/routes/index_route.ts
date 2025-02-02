@@ -13,9 +13,7 @@ import { adminRoutes } from '../modules/allUser/admin/admin.route';
 
 import { AdminSettingRoute } from '../modules/adminSetting/route.adminSetting';
 
-import { EmployeeUserRoutes } from '../modules/allUser/employee/route.employee';
-import { HrAdminRoutes } from '../modules/allUser/hrAdmin/route.hrAdmin';
-
+import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalUser';
 import { FriendShipsRoute } from '../modules/messageing/friendship/friendship.route';
 import { ChatMessageRoute } from '../modules/messageing/message/messages.route';
 
@@ -36,12 +34,8 @@ const moduleRoutes = [
   },
 
   {
-    path: '/hr-admin',
-    route: HrAdminRoutes,
-  },
-  {
-    path: '/employee',
-    route: EmployeeUserRoutes,
+    path: '/general-users',
+    route: GeneralUserRoutes,
   },
 
   {

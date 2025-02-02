@@ -43,12 +43,12 @@ export type IUserRef = z.infer<typeof zodRefUser>;
 export type IUserRefAndDetails = IUserRef & { details: IUser };
 //--------------------------------------------
 //
-export const VERIFY_ARRAY = ['pending', 'accept', 'cancel'];
-export type I_VERIFY = 'pending' | 'accept' | 'cancel';
+export const VERIFY_ARRAY = ['pending', 'accept', 'reject'];
+export type I_VERIFY = 'pending' | 'accept' | 'reject';
 export enum ENUM_VERIFY {
   PENDING = 'pending',
   ACCEPT = 'accept',
-  CANCEL = 'cancel',
+  CANCEL = 'reject',
 }
 //
 export type ICommonUser = {

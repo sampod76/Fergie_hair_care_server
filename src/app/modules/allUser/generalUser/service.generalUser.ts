@@ -5,6 +5,7 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import mongoose, { PipelineStage, Schema, Types } from 'mongoose';
 
+import { ENUM_YN } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
@@ -14,37 +15,33 @@ import { IPaginationOption } from '../../../interface/pagination';
 import { LookupReusable } from '../../../../helper/lookUpResuable';
 import { ENUM_VERIFY, IUserRef } from '../typesAndConst';
 import { User } from '../user/user.model';
-import { HrAdminSearchableFields } from './constant.hrAdmin';
+import { GeneralUserSearchableFields } from './constant.generalUser';
+import { IGeneralUser, IGeneralUserFilters } from './interface.generalUser';
+import { GeneralUser } from './model.generalUser';
 
-import { IHrAdminUser, IHrAdminUserFilters } from './interface.hrAdmin';
-import { HrAdmin } from './model.hrAdmin';
-
-const createHrAdmin = async (
-  data: IHrAdminUser,
+const createGeneralUser = async (
+  data: IGeneralUser,
   req?: Request,
-): Promise<IHrAdminUser | null> => {
-  const res = await HrAdmin.create(data);
+): Promise<IGeneralUser | null> => {
+  const res = await GeneralUser.create(data);
   return res;
 };
 
-const getAllHrAdminsFromDB = async (
-  filters: IHrAdminUserFilters,
+const getAllGeneralUsersFromDB = async (
+  filters: IGeneralUserFilters,
   paginationOptions: IPaginationOption,
   req: Request,
-): Promise<IGenericResponse<IHrAdminUser[] | null>> => {
+): Promise<IGenericResponse<IGeneralUser[] | null>> => {
   const {
     searchTerm,
     createdAtFrom,
     createdAtTo,
-
     needProperty,
     ...filtersData
   } = filters;
   filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete == 'true'
-      ? true
-      : false
-    : false;
+    ? filtersData.isDelete
+    : ENUM_YN.NO;
   filtersData.verify = filtersData.verify
     ? filtersData.verify
     : ENUM_VERIFY.ACCEPT;
@@ -53,7 +50,7 @@ const getAllHrAdminsFromDB = async (
 
   if (searchTerm) {
     andConditions.push({
-      $or: HrAdminSearchableFields.map((field: string) => ({
+      $or: GeneralUserSearchableFields.map((field: string) => ({
         [field]: {
           $regex: searchTerm,
           $options: 'i',
@@ -78,9 +75,9 @@ const getAllHrAdminsFromDB = async (
           modifyFiled = {
             ['country.name']: new Types.ObjectId(value),
           };
-        } else if (field === 'skills') {
+        } else if (field === 'authUserId') {
           modifyFiled = {
-            [field]: { $in: [...value.split(',')] },
+            ['authUserId']: new Types.ObjectId(value),
           };
         } else if (field === 'dateOfBirth') {
           const timeTo = new Date(value);
@@ -91,17 +88,7 @@ const getAllHrAdminsFromDB = async (
               $lte: new Date(createdAtToModify),
             },
           };
-        }
-        //  else if (field === 'from') {
-        //   modifyFiled = {
-        //     ['from']: { $gte: new Date(value) },
-        //   };
-        // } else if (field === 'to') {
-        //   modifyFiled = {
-        //     ['to']: { $lte: new Date(value) },
-        //   };
-        // }
-        else {
+        } else {
           modifyFiled = { [field]: value };
         }
         // console.log(modifyFiled);
@@ -151,10 +138,11 @@ const getAllHrAdminsFromDB = async (
   const pipeline: PipelineStage[] = [
     { $match: whereConditions },
     { $sort: sortConditions },
-    { $project: { password: 0 } },
+    { $project: { password: 0, secret: 0 } },
     { $skip: Number(skip) || 0 },
     { $limit: Number(limit) || 10 },
   ];
+
   LookupReusable(pipeline, {
     collections: [
       {
@@ -162,15 +150,14 @@ const getAllHrAdminsFromDB = async (
         idFiledName: 'email',
         pipeLineMatchField: 'email',
         outPutFieldName: 'userDetails',
-        project: { password: 0 },
       },
     ],
   });
 
-  // const result = await HrAdmin.aggregate(pipeline);
-  // const total = await HrAdmin.countDocuments(whereConditions);
+  // const result = await GeneralUser.aggregate(pipeline);
+  // const total = await GeneralUser.countDocuments(whereConditions);
   //!-- alternatively and faster
-  const pipeLineResult = await HrAdmin.aggregate([
+  const pipeLineResult = await GeneralUser.aggregate([
     {
       $facet: {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -198,90 +185,90 @@ const getAllHrAdminsFromDB = async (
   };
 };
 
-const updateHrAdminFromDB = async (
+const updateGeneralUserFromDB = async (
   id: string,
-  data: IHrAdminUser,
+  data: IGeneralUser,
   user?: IUserRef,
   req?: Request,
-): Promise<IHrAdminUser | null> => {
-  const isExist = (await HrAdmin.findById(id)) as IHrAdminUser & {
+): Promise<IGeneralUser | null> => {
+  const isExist = (await GeneralUser.findById(id)) as IGeneralUser & {
     _id: Schema.Types.ObjectId;
   };
   if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'HrAdmin not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'GeneralUser not found');
   }
   if (
-    req?.user?.role !== ENUM_USER_ROLE.superAdmin &&
-    req?.user?.role !== ENUM_USER_ROLE.admin &&
-    isExist?._id?.toString() !== req?.user?.roleBaseUserId
+    user?.role !== ENUM_USER_ROLE.superAdmin &&
+    user?.role !== ENUM_USER_ROLE.admin &&
+    isExist?._id?.toString() !== user?.roleBaseUserId
   ) {
     throw new ApiError(403, 'forbidden access');
   }
 
-  const { name, address, ...HrAdminData } = data;
+  const { name, address, ...GeneralUserData } = data;
   if (
-    req?.user?.role !== ENUM_USER_ROLE.superAdmin &&
-    req?.user?.role !== ENUM_USER_ROLE.admin
+    user?.role !== ENUM_USER_ROLE.superAdmin &&
+    user?.role !== ENUM_USER_ROLE.admin
   ) {
-    delete (HrAdminData as Partial<IHrAdminUser>)['isDelete']; // remove it because , any user update time to not update this field , when user apply delete route to modify this field
-    delete (HrAdminData as Partial<IHrAdminUser>)['email'];
-    delete (HrAdminData as Partial<IHrAdminUser>)['userUniqueId'];
-    delete (HrAdminData as Partial<IHrAdminUser>)['verify'];
+    delete (GeneralUserData as Partial<IGeneralUser>)['isDelete']; // remove it because , any user update time to not update this field , when user apply delete route to modify this field
+    delete (GeneralUserData as Partial<IGeneralUser>)['email'];
+    delete (GeneralUserData as Partial<IGeneralUser>)['userUniqueId'];
+    delete (GeneralUserData as Partial<IGeneralUser>)['verify'];
   }
-  const updatedHrAdminData: Partial<IHrAdminUser> = { ...HrAdminData };
+  const updatedGeneralUserData: Partial<IGeneralUser> = { ...GeneralUserData };
 
   if (address && Object.keys(address).length) {
     Object.keys(address).forEach(key => {
-      const nameKey = `address.${key}` as keyof Partial<IHrAdminUser>;
-      (updatedHrAdminData as any)[nameKey] =
+      const nameKey = `address.${key}` as keyof Partial<IGeneralUser>;
+      (updatedGeneralUserData as any)[nameKey] =
         address[key as keyof typeof address];
     });
   }
   if (name && Object.keys(name).length) {
     Object.keys(name).forEach(key => {
-      const nameKey = `name.${key}` as keyof Partial<IHrAdminUser>;
-      (updatedHrAdminData as any)[nameKey] = name[key as keyof typeof name];
+      const nameKey = `name.${key}` as keyof Partial<IGeneralUser>;
+      (updatedGeneralUserData as any)[nameKey] = name[key as keyof typeof name];
     });
   }
-  const updatedHrAdmin = await HrAdmin.findOneAndUpdate(
+  const updatedGeneralUser = await GeneralUser.findOneAndUpdate(
     { _id: id },
-    updatedHrAdminData,
+    updatedGeneralUserData,
     {
       new: true,
       runValidators: true,
     },
   );
-  if (!updatedHrAdmin) {
-    throw new ApiError(400, 'Failed to update HrAdmin');
+  if (!updatedGeneralUser) {
+    throw new ApiError(400, 'Failed to update GeneralUser');
   }
-  return updatedHrAdmin;
+  return updatedGeneralUser;
 };
 
-const getSingleHrAdminFromDB = async (
+const getSingleGeneralUserFromDB = async (
   id: string,
   req: Request,
-): Promise<IHrAdminUser | null> => {
-  const user = await HrAdmin.isHrAdminUserExistMethod(id, {
+): Promise<IGeneralUser | null> => {
+  const user = await GeneralUser.isGeneralUserExistMethod(id, {
     populate: true,
   });
 
   return user;
 };
 
-const deleteHrAdminFromDB = async (
+const deleteGeneralUserFromDB = async (
   id: string,
-  query: IHrAdminUserFilters,
+  query: IGeneralUserFilters,
   req: Request,
-): Promise<IHrAdminUser | null> => {
-  // const isExist = (await HrAdmin.findById(id).select('+password')) as IHrAdminUser & {
+): Promise<IGeneralUser | null> => {
+  // const isExist = (await GeneralUser.findById(id).select('+password')) as IGeneralUser & {
   //   _id: Schema.Types.ObjectId;
   // };
-  const isExist = await HrAdmin.aggregate([
-    { $match: { _id: new Types.ObjectId(id), isDelete: false } },
+  const isExist = await GeneralUser.aggregate([
+    { $match: { _id: new Types.ObjectId(id), isDelete: ENUM_YN.NO } },
   ]);
 
   if (!isExist.length) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'HrAdmin not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'GeneralUser not found');
   }
 
   if (
@@ -308,24 +295,24 @@ const deleteHrAdminFromDB = async (
   let data;
 
   if (
-    query.delete == 'yes' && // this is permanently delete but store trash collection
+    query.delete == ENUM_YN.YES && // this is permanently delete but store trash collection
     (req?.user?.role == ENUM_USER_ROLE.admin ||
       req?.user?.role == ENUM_USER_ROLE.superAdmin)
   ) {
     data = null;
-    // data = await HrAdmin.findOneAndDelete({ _id: id });
+    // data = await GeneralUser.findOneAndDelete({ _id: id });
     /*  const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      data = await HrAdmin.findOneAndDelete({ _id: id });
+      data = await GeneralUser.findOneAndDelete({ _id: id });
       if (!data?.email) {
-        throw new ApiError(400, 'Felid to delete HrAdmin');
+        throw new ApiError(400, 'Felid to delete GeneralUser');
       }
       const deleteUser = (await User.findOneAndDelete({
         email: isExist[0].email,
       })) as IUser;
       if (!deleteUser?.email) {
-        throw new ApiError(400, 'Felid to delete HrAdmin');
+        throw new ApiError(400, 'Felid to delete GeneralUser');
       }
       await session.commitTransaction();
       await session.endSession();
@@ -335,46 +322,46 @@ const deleteHrAdminFromDB = async (
       throw new ApiError(error?.statusCode || 400, error?.message);
     } */
   } else {
-    // data = await HrAdmin.findOneAndUpdate(
+    // data = await GeneralUser.findOneAndUpdate(
     //   { _id: id },
-    //   { isDelete: true },
+    //   { isDelete: ENUM_YN.YES },
     //   { new: true, runValidators: true },
     // );
 
     const session = await mongoose.startSession();
     try {
       session.startTransaction();
-      data = await HrAdmin.findOneAndUpdate(
+      data = await GeneralUser.findOneAndUpdate(
         { _id: id },
-        { isDelete: true },
+        { isDelete: ENUM_YN.YES },
         { new: true, runValidators: true, session },
       );
       if (!data?.email) {
-        throw new ApiError(400, 'Felid to delete HrAdmin');
+        throw new ApiError(400, 'Felid to delete GeneralUser');
       }
       const deleteUser = await User.findOneAndUpdate(
         { email: isExist[0].email },
-        { isDelete: true },
+        { isDelete: ENUM_YN.YES },
         { new: true, runValidators: true, session },
       );
       if (!deleteUser?.email) {
-        throw new ApiError(400, 'Felid to delete HrAdmin');
+        throw new ApiError(400, 'Felid to delete GeneralUser');
       }
       await session.commitTransaction();
       await session.endSession();
     } catch (error: any) {
       await session.abortTransaction();
       await session.endSession();
-      throw new ApiError(error?.statusCode || 400, error?.message);
+      throw new Error(error?.message);
     }
   }
   return data;
 };
 
-export const HrAdminService = {
-  createHrAdmin,
-  getAllHrAdminsFromDB,
-  updateHrAdminFromDB,
-  getSingleHrAdminFromDB,
-  deleteHrAdminFromDB,
+export const GeneralUserService = {
+  createGeneralUser,
+  getAllGeneralUsersFromDB,
+  updateGeneralUserFromDB,
+  getSingleGeneralUserFromDB,
+  deleteGeneralUserFromDB,
 };
