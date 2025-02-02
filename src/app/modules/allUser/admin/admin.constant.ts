@@ -3,6 +3,7 @@ export const adminSearchableFields = [
   'name.firstName',
   'name.lastName',
   'address',
+  'userUniqueId',
 ];
 
 export const adminFilterableFields = [

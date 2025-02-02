@@ -19,8 +19,8 @@ router.post(
   '/log-out-history/:id', // id --> login history _id
   authMiddleware(
     ENUM_USER_ROLE.admin,
-    ENUM_USER_ROLE.hrAdmin,
-    ENUM_USER_ROLE.employee,
+    ENUM_USER_ROLE.vendor,
+    ENUM_USER_ROLE.generalUser,
     ENUM_USER_ROLE.superAdmin,
   ),
   // validateRequestZod(AuthValidation.refreshTokenZodSchema),
@@ -45,8 +45,8 @@ router.post(
   validateRequestZod(AuthValidation.changePasswordZodSchema),
   authMiddleware(
     ENUM_USER_ROLE.admin,
-    ENUM_USER_ROLE.hrAdmin,
-    ENUM_USER_ROLE.employee,
+    ENUM_USER_ROLE.vendor,
+    ENUM_USER_ROLE.generalUser,
     ENUM_USER_ROLE.superAdmin,
   ),
 
@@ -57,8 +57,8 @@ router.get(
   '/profile',
   authMiddleware(
     ENUM_USER_ROLE.admin,
-    ENUM_USER_ROLE.hrAdmin,
-    ENUM_USER_ROLE.employee,
+    ENUM_USER_ROLE.vendor,
+    ENUM_USER_ROLE.generalUser,
     ENUM_USER_ROLE.superAdmin,
   ),
   AuthController.profile,
@@ -91,8 +91,8 @@ router
     apiLimiter(10, 30),
     authMiddleware(
       ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
       ENUM_USER_ROLE.superAdmin,
     ),
     AuthController.enableTwoFactorAuth,
@@ -103,8 +103,8 @@ router
     apiLimiter(10, 30),
     authMiddleware(
       ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
       ENUM_USER_ROLE.superAdmin,
     ),
     AuthController.verifyTwoFactorAuth,

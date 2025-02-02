@@ -7,22 +7,22 @@ import catchAsync from '../../../share/catchAsync';
 import pick from '../../../share/pick';
 import sendResponse from '../../../share/sendResponse';
 import { IUserRef } from '../typesAndConst';
-import { HrAdminFilterableFields } from './constant.hrAdmin';
+import { GeneralUserFilterableFields } from './constant.generalUser';
+import { IGeneralUser } from './interface.generalUser';
+import { GeneralUserService } from './service.generalUser';
 
-import { HrAdminService } from './service.hrAdmin';
-import { IHrAdminUser } from './interface.hrAdmin';
-
-const createHrAdmin = catchAsync(async (req: Request, res: Response) => {
+const createGeneralUser = catchAsync(async (req: Request, res: Response) => {
   //-----------------------fil--upload--------------------------
-  // await RequestToFileDecodeAddBodyHandle(req);
   //when single file upload. image:{} --> in the multer->fields-> in single file max:1
-  /*  if (Array.isArray(req.body?.profileImage) && req.body?.profileImage?.length) {
+  /*
+    if (Array.isArray(req.body?.profileImage) && req.body?.profileImage?.length) {
     const singleImage = req.body?.profileImage[0];
     req.body = {
       ...req.body,
       profileImage: singleImage,
     };
-  } */
+  } 
+    */
   //----------------------------------------------------------------
   let data = req.body;
   if (req?.user?.userId) {
@@ -36,34 +36,34 @@ const createHrAdmin = catchAsync(async (req: Request, res: Response) => {
       },
     };
   }
-  const result = await HrAdminService.createHrAdmin(data, req);
-  sendResponse<IHrAdminUser>(req, res, {
+  const result = await GeneralUserService.createGeneralUser(data, req);
+  sendResponse<IGeneralUser>(req, res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'HrAdmin created successfully',
+    message: 'GeneralUser created successfully',
     data: result,
   });
 });
 
-const getAllHrAdmins = catchAsync(async (req: Request, res: Response) => {
-  const filters = pick(req.query, HrAdminFilterableFields);
+const getAllGeneralUsers = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, GeneralUserFilterableFields);
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
-  const result = await HrAdminService.getAllHrAdminsFromDB(
+  const result = await GeneralUserService.getAllGeneralUsersFromDB(
     filters,
     paginationOptions,
     req,
   );
 
-  sendResponse<IHrAdminUser[]>(req, res, {
+  sendResponse<IGeneralUser[]>(req, res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'Get all HrAdmins',
+    message: 'Get all GeneralUsers',
     data: result.data,
     meta: result.meta,
   });
 });
 
-const updateHrAdmin = catchAsync(async (req: Request, res: Response) => {
+const updateGeneralUser = catchAsync(async (req: Request, res: Response) => {
   //-----------------------fil--upload--------------------------
   // await RequestToFileDecodeAddBodyHandle(req);
   //when single file upload. image:{} --> in the multer->fields-> in single file max:1
@@ -78,46 +78,50 @@ const updateHrAdmin = catchAsync(async (req: Request, res: Response) => {
   const { password, role, authentication, ...data } = req.body;
   const id = req.params.id;
 
-  const result = await HrAdminService.updateHrAdminFromDB(
+  const result = await GeneralUserService.updateGeneralUserFromDB(
     id,
     data,
     req.user as IUserRef,
     req,
   );
-  sendResponse<IHrAdminUser>(req, res, {
+  sendResponse<IGeneralUser>(req, res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'HrAdmin updated successfully',
+    message: 'GeneralUser updated successfully',
     data: result,
   });
 });
 
-const getSingleHrAdmin = catchAsync(async (req: Request, res: Response) => {
+const getSingleGeneralUser = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
-  const result = await HrAdminService.getSingleHrAdminFromDB(id, req);
-  sendResponse<IHrAdminUser>(req, res, {
+  const result = await GeneralUserService.getSingleGeneralUserFromDB(id, req);
+  sendResponse<IGeneralUser>(req, res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'HrAdmin find successfully',
+    message: 'GeneralUser find successfully',
     data: result,
   });
 });
 
-const deleteHrAdmin = catchAsync(async (req: Request, res: Response) => {
+const deleteGeneralUser = catchAsync(async (req: Request, res: Response) => {
   const id = req.params.id;
-  const result = await HrAdminService.deleteHrAdminFromDB(id, req.query, req);
-  sendResponse<IHrAdminUser>(req, res, {
+  const result = await GeneralUserService.deleteGeneralUserFromDB(
+    id,
+    req.query,
+    req,
+  );
+  sendResponse<IGeneralUser>(req, res, {
     statusCode: httpStatus.OK,
     success: true,
-    message: 'HrAdmin deleted successfully',
+    message: 'GeneralUser deleted successfully',
     data: result,
   });
 });
 
-export const HrAdminController = {
-  createHrAdmin,
-  getAllHrAdmins,
-  updateHrAdmin,
-  getSingleHrAdmin,
-  deleteHrAdmin,
+export const GeneralUserController = {
+  createGeneralUser,
+  getAllGeneralUsers,
+  updateGeneralUser,
+  getSingleGeneralUser,
+  deleteGeneralUser,
 };

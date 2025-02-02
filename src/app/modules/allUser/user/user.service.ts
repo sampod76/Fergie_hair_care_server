@@ -2,9 +2,9 @@
 import bcrypt from 'bcrypt';
 import { Request } from 'express';
 import httpStatus from 'http-status';
-import mongoose, { PipelineStage, Schema } from 'mongoose';
+import mongoose, { PipelineStage, Schema, Types } from 'mongoose';
 import { z } from 'zod';
-import { ENUM_STATUS } from '../../../../global/enum_constant_type';
+import { ENUM_STATUS, ENUM_YN } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
@@ -14,12 +14,12 @@ import { Admin } from '../admin/admin.model';
 
 import { LookupAnyRoleDetailsReusable } from '../../../../helper/lookUpResuable';
 
-// import { ENUM_QUEUE_NAME } from '../../../queue/consent.queus';
-// import { emailQueue } from '../../../queue/jobs/emailQueues';
+import { ENUM_QUEUE_NAME } from '../../../queue/consent.queus';
+import { emailQueue } from '../../../queue/jobs/emailQueues';
 
-import { sendMailHelper } from '../../../../utils/sendMail';
-import { EmployeeUser } from '../employee/model.employee';
-import { HrAdmin } from '../hrAdmin/model.hrAdmin';
+import { GeneralUser } from '../generalUser/model.generalUser';
+import { IUserRefAndDetails } from '../typesAndConst';
+import { Vendor } from '../vendor/model.vendor';
 import { userSearchableFields } from './user.constant';
 import { ITempUser, IUser, IUserFilters } from './user.interface';
 import { TempUser, User } from './user.model';
@@ -29,9 +29,11 @@ const createUser = async (
   data: any,
   req: Request,
 ): Promise<IUser | null | any> => {
+  const user = req.user as IUserRefAndDetails;
   // auto generated incremental id
   const authData = data?.authData as z.infer<typeof UserValidation.authData> & {
     userUniqueId: string;
+    company: string;
   };
   const roleData = data[authData?.role];
   // default password
@@ -49,7 +51,7 @@ const createUser = async (
     throw new ApiError(400, 'Failed to get request user');
   }
   if (verifyTempUser?.authentication?.otp !== Number(authData?.tempUser?.otp)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, 'OTP not matching');
+    throw new ApiError(httpStatus.BAD_REQUEST, 'Otp not matching');
   }
   if (
     verifyTempUser?.authentication?.timeOut &&
@@ -57,6 +59,10 @@ const createUser = async (
   ) {
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP has expired');
   }
+  //--add company in verifyTempUser
+  authData.company = verifyTempUser.company;
+  roleData.company = verifyTempUser.company;
+  //
   const session = await mongoose.startSession();
   let createdUser;
   let roleCreate;
@@ -75,12 +81,12 @@ const createUser = async (
       roleCreate = await Admin.create([{ ...roleData, ...authData }], {
         session,
       });
-    } else if (authData?.role === ENUM_USER_ROLE.employee) {
-      roleCreate = await EmployeeUser.create([{ ...roleData, ...authData }], {
+    } else if (authData?.role === ENUM_USER_ROLE.generalUser) {
+      roleCreate = await GeneralUser.create([{ ...roleData, ...authData }], {
         session,
       });
-    } else if (authData?.role === ENUM_USER_ROLE.hrAdmin) {
-      roleCreate = await HrAdmin.create([{ ...roleData, ...authData }], {
+    } else if (authData?.role === ENUM_USER_ROLE.vendor) {
+      roleCreate = await Vendor.create([{ ...roleData, ...authData }], {
         session,
       });
     }
@@ -102,7 +108,7 @@ const createUser = async (
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new ApiError(error?.statusCode || 400, error?.message);
+    throw new Error(error?.message);
   }
   //----------------------------------------------------------------
   return createdUser.length ? createdUser[0] : null;
@@ -113,7 +119,7 @@ const createTempUserFromDb = async (
   req: Request,
 ): Promise<IUser | null> => {
   const previousUser = await User.findOne({ email: user.email?.toLowerCase() });
-  if (previousUser?.isDelete) {
+  if (previousUser?.isDelete === ENUM_YN.YES) {
     throw new ApiError(
       400,
       'The account associated with this email is deleted. Please choose another email.',
@@ -144,11 +150,8 @@ const createTempUserFromDb = async (
   </div>`,
   };
 
-  // const result = await sendMailHelper(emailDate);
   //
-  // const job = await emailQueue.add(ENUM_QUEUE_NAME.email, emailDate);
-  const job = await sendMailHelper(emailDate);
-  console.log('🚀 ~ job:', job);
+  const job = await emailQueue.add(ENUM_QUEUE_NAME.email, emailDate);
   //!--if you want to wait then job is completed then use it
   // const queueResult = await checkEmailQueueResult(job.id as string);
   const createdUser = await TempUser.create({
@@ -165,13 +168,18 @@ const getAllUsersFromDB = async (
   req: Request,
 ): Promise<IGenericResponse<IUser[] | null>> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { searchTerm, needProperty, multipleRole, ...filtersData } = filters;
+  const {
+    searchTerm,
+    needProperty,
+    createdAtFrom,
+    createdAtTo,
+    multipleRole,
+    ...filtersData
+  } = filters;
 
   filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete == 'true'
-      ? true
-      : false
-    : false;
+    ? filtersData.isDelete
+    : ENUM_YN.NO;
 
   const andConditions = [];
 
@@ -187,10 +195,53 @@ const getAllUsersFromDB = async (
   }
 
   if (Object.keys(filtersData).length) {
+    const condition = Object.entries(filtersData).map(
+      //@ts-ignore
+      ([field, value]: [keyof typeof filtersData, string]) => {
+        let modifyFiled;
+        /* 
+        if (field === 'userRoleBaseId' || field === 'referRoleBaseId') {
+        modifyFiled = { [field]: new Types.ObjectId(value) };
+        } else {
+         modifyFiled = { [field]: value };
+         } 
+       */
+        if (field === 'authUserId') {
+          modifyFiled = {
+            ['authUserId']: new Types.ObjectId(value),
+          };
+        } else {
+          modifyFiled = { [field]: value };
+        }
+
+        return modifyFiled;
+      },
+    );
+    //
+    if (createdAtFrom && !createdAtTo) {
+      //only single data in register all data -> 2022-02-25_12:00 am to 2022-02-25_11:59 pm minutes
+      const timeTo = new Date(createdAtFrom);
+      const createdAtToModify = new Date(timeTo.setHours(23, 59, 59, 999));
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtToModify),
+        },
+      });
+    } else if (createdAtFrom && createdAtTo) {
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtTo),
+        },
+      });
+    }
+
+    //
     andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => ({
-        [field]: value,
-      })),
+      $and: condition,
     });
   }
   const { page, limit, skip, sortBy, sortOrder } =
@@ -204,11 +255,11 @@ const getAllUsersFromDB = async (
 
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
-
+  console.log(JSON.stringify(whereConditions));
   const pipeline: PipelineStage[] = [
     { $match: whereConditions },
     { $sort: sortConditions },
-    { $project: { password: 0 } },
+    { $project: { password: 0, secret: 0 } },
     { $skip: Number(skip) || 0 },
     { $limit: Number(limit) || 10 },
     //line 5 in put lookup,
@@ -247,6 +298,74 @@ const getAllUsersFromDB = async (
     data: result[0] as IUser[],
   };
 };
+const dashboardUsersFromDB = async (
+  filters: IUserFilters,
+  paginationOptions: IPaginationOption,
+  req: Request,
+): Promise<IGenericResponse<IUser[] | null>> => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { searchTerm, needProperty, multipleRole, ...filtersData } = filters;
+  filtersData.isDelete = filtersData.isDelete
+    ? filtersData.isDelete
+    : ENUM_YN.NO;
+
+  const andConditions = [];
+
+  if (searchTerm) {
+    andConditions.push({
+      $or: userSearchableFields.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filtersData).length) {
+    andConditions.push({
+      $and: Object.entries(filtersData).map(([field, value]) => ({
+        [field]: value,
+      })),
+    });
+  }
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOptions);
+  const sortConditions: { [key: string]: 1 | -1 } = {};
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+  }
+
+  //****************pagination end ***************/
+
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+
+  const pipeline: PipelineStage[] = [
+    { $match: whereConditions },
+    {
+      $group: {
+        _id: '$company',
+        totalUsers: { $sum: 1 },
+      },
+    },
+  ];
+
+  const resultArray = [User.aggregate(pipeline)];
+  const result = await Promise.all(resultArray);
+
+  // const result = await User.aggregate(pipeline);
+  // const total = await User.countDocuments(whereConditions);
+
+  return {
+    meta: {
+      page,
+      limit,
+      total: 0,
+    },
+    data: result[0] as IUser[],
+  };
+};
 
 const updateUserFromDB = async (
   id: string,
@@ -266,6 +385,13 @@ const updateUserFromDB = async (
   ) {
     throw new ApiError(403, 'Unauthorize user');
   }
+  if (
+    data.verify &&
+    req?.user?.role !== ENUM_USER_ROLE.admin &&
+    req?.user?.role !== ENUM_USER_ROLE.superAdmin
+  ) {
+    throw new ApiError(403, 'Unauthorize Your are not update verify status');
+  }
 
   if (
     (data?.role === ENUM_USER_ROLE.superAdmin ||
@@ -277,7 +403,6 @@ const updateUserFromDB = async (
       'Unauthorize user super admin data not update another user',
     );
   }
-
   let updatedUser;
   const session = await mongoose.startSession();
   try {
@@ -288,27 +413,22 @@ const updateUserFromDB = async (
       runValidators: true,
       session,
     });
-    if (data.status) {
-      let roleUser;
-      if (isExist.role === ENUM_USER_ROLE.employee) {
-        roleUser = await EmployeeUser.findOneAndUpdate(
-          { email: isExist.email },
-          data,
-          { runValidators: true, session },
-        );
-      } else if (isExist.role === ENUM_USER_ROLE.hrAdmin) {
-        roleUser = await HrAdmin.findOneAndUpdate(
-          { email: isExist.email },
-          data,
-          { runValidators: true, session },
-        );
-      } else if (isExist.role === ENUM_USER_ROLE.admin) {
-        roleUser = await Admin.findOneAndUpdate(
-          { email: isExist.email },
-          data,
-          { runValidators: true, session },
-        );
-      }
+
+    let roleUser;
+    if (isExist.role === ENUM_USER_ROLE.generalUser) {
+      roleUser = await GeneralUser.findOneAndUpdate(
+        { email: isExist.email },
+        data,
+        {
+          runValidators: true,
+          session,
+        },
+      );
+    } else if (isExist.role === ENUM_USER_ROLE.admin) {
+      roleUser = await Admin.findOneAndUpdate({ email: isExist.email }, data, {
+        runValidators: true,
+        session,
+      });
     }
 
     if (!updatedUser) {
@@ -319,10 +439,7 @@ const updateUserFromDB = async (
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new ApiError(
-      httpStatus.BAD_REQUEST,
-      error?.message || 'something went wrong',
-    );
+    throw new Error(error?.message);
   }
   return updatedUser;
 };
@@ -340,6 +457,9 @@ const getSingleUserFromDB = async (
     },
   );
 
+  if (!user) {
+    throw new ApiError(400, 'Failed to get user');
+  }
   return user;
 };
 
@@ -384,23 +504,17 @@ const deleteUserFromDB = async (
     session.startTransaction();
     data = await User.findOneAndUpdate(
       { _id: id },
-      { isDelete: true },
+      { isDelete: ENUM_YN.YES },
       { new: true, runValidators: true, session },
     );
     if (!data?._id) {
       throw new ApiError(400, 'Felid to delete user');
     }
     let roleUser;
-    if (data?.role === ENUM_USER_ROLE.employee) {
-      roleUser = await EmployeeUser.findOneAndUpdate(
+    if (data?.role === ENUM_USER_ROLE.generalUser) {
+      roleUser = await GeneralUser.findOneAndUpdate(
         { email: data?.email },
-        { isDelete: true },
-        { runValidators: true, new: true },
-      );
-    } else if (data?.role === ENUM_USER_ROLE.hrAdmin) {
-      roleUser = await HrAdmin.findOneAndUpdate(
-        { email: data?.email },
-        { isDelete: true },
+        { isDelete: ENUM_YN.YES },
         { runValidators: true, new: true },
       );
     } else if (
@@ -409,7 +523,7 @@ const deleteUserFromDB = async (
     ) {
       roleUser = await Admin.findOneAndUpdate(
         { email: data?.email },
-        { isDelete: true },
+        { isDelete: ENUM_YN.YES },
         { runValidators: true, new: true },
       );
     }
@@ -423,7 +537,7 @@ const deleteUserFromDB = async (
   } catch (error: any) {
     await session.abortTransaction();
     await session.endSession();
-    throw new ApiError(error?.statusCode || 400, error?.message);
+    throw new Error(error?.message);
   }
   return data;
 };
@@ -435,4 +549,6 @@ export const UserService = {
   getSingleUserFromDB,
   deleteUserFromDB,
   createTempUserFromDb,
+  //
+  dashboardUsersFromDB,
 };

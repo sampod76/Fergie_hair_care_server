@@ -1,12 +1,15 @@
 import { NextFunction, Request, Response } from 'express';
 import { AnyZodObject, ZodEffects } from 'zod';
+import config from '../../config';
 
 //
 const validateRequestZod =
   (schema: AnyZodObject | ZodEffects<AnyZodObject>) =>
   async (req: Request, res: Response, next: NextFunction) => {
-    console.log('req---body ---.', req.body, '---body end--');
-    // console.log(JSON.parse(req.body?.jsonEncoded))
+    if (config.env !== 'production') {
+      console.log('req---body ---.', req.body, '---body end--');
+    }
+
     try {
       await schema.parseAsync({
         body: req.body,

@@ -36,9 +36,10 @@ export type IFileAfterUpload = {
   mimetype: string;
   server_url?: string;
   filename?: string;
-  fieldname?: string;
+  uid?: string;
   path?: string;
   url?: string;
+  originalUrl?: string;
   durl?: string;
   platform: IImagePlatform;
   cdn?: string; //https://www.youtube.com/watch?v=kbI7kRWAU-w

@@ -6,9 +6,9 @@ import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import parseBodyData from '../../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../../middlewares/validateRequestZod';
 
+import { uploadImage } from '../../../middlewares/uploader.multer';
 import { GroupssController } from './controller.groups';
 import { GroupsValidation } from './validation.groups';
-import { uploadImage } from '../../../middlewares/uploader.multer';
 const router = express.Router();
 
 router
@@ -17,8 +17,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     GroupssController.getAllGroupss,
   )
@@ -26,8 +26,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     uploadImage.fields([
       { name: 'profileImage', maxCount: 1 },
@@ -42,8 +42,8 @@ router.route('/check-userid-to-exist-groups/:id').get(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.hrAdmin,
-    ENUM_USER_ROLE.employee,
+    ENUM_USER_ROLE.vendor,
+    ENUM_USER_ROLE.generalUser,
   ),
 
   GroupssController.checkUserIdToExistGroups,
@@ -55,8 +55,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(GroupsValidation.GroupsListSortDataZodSchema),
     GroupssController.updateGroupsListSort,
@@ -69,8 +69,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(GroupsValidation.updateGroupsZodSchema),
     GroupssController.updateGroups,
@@ -79,8 +79,8 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.hrAdmin,
-      ENUM_USER_ROLE.employee,
+      ENUM_USER_ROLE.vendor,
+      ENUM_USER_ROLE.generalUser,
     ),
     GroupssController.deleteGroups,
   );

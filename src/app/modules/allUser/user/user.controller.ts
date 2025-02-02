@@ -45,16 +45,6 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
     };
   }
 
-  if (req?.body?.profileImage) {
-    req.body = {
-      ...req.body,
-      [authData.role]: {
-        ...req.body[authData.role],
-        profileImage: req.body.profileImage,
-      },
-    };
-  }
-
   //------------------------------------------
   const result = await UserService.createUser(req.body, req);
   sendResponse<IUser>(req, res, {
@@ -103,6 +93,23 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, userFilterableFields);
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
   const result = await UserService.getAllUsersFromDB(
+    filters,
+    paginationOptions,
+    req,
+  );
+
+  sendResponse<IUser[]>(req, res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'Get all users',
+    data: result.data,
+    meta: result.meta,
+  });
+});
+const dashboardUsers = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, userFilterableFields);
+  const paginationOptions = pick(req.query, PAGINATION_FIELDS);
+  const result = await UserService.dashboardUsersFromDB(
     filters,
     paginationOptions,
     req,
@@ -172,4 +179,6 @@ export const UserController = {
   deleteUser,
   createUserTempUser,
   isOnline,
+  //
+  dashboardUsers,
 };

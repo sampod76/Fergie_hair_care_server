@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-this-alias */
 import bcrypt from 'bcrypt';
-import { PipelineStage, Schema, Types, model } from 'mongoose';
+import { model, PipelineStage, Schema, Types } from 'mongoose';
 import config from '../../../../config';
 
 import {
   ENUM_SOCKET_STATUS,
   ENUM_STATUS,
+  ENUM_YN,
+  I_YN,
   SOCKET_STATUS_ARRAY,
   STATUS_ARRAY,
+  YN_ARRAY,
 } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { mongooseLocationSchema } from '../../../../global/schema/global.schema';
@@ -20,9 +23,11 @@ import { LookupAnyRoleDetailsReusable } from '../../../../helper/lookUpResuable'
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
 import { redisClient } from '../../../redis/redis';
 
-import { EmployeeUser } from '../employee/model.employee';
-import { HrAdmin } from '../hrAdmin/model.hrAdmin';
+import { GeneralUser } from '../generalUser/model.generalUser';
+import { ENUM_VERIFY, VERIFY_ARRAY } from '../typesAndConst';
+import { ENUM_COMPANY_TYPE } from './user.constant';
 import { IUser, USER_ROLE_ARRAY, UserModel } from './user.interface';
+import { ROLE_TYPE_ARRAY } from './zod/generalUser.zod';
 
 const userSchema = new Schema<IUser, UserModel>(
   {
@@ -34,7 +39,6 @@ const userSchema = new Schema<IUser, UserModel>(
       type: String,
       // required: true,
     },
-
     email: {
       type: String,
       required: true,
@@ -47,41 +51,59 @@ const userSchema = new Schema<IUser, UserModel>(
       type: String,
       required: true,
       enum: USER_ROLE_ARRAY,
-      default: ENUM_USER_ROLE.employee,
+      default: ENUM_USER_ROLE.generalUser,
     },
+
     password: {
       type: String,
       required: true,
       select: 0,
     },
-
+    //
     //
     authentication: {
       otp: Number,
       timeOut: Date,
       jwtToken: String,
-      //
-      passwordChangeOtp: Number,
-      passwordChangeOtpTimeOut: Date,
+      status: {
+        type: String,
+        enum: STATUS_ARRAY,
+        // default: ENUM_STATUS.ACTIVE,
+      },
     },
     lastActive: {
       createdAt: Date,
     },
-    secret: String,
-    location: mongooseLocationSchema,
+    secret: {
+      // 2FA
+      type: String,
+      select: 0,
+    },
     socketStatus: {
       type: String,
       enum: SOCKET_STATUS_ARRAY,
       default: ENUM_SOCKET_STATUS.OFFLINE,
-    }, // set yourAreOnlineOffline function
+    },
+    location: mongooseLocationSchema,
     status: {
       type: String,
       enum: STATUS_ARRAY,
       default: ENUM_STATUS.ACTIVE,
     },
+    verify: {
+      type: String,
+      enum: VERIFY_ARRAY,
+      default: function () {
+        return this.role === ENUM_USER_ROLE.admin
+          ? ENUM_VERIFY.PENDING
+          : ENUM_VERIFY.ACCEPT;
+      },
+    },
     isDelete: {
-      type: Boolean,
-      default: false,
+      type: String,
+      enum: YN_ARRAY,
+      default: ENUM_YN.NO,
+      index: true,
     },
   },
   {
@@ -93,9 +115,9 @@ const userSchema = new Schema<IUser, UserModel>(
 );
 
 userSchema.statics.isUserFindMethod = async function (
-  query: { id?: string; email?: string },
+  query: { id?: string; email?: string; company?: string },
   option?: {
-    isDelete?: boolean;
+    isDelete?: I_YN;
     populate?: boolean;
     password?: boolean;
     needProperty?: string[];
@@ -108,15 +130,21 @@ userSchema.statics.isUserFindMethod = async function (
   } else if (query.email) {
     match.email = query.email;
   }
+  if (query.company) {
+    match.company = query.company;
+  }
+  //
   if (option?.isDelete) {
     match.isDelete = option.isDelete;
   } else {
-    match.isDelete = false;
+    match.isDelete = ENUM_YN.NO;
   }
-  const project: any = { __v: 0, password: 0 };
+  const project: any = { __v: 0, password: 0, secret: 0 };
   if (option?.password) {
     delete project.password;
   }
+  console.log(match, 'match');
+  //general perpose
   if (!option?.populate) {
     const result = await User.aggregate([
       {
@@ -173,11 +201,11 @@ userSchema.pre('save', async function (next) {
     }
       */
     let roleUser;
-    if (user.role === ENUM_USER_ROLE.employee) {
-      roleUser = await EmployeeUser.findOne({ email: user.email });
-    } else if (user.role === ENUM_USER_ROLE.hrAdmin) {
-      roleUser = await HrAdmin.findOne({ email: user.email });
+    if (user.role === ENUM_USER_ROLE.generalUser) {
+      roleUser = await GeneralUser.findOne({ email: user.email });
     } else if (user.role === ENUM_USER_ROLE.admin) {
+      roleUser = await Admin.findOne({ email: user.email });
+    } else if (user.role === ENUM_USER_ROLE.vendor) {
       roleUser = await Admin.findOne({ email: user.email });
     }
 
@@ -201,11 +229,12 @@ userSchema.pre('save', async function (next) {
 userSchema.post('save', async function (data, next) {
   try {
     data.password = '';
+
     await redisClient.set(
       ENUM_REDIS_KEY.REDIS_IN_SAVE_ALL_USERS + data?._id,
       JSON.stringify(data),
       'EX',
-      24 * 60, // 1 day to second
+      24 * 60 * 60, // 1 day to second
     );
     next();
   } catch (error: any) {
@@ -216,11 +245,23 @@ userSchema.post('save', async function (data, next) {
 userSchema.post('findOneAndUpdate', async function (data, next) {
   try {
     data.password = '';
+    const updatedFields = this.getUpdate();
+    // let roleUser;
+    // //@ts-ignore
+    // if (updatedFields && updatedFields?.$set?.verify) {
+    //   if (data.role === ENUM_USER_ROLE.BUYER) {
+    //     roleUser = await BuyerUser.findOne({ email: data.email });
+    //   } else if (data.role === ENUM_USER_ROLE.generalUser) {
+    //     roleUser = await GeneralUser.findOne({ email: data.email });
+    //   } else if (data.role === ENUM_USER_ROLE.admin) {
+    //     roleUser = await Admin.findOne({ email: data.email });
+    //   }
+    // }
     await redisClient.set(
       ENUM_REDIS_KEY.REDIS_IN_SAVE_ALL_USERS + data?._id,
       JSON.stringify(data),
       'EX',
-      24 * 60, // 1 day to second
+      24 * 60 * 60, // 1 day to second
     );
     next();
   } catch (error: any) {
@@ -253,12 +294,19 @@ const tempUserSchema = new Schema(
       type: String,
       required: true,
       enum: USER_ROLE_ARRAY,
-      default: ENUM_USER_ROLE.employee,
+      default: ENUM_USER_ROLE.generalUser,
     },
-    // isEmailVerify:  {
-    //   type: Boolean,
-    //   default: false,
-    // },
+    company: {
+      type: String,
+      enum: ROLE_TYPE_ARRAY,
+      default: ENUM_COMPANY_TYPE.companyOne,
+    },
+
+    isEmailVerify: {
+      type: String,
+      enum: YN_ARRAY,
+      default: ENUM_YN.NO,
+    },
     authentication: {
       type: {
         otp: Number,
@@ -277,8 +325,10 @@ const tempUserSchema = new Schema(
       default: ENUM_STATUS.ACTIVE,
     },
     isDelete: {
-      type: Boolean,
-      default: false,
+      type: String,
+      enum: YN_ARRAY,
+      default: ENUM_YN.NO,
+      index: true,
     },
   },
   {

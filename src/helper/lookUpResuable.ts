@@ -332,7 +332,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
           employeeInfo: [
             {
               $match: {
-                [roleMatchFiledName]: ENUM_USER_ROLE.employee,
+                [roleMatchFiledName]: ENUM_USER_ROLE.generalUser,
               },
             },
             //!--------------generalUser-------start----------
@@ -389,7 +389,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
           hradminInfo: [
             {
               $match: {
-                [roleMatchFiledName]: ENUM_USER_ROLE.hrAdmin,
+                [roleMatchFiledName]: ENUM_USER_ROLE.vendor,
               },
             },
             //!--------------hostUser-------start----------
@@ -610,7 +610,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
           generalUserInfo: [
             {
               $match: {
-                role: ENUM_USER_ROLE.employee,
+                role: ENUM_USER_ROLE.generalUser,
               },
             },
             //!--------------generalUser-------start----------
@@ -653,7 +653,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
           hostUserInfo: [
             {
               $match: {
-                role: ENUM_USER_ROLE.hrAdmin,
+                role: ENUM_USER_ROLE.vendor,
               },
             },
             //!--------------hostUser-------start----------

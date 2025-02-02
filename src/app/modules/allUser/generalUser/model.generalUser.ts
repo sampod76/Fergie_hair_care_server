@@ -8,19 +8,16 @@ import {
 
 import {
   ENUM_STATUS,
+  ENUM_YN,
+  I_YN,
   STATUS_ARRAY,
 } from '../../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../../global/schema/global.schema';
 import { LookupReusable } from '../../../../helper/lookUpResuable';
-import {
-  ENUM_VERIFY,
-  GENDER_ARRAY,
-  mongooseIUserRef,
-  VERIFY_ARRAY,
-} from '../typesAndConst';
-import { HrAdminUserModel, IHrAdminUser } from './interface.hrAdmin';
+import { ENUM_VERIFY, mongooseIUserRef, VERIFY_ARRAY } from '../typesAndConst';
+import { GeneralUserModel, IGeneralUser } from './interface.generalUser';
 
-const HrAdminSchema = new Schema<IHrAdminUser, HrAdminUserModel>(
+const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
   {
     userUniqueId: {
       type: String,
@@ -35,6 +32,10 @@ const HrAdminSchema = new Schema<IHrAdminUser, HrAdminUserModel>(
       trim: true,
       index: true,
     },
+    authUserId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Vendor', // when general user create vendor
+    },
     name: {
       firstName: { type: String, trim: true },
       lastName: { type: String, trim: true },
@@ -46,12 +47,6 @@ const HrAdminSchema = new Schema<IHrAdminUser, HrAdminUserModel>(
       flag: { url: String },
       isoCode: String,
     },
-    designation: { type: String, trim: true },
-    skills: [{ type: String, trim: true }],
-    biography: {
-      type: String,
-      trim: true,
-    },
     contactNumber: {
       type: String,
       trim: true,
@@ -60,15 +55,16 @@ const HrAdminSchema = new Schema<IHrAdminUser, HrAdminUserModel>(
       type: Date,
       trim: true,
     },
-    gender: {
-      type: String,
-      enum: GENDER_ARRAY,
-    },
+
+    // gender: {
+    //   type: String,
+    //   enum: GENDER_ARRAY,
+    // },
     profileImage: mongooseFileSchema,
     verify: {
       type: String,
       enum: VERIFY_ARRAY,
-      default: ENUM_VERIFY.PENDING,
+      default: ENUM_VERIFY.ACCEPT,
     },
     author: mongooseIUserRef,
     status: {
@@ -79,6 +75,7 @@ const HrAdminSchema = new Schema<IHrAdminUser, HrAdminUserModel>(
     isDelete: {
       type: Boolean,
       default: false,
+      index: true,
     },
   },
   {
@@ -89,25 +86,25 @@ const HrAdminSchema = new Schema<IHrAdminUser, HrAdminUserModel>(
   },
 );
 
-HrAdminSchema.statics.isHrAdminExistMethod = async function (
+GeneralSchema.statics.isGeneralUserExistMethod = async function (
   id: string,
   option?: Partial<{
-    isDelete: boolean;
+    isDelete: I_YN;
     populate: boolean;
     needProperty?: string[];
   }>,
-): Promise<IHrAdminUser | null> {
+): Promise<IGeneralUser | null> {
   let user;
   if (!option?.populate) {
-    const result = await HrAdmin.aggregate([
+    const result = await GeneralUser.aggregate([
       {
         $match: {
           _id: new Types.ObjectId(id),
-          isDelete: option?.isDelete || false,
+          isDelete: option?.isDelete || ENUM_YN.NO,
         },
       },
       {
-        $project: { password: 0 },
+        $project: { password: 0, secret: 0 },
       },
     ]);
     user = result[0];
@@ -116,7 +113,7 @@ HrAdminSchema.statics.isHrAdminExistMethod = async function (
       {
         $match: {
           _id: new Types.ObjectId(id),
-          isDelete: option.isDelete || false,
+          isDelete: option.isDelete || ENUM_YN.NO,
         },
       },
     ];
@@ -127,22 +124,21 @@ HrAdminSchema.statics.isHrAdminExistMethod = async function (
           idFiledName: 'email',
           pipeLineMatchField: 'email',
           outPutFieldName: 'userDetails',
-          project: { password: 0 },
         },
       ],
     });
-    const result = await HrAdmin.aggregate(pipeline);
+    const result = await GeneralUser.aggregate(pipeline);
     user = result[0];
   }
   return user;
 };
 
-HrAdminSchema.pre(
+GeneralSchema.pre(
   'save',
   async function (next: CallbackWithoutResultAndOptionalError) {
     try {
-      // const HrAdmin = this;
-      // const existUser = await HrAdmin.findOne({ userName: HrAdmin?.userName });
+      // const General = this;
+      // const existUser = await General.findOne({ userName: General?.userName });
       // if (existUser) {
       //   throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'User Name already exist');
       // }
@@ -154,7 +150,7 @@ HrAdminSchema.pre(
   },
 );
 
-export const HrAdmin = model<IHrAdminUser, HrAdminUserModel>(
-  'HrAdmin',
-  HrAdminSchema,
+export const GeneralUser = model<IGeneralUser, GeneralUserModel>(
+  'GeneralUser',
+  GeneralSchema,
 );

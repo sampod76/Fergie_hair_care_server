@@ -4,12 +4,14 @@ import httpStatus from 'http-status';
 import { I_STATUS, STATUS_ARRAY } from '../../../../global/enum_constant_type';
 import { zodFileAfterUploadSchema } from '../../../../global/schema/global.schema';
 import ApiError from '../../../errors/ApiError';
-import { GENDER_ARRAY } from '../typesAndConst';
-import { I_USER_ROLE, USER_ROLE_ARRAY } from './user.interface';
-import { employeeZodSchema } from './zod/employee.zod';
-import { hrAdminZodSchema } from './zod/hrAdmin.zod';
+import { I_VERIFY, VERIFY_ARRAY } from '../typesAndConst';
+import { I_ROLE_TYPE, I_USER_ROLE, USER_ROLE_ARRAY } from './user.interface';
 
-export const authData = z.object({
+import { ENUM_USER_ROLE } from '../../../../global/enums/users';
+import { ROLE_TYPE_ARRAY, generalUserSchema } from './zod/generalUser.zod';
+import { vendorUserSchema } from './zod/vendorUserZod';
+
+const authData = z.object({
   email: z
     .string({
       required_error: 'Email is required',
@@ -21,7 +23,7 @@ export const authData = z.object({
   password: z.string({
     required_error: 'Password is required.',
   }),
-  userName: z.string({ required_error: 'User name is required' }).optional(),
+  // userName: z.string({ required_error: 'User name is required' }),
   tempUser: z.object({
     tempUserId: z.string({ required_error: 'Temp user id is required' }),
     otp: z.union([
@@ -40,39 +42,46 @@ export const basicZodData = z.object({
     lastName: z.string({ required_error: 'Last name is required' }),
   }),
   // userName: z.string({ required_error: 'User name is required' }).optional(),
-  contactNumber: z.string({ required_error: 'Contact number is required' }),
-  biography: z.string().max(5000).optional(),
-  gender: z
-    .enum([...GENDER_ARRAY] as [string, ...string[]], {
-      required_error: 'Gender is required',
-    })
+  contactNumber: z
+    .string({ required_error: 'Contact number is required' })
     .optional(),
+  biography: z.string().max(5000).optional(),
+  // gender: z
+  //   .enum([...GENDER_ARRAY] as [string, ...string[]],)
+  //   .optional(),
   dateOfBirth: z.string().optional(),
   profileImage: zodFileAfterUploadSchema.optional(),
   // location: zodLocationSchema.optional(),
-  address: z.object({ area: z.string().optional() }).optional(),
+  address: z.object({ area: z.string().optional() }),
 });
 
-export const adminBodyData = basicZodData.merge(
-  employeeZodSchema.pick({ nid: true, passport: true }),
-);
+export const adminZod_BodyData = basicZodData;
 
-export const hradminBodyData = basicZodData.merge(hrAdminZodSchema);
-export const employeeBodyData = basicZodData.merge(employeeZodSchema);
+export const generalUserZod_BodyData = basicZodData.merge(generalUserSchema);
+export const vendorUserZod_BodyData = basicZodData.merge(vendorUserSchema);
 
 const createUserZodSchema = z
   .object({
     body: z.object({
       authData: authData,
-      admin: adminBodyData.optional(),
-      hrAdmin: hradminBodyData.optional(),
-      employee: employeeBodyData.optional(),
+      admin: adminZod_BodyData.optional(),
+      generalUser: generalUserZod_BodyData.optional(),
+      vendor: vendorUserZod_BodyData.optional(),
     }),
   })
   .refine(
     bodyData => {
       const role = bodyData.body.authData.role;
       if (role in bodyData.body) {
+        // if (
+        //   role === ENUM_USER_ROLE.generalUser &&
+        //   !bodyData.body.authData.userName
+        // ) {
+        //   throw new ApiError(
+        //     httpStatus.NOT_ACCEPTABLE,
+        //     'User name is required',
+        //   );
+        // }
         return true;
       } else {
         throw new ApiError(
@@ -90,26 +99,42 @@ const createUserZodSchema = z
 //
 const updateUserZodSchema = z.object({
   body: z.object({
-    isDelete: z.boolean().optional().default(false),
     status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
+    verify: z.enum(VERIFY_ARRAY as [I_VERIFY, ...I_VERIFY[]]).optional(),
   }),
 });
 
-const tempUser = z.object({
-  body: z.object({
-    email: z.string({ required_error: 'email is required' }),
-    role: z.enum([...USER_ROLE_ARRAY] as [I_USER_ROLE, ...I_USER_ROLE[]], {
-      required_error: 'role is required',
+const tempUser = z
+  .object({
+    body: z.object({
+      email: z.string({ required_error: 'email is required' }),
+      role: z.enum([...USER_ROLE_ARRAY] as [I_USER_ROLE, ...I_USER_ROLE[]], {
+        required_error: 'role is required',
+      }),
+      company: z
+        .enum(ROLE_TYPE_ARRAY as [I_ROLE_TYPE], {
+          required_error: 'company is required',
+        })
+        .optional(),
     }),
-  }),
-});
+  })
+  .superRefine((val, ctx) => {
+    if (val.body.role === ENUM_USER_ROLE.generalUser) {
+      if (!val.body.company)
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: 'company is required',
+        });
+    }
+  });
 
 export const UserValidation = {
   createUserZodSchema,
   updateUserZodSchema,
   tempUser,
   authData,
-  adminBodyData,
-  hradminBodyData,
-  employeeBodyData,
+  //
+  adminZod_BodyData,
+  generalUserZod_BodyData,
+  vendorUserZod_BodyData,
 };
