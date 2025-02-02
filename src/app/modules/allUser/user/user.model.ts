@@ -23,7 +23,13 @@ import { redisClient } from '../../../redis/redis';
 
 import { GeneralUser } from '../generalUser/model.generalUser';
 import { ENUM_VERIFY, VERIFY_ARRAY } from '../typesAndConst';
-import { IUser, USER_ROLE_ARRAY, UserModel } from './user.interface';
+import {
+  ENUM_ACCOUNT_TYPE,
+  I_AccountTypeArray,
+  IUser,
+  USER_ROLE_ARRAY,
+  UserModel,
+} from './user.interface';
 
 const userSchema = new Schema<IUser, UserModel>(
   {
@@ -49,7 +55,11 @@ const userSchema = new Schema<IUser, UserModel>(
       enum: USER_ROLE_ARRAY,
       default: ENUM_USER_ROLE.generalUser,
     },
-
+    accountType: {
+      type: String,
+      enum: I_AccountTypeArray,
+      default: ENUM_ACCOUNT_TYPE.custom,
+    },
     password: {
       type: String,
       required: true,

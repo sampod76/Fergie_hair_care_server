@@ -17,9 +17,15 @@ import { LookupAnyRoleDetailsReusable } from '../../../../helper/lookUpResuable'
 import { ENUM_QUEUE_NAME } from '../../../queue/consent.queus';
 import { emailQueue } from '../../../queue/jobs/emailQueues';
 
+import { AuthService } from '../../auth/auth.service';
 import { GeneralUser } from '../generalUser/model.generalUser';
 import { userSearchableFields } from './user.constant';
-import { ITempUser, IUser, IUserFilters } from './user.interface';
+import {
+  ENUM_ACCOUNT_TYPE,
+  ITempUser,
+  IUser,
+  IUserFilters,
+} from './user.interface';
 import { TempUser, User } from './user.model';
 import { generateUserId } from './user.utils';
 import { UserValidation } from './user.validation';
@@ -151,6 +157,72 @@ const createTempUserFromDb = async (
     status: ENUM_STATUS.ACTIVE,
   });
   return createdUser;
+};
+const createUserByGooglefromDb = async (
+  data: any,
+  req: Request,
+): Promise<IUser | null | any> => {
+  // auto generated incremental id
+  const authData = data?.authData as z.infer<typeof UserValidation.authData> & {
+    userUniqueId: string;
+    accountType: string;
+  };
+
+  const roleData = data[authData?.role];
+  if (authData?.role !== ENUM_USER_ROLE.vendor) {
+    throw new ApiError(
+      httpStatus.NOT_ACCEPTABLE,
+      'Only vendor allowed google login',
+    );
+  }
+  const findUser = await User.findOne({ email: authData?.email });
+  if (findUser) {
+    if (findUser?.isDelete === true) {
+      throw new ApiError(409, 'User already delete');
+    }
+    if (findUser.accountType === ENUM_ACCOUNT_TYPE.google) {
+      const loginDetails = await AuthService.loginUserBySocialMedia({
+        email: findUser?.email,
+      });
+
+      return loginDetails;
+    }
+    throw new ApiError(409, 'User already registered with google');
+  }
+  //--add roleType in verifyTempUser
+  authData.accountType = ENUM_ACCOUNT_TYPE.google;
+  //
+  roleData.accountType = ENUM_ACCOUNT_TYPE.google;
+  //
+  const session = await mongoose.startSession();
+  let createdUser;
+  let roleCreate;
+  try {
+    session.startTransaction();
+    const id = await generateUserId();
+    authData.userUniqueId =
+      authData?.role?.toUpperCase()?.slice(0, 2) + '-' + id;
+    createdUser = await User.create([{ ...authData }], { session });
+    if (Array.isArray(createdUser) && !createdUser?.length) {
+      throw new ApiError(400, 'Failed to create user');
+    }
+    roleCreate = await GeneralUser.create([{ ...roleData, ...authData }], {
+      session,
+    });
+    if (Array.isArray(roleCreate) && !roleCreate.length) {
+      throw new ApiError(400, 'Failed to create role user');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error?.message);
+  }
+  const loginDetails = await AuthService.loginUserBySocialMedia({
+    email: roleData?.email,
+  });
+  return loginDetails;
 };
 
 const getAllUsersFromDB = async (
@@ -546,4 +618,5 @@ export const UserService = {
   createTempUserFromDb,
   //
   dashboardUsersFromDB,
+  createUserByGooglefromDb,
 };

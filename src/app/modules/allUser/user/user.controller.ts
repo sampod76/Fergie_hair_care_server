@@ -88,7 +88,16 @@ const createUserTempUser = catchAsync(async (req: Request, res: Response) => {
     data: { _id: result?._id },
   });
 });
-
+const createUserByGoogle = catchAsync(async (req: Request, res: Response) => {
+  //------------------------------------------
+  const result = await UserService.createUserByGooglefromDb(req.body, req);
+  sendResponse<IUser>(req, res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User created successfully',
+    data: result,
+  });
+});
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, userFilterableFields);
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
@@ -182,4 +191,6 @@ export const UserController = {
   isOnline,
   //
   dashboardUsers,
+  //
+  createUserByGoogle,
 };

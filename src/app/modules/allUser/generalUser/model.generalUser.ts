@@ -14,6 +14,7 @@ import { mongooseFileSchema } from '../../../../global/schema/global.schema';
 import { LookupReusable } from '../../../../helper/lookUpResuable';
 import { ENUM_VERIFY, mongooseIUserRef, VERIFY_ARRAY } from '../typesAndConst';
 import { GeneralUserModel, IGeneralUser } from './interface.generalUser';
+import { ENUM_ACCOUNT_TYPE, I_AccountTypeArray } from '../user/user.interface';
 
 const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
   {
@@ -33,6 +34,11 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
       // unique: true,
       trim: true,
       index: true,
+    },
+    accountType: {
+      type: String,
+      enum: I_AccountTypeArray,
+      default: ENUM_ACCOUNT_TYPE.custom,
     },
     authUserId: {
       type: Schema.Types.ObjectId,

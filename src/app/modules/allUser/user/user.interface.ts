@@ -15,6 +15,15 @@ export type I_USER_ROLE = keyof typeof ENUM_USER_ROLE;
 //
 export type I_ROLE_TYPE = keyof typeof ENUM_COMPANY_TYPE;
 //
+//
+export enum ENUM_ACCOUNT_TYPE {
+  custom = 'custom',
+  google = 'google',
+  apple = 'apple',
+}
+export type IACCOUNT_TYPE = keyof typeof ENUM_ACCOUNT_TYPE;
+export const I_AccountTypeArray = Object.values(ENUM_ACCOUNT_TYPE);
+//
 export type IUserFilters = {
   searchTerm?: string;
   delete?: I_YN;
@@ -57,6 +66,7 @@ export type IUser = {
     timeOut: string;
     status: I_STATUS;
   };
+  accountType?: string;
   secret: string;
   location?: ILocation;
   status: I_STATUS;

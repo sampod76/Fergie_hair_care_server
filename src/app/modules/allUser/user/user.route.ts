@@ -26,6 +26,12 @@ router
     validateRequestZod(UserValidation.createUserZodSchema),
     UserController.createUser,
   );
+router.route('/create-account-google').post(
+  // uploadAwsS3Bucket.single('profileImage'),
+  // parseBodyData({}),
+  // validateRequestZod(UserValidation.createUserZodSchema),
+  UserController.createUserByGoogle,
+);
 router
   .route('/dashboard')
   .get(
