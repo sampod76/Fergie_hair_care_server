@@ -18,7 +18,7 @@ import {
 import { produceUpdateGroupMemberListSortKafka } from '../../../kafka/producer.kafka';
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
 import { redisClient } from '../../../redis/redis';
-import { findAllSocketsIdsFromUserId } from '../../../redis/service.redis';
+import { RedisAllCustomServiceOop } from '../../../redis/service.redis';
 import { redisSetter } from '../../../redis/utls.redis';
 
 import { IUserRef, IUserRefAndDetails } from '../../allUser/typesAndConst';
@@ -86,7 +86,7 @@ const checkUserIdToExistGroupsFromDb = async (
   req: Request,
 ): Promise<IGroups | null> => {
   const user = req?.user as IUserRefAndDetails;
-
+  const redisOop = new RedisAllCustomServiceOop();
   //
   const whenMySender =
     ENUM_REDIS_KEY.RIS_senderId_receiverId + `:${requestUser.userId}:${userId}`;
@@ -97,7 +97,7 @@ const checkUserIdToExistGroupsFromDb = async (
     await Promise.all([
       validateUserInDbOrRedis([userId]),
       redisClient.mget([whenMySender, whenMyReceiver]),
-      findAllSocketsIdsFromUserId(userId as string),
+      redisOop.findAllSocketsIdsFromUserId(userId as string),
     ]);
   //
 
@@ -188,7 +188,7 @@ const checkUserIdToExistGroupsFromDb = async (
   }
   //------ check online office------
   const promises2: any[] = [];
-  promises2.push(findAllSocketsIdsFromUserId(userId as string));
+  promises2.push(redisOop.findAllSocketsIdsFromUserId(userId as string));
   // promises2.push(
   //   findAllSocketsIdsFromUserId(findData.receiver.userId as string),
   // );

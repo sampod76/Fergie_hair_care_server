@@ -8,7 +8,7 @@ import { NextFunction } from 'express';
 import http, { Server } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { kafkaInit } from './app/kafka/kafka';
-import { RedisRunFunction } from './app/redis/service.redis';
+import { RedisAllCustomServiceOop } from './app/redis/service.redis';
 import { errorLogger, logger } from './app/share/logger';
 import config from './config/index';
 import socketConnection from './sockit';
@@ -103,7 +103,8 @@ async function connection() {
     //!------Redis-------
     // const sub = await subRedis.subscribe(...subscribeArray);
     // console.log('🚀 ~ RedisRunFunction ~ sub:', sub);
-    await RedisRunFunction();
+    const redisOop = new RedisAllCustomServiceOop();
+    await redisOop.RedisRunFunction();
     //!-------- socket connection---------
     await socketConnection(io);
     //!-----kafka--init----

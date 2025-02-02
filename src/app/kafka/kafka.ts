@@ -44,8 +44,9 @@ export async function kafkaInit() {
  
    */
     const allTopics = Object.values(ENUM_KAFKA_TOPIC);
-    for (const topics of allTopics) {
-      if (!existingTopics.includes(ENUM_KAFKA_TOPIC.message)) {
+    // console.log('🚀 ~ kafkaInit ~ allTopics:', allTopics);
+    for (const topic of allTopics) {
+      if (!existingTopics.includes(topic)) {
         //
         // Topic does not exist, so create it
         const res = await admin.createTopics({
@@ -54,7 +55,7 @@ export async function kafkaInit() {
           // timeout: 5000,
           topics: [
             {
-              topic: ENUM_KAFKA_TOPIC.message,
+              topic: topic,
               numPartitions: currentPartitions, // Starting with 1 partition
               // numPartitions: 4, // Uncomment this line if you want more partitions
             },
@@ -62,23 +63,23 @@ export async function kafkaInit() {
         });
         console.log('🚀 ~ kafkaInit ~ res:', res);
       } else {
-        console.log(`Topic "${ENUM_KAFKA_TOPIC.message}" already exists.`);
+        console.log(`Topic "${topic}" already exists.`);
         // Increase the number of partitions
         /* 
         const newPartitionCount = 3; // Specify the new number of partitions
         const currentPartitions =
-          metadata.topics.find(topic => topic.name === ENUM_KAFKA_TOPIC.message)
+          metadata.topics.find(topic => topic.name === topic)
             ?.partitions.length || 0;
   
         if (currentPartitions < newPartitionCount) {
           console.log(
-            `Increasing partitions for topic "${ENUM_KAFKA_TOPIC.message}" from ${currentPartitions} to ${newPartitionCount}`,
+            `Increasing partitions for topic "${topic}" from ${currentPartitions} to ${newPartitionCount}`,
           );
   
           const res = await admin.createPartitions({
             topicPartitions: [
               {
-                topic: ENUM_KAFKA_TOPIC.message,
+                topic: topic,
                 count: newPartitionCount,
               },
             ],
@@ -86,106 +87,11 @@ export async function kafkaInit() {
           console.log('🚀 ~ kafkaInit ~ Partition increase result:', res);
         } else {
           console.log(
-            `Topic "${ENUM_KAFKA_TOPIC.message}" already has ${currentPartitions} partitions.`,
+            `Topic "${topic}" already has ${currentPartitions} partitions.`,
           );
         }
      */
       }
-    }
-
-    if (!existingTopics.includes(ENUM_KAFKA_TOPIC.friendShipUpdateSortList)) {
-      //
-      // Topic does not exist, so create it
-      const res = await admin.createTopics({
-        // waitForLeaders: true,
-        // validateOnly: true,
-        // timeout: 5000,
-        topics: [
-          {
-            topic: ENUM_KAFKA_TOPIC.friendShipUpdateSortList,
-            numPartitions: currentPartitions, // Starting with 1 partition
-            // numPartitions: 4, // Uncomment this line if you want more partitions
-          },
-        ],
-      });
-      console.log('🚀 ~ kafkaInit ~ res:', res);
-    } else {
-      console.log(
-        `Topic "${ENUM_KAFKA_TOPIC.friendShipUpdateSortList}" already exists.`,
-      );
-      // Increase the number of partitions
-      /* 
-      const newPartitionCount = 3; // Specify the new number of partitions
-      const currentPartitions =
-        metadata.topics.find(topic => topic.name === ENUM_KAFKA_TOPIC.message)
-          ?.partitions.length || 0;
-
-      if (currentPartitions < newPartitionCount) {
-        console.log(
-          `Increasing partitions for topic "${ENUM_KAFKA_TOPIC.message}" from ${currentPartitions} to ${newPartitionCount}`,
-        );
-
-        const res = await admin.createPartitions({
-          topicPartitions: [
-            {
-              topic: ENUM_KAFKA_TOPIC.message,
-              count: newPartitionCount,
-            },
-          ],
-        });
-        console.log('🚀 ~ kafkaInit ~ Partition increase result:', res);
-      } else {
-        console.log(
-          `Topic "${ENUM_KAFKA_TOPIC.message}" already has ${currentPartitions} partitions.`,
-        );
-      }
-   */
-    }
-    if (!existingTopics.includes(ENUM_KAFKA_TOPIC.groupMessage)) {
-      //
-      // Topic does not exist, so create it
-      const res = await admin.createTopics({
-        // waitForLeaders: true,
-        // validateOnly: true,
-        // timeout: 5000,
-        topics: [
-          {
-            topic: ENUM_KAFKA_TOPIC.groupMessage,
-            numPartitions: currentPartitions, // Starting with 1 partition
-            // numPartitions: 4, // Uncomment this line if you want more partitions
-          },
-        ],
-      });
-      console.log('🚀 ~ kafkaInit ~ res:', res);
-    } else {
-      console.log(`Topic "${ENUM_KAFKA_TOPIC.groupMessage}" already exists.`);
-      // Increase the number of partitions
-      /* 
-      const newPartitionCount = 3; // Specify the new number of partitions
-      const currentPartitions =
-        metadata.topics.find(topic => topic.name === ENUM_KAFKA_TOPIC.message)
-          ?.partitions.length || 0;
-
-      if (currentPartitions < newPartitionCount) {
-        console.log(
-          `Increasing partitions for topic "${ENUM_KAFKA_TOPIC.message}" from ${currentPartitions} to ${newPartitionCount}`,
-        );
-
-        const res = await admin.createPartitions({
-          topicPartitions: [
-            {
-              topic: ENUM_KAFKA_TOPIC.message,
-              count: newPartitionCount,
-            },
-          ],
-        });
-        console.log('🚀 ~ kafkaInit ~ Partition increase result:', res);
-      } else {
-        console.log(
-          `Topic "${ENUM_KAFKA_TOPIC.message}" already has ${currentPartitions} partitions.`,
-        );
-      }
-   */
     }
 
     await admin.disconnect();

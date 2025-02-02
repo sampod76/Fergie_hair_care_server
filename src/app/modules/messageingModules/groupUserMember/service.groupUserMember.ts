@@ -18,7 +18,7 @@ import {
 import { produceUpdateGroupMemberListSortKafka } from '../../../kafka/producer.kafka';
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
 import { redisClient } from '../../../redis/redis';
-import { findAllSocketsIdsFromUserId } from '../../../redis/service.redis';
+import { RedisAllCustomServiceOop } from '../../../redis/service.redis';
 import { redisSetter } from '../../../redis/utls.redis';
 
 import { IUserRef, IUserRefAndDetails } from '../../allUser/typesAndConst';
@@ -105,7 +105,7 @@ const checkUserIdToExistGroupMemberFromDb = async (
   req: Request,
 ): Promise<IGroupMember | null> => {
   const user = req?.user as IUserRefAndDetails;
-
+  const redisOop = new RedisAllCustomServiceOop();
   //
   const whenMySender =
     ENUM_REDIS_KEY.RIS_senderId_receiverId + `:${requestUser.userId}:${userId}`;
@@ -116,7 +116,7 @@ const checkUserIdToExistGroupMemberFromDb = async (
     await Promise.all([
       validateUserInDbOrRedis([userId]),
       redisClient.mget([whenMySender, whenMyReceiver]),
-      findAllSocketsIdsFromUserId(userId as string),
+      redisOop.findAllSocketsIdsFromUserId(userId as string),
     ]);
   //
 
@@ -236,7 +236,7 @@ const checkUserIdToExistGroupMemberFromDb = async (
   }
   //------ check online office------
   const promises2: any[] = [];
-  promises2.push(findAllSocketsIdsFromUserId(userId as string));
+  promises2.push(redisOop.findAllSocketsIdsFromUserId(userId as string));
   // promises2.push(
   //   findAllSocketsIdsFromUserId(findData.receiver.userId as string),
   // );
@@ -269,10 +269,15 @@ const getSingleGroupMemberFromDB = async (
   if (!GroupMember) {
     return null;
   }
+  const redisOop = new RedisAllCustomServiceOop();
   //------ check online office------
   const promises = [];
-  promises.push(findAllSocketsIdsFromUserId(result.sender.userId as string));
-  promises.push(findAllSocketsIdsFromUserId(result.receiver.userId as string));
+  promises.push(
+    redisOop.findAllSocketsIdsFromUserId(result.sender.userId as string),
+  );
+  promises.push(
+    redisOop.findAllSocketsIdsFromUserId(result.receiver.userId as string),
+  );
   const resolved = await Promise.all(promises);
 
   result.sender = {
