@@ -27,8 +27,11 @@ const getAllChatMessagesFromDB = async (
   requestUser: IUserRef & { id: string },
 ): Promise<IGenericResponse<IChatMessage[] | null>> => {
   const { searchTerm, ...filtersData } = filters;
-  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
-  console.log(requestUser);
+  filtersData.isDelete = filtersData.isDelete
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
   const andConditions = [];
 
   if (searchTerm) {

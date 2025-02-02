@@ -168,7 +168,11 @@ const getAllUsersFromDB = async (
     ...filtersData
   } = filters;
 
-  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
+  filtersData.isDelete = filtersData.isDelete
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
 
   const andConditions = [];
 
@@ -294,7 +298,11 @@ const dashboardUsersFromDB = async (
 ): Promise<IGenericResponse<IUser[] | null>> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { searchTerm, needProperty, multipleRole, ...filtersData } = filters;
-  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
+  filtersData.isDelete = filtersData.isDelete
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
 
   const andConditions = [];
 

@@ -27,7 +27,11 @@ const getAllGroupMessagesFromDB = async (
   requestUser: IUserRef,
 ): Promise<IGenericResponse<IGroupMessage[] | null>> => {
   const { searchTerm, ...filtersData } = filters;
-  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
+  filtersData.isDelete = filtersData.isDelete
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
 
   const andConditions = [];
 
