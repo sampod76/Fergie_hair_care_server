@@ -15,7 +15,10 @@ const adminSchema = new Schema<IAdmin, AdminModel>(
       required: true,
       unique: true,
     },
-
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     name: {
       firstName: { type: String },
       lastName: { type: String },

@@ -147,8 +147,8 @@ const getAllGeneralUsersFromDB = async (
     collections: [
       {
         connectionName: 'users',
-        idFiledName: 'email',
-        pipeLineMatchField: 'email',
+        idFiledName: 'userId',
+        pipeLineMatchField: '_id',
         outPutFieldName: 'userDetails',
       },
     ],

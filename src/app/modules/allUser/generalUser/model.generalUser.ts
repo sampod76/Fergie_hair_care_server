@@ -24,6 +24,10 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
       required: true,
       // unique: true,
     },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    },
     email: {
       type: String,
       required: true,
@@ -121,8 +125,8 @@ GeneralSchema.statics.isGeneralUserExistMethod = async function (
       collections: [
         {
           connectionName: 'users',
-          idFiledName: 'email',
-          pipeLineMatchField: 'email',
+          idFiledName: 'userId',
+          pipeLineMatchField: '_id',
           outPutFieldName: 'userDetails',
         },
       ],

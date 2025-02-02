@@ -19,7 +19,6 @@ import { emailQueue } from '../../../queue/jobs/emailQueues';
 
 import { GeneralUser } from '../generalUser/model.generalUser';
 import { IUserRefAndDetails } from '../typesAndConst';
-import { Vendor } from '../vendor/model.vendor';
 import { userSearchableFields } from './user.constant';
 import { ITempUser, IUser, IUserFilters } from './user.interface';
 import { TempUser, User } from './user.model';
@@ -29,11 +28,9 @@ const createUser = async (
   data: any,
   req: Request,
 ): Promise<IUser | null | any> => {
-  const user = req.user as IUserRefAndDetails;
   // auto generated incremental id
   const authData = data?.authData as z.infer<typeof UserValidation.authData> & {
     userUniqueId: string;
-    company: string;
   };
   const roleData = data[authData?.role];
   // default password
@@ -60,9 +57,7 @@ const createUser = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP has expired');
   }
   //--add company in verifyTempUser
-  authData.company = verifyTempUser.company;
-  roleData.company = verifyTempUser.company;
-  //
+
   const session = await mongoose.startSession();
   let createdUser;
   let roleCreate;
@@ -77,16 +72,13 @@ const createUser = async (
     if (Array.isArray(createdUser) && !createdUser?.length) {
       throw new ApiError(400, 'Failed to create user');
     }
+    roleData.userId = createdUser[0]._id;
     if (authData?.role === ENUM_USER_ROLE.admin) {
       roleCreate = await Admin.create([{ ...roleData, ...authData }], {
         session,
       });
     } else if (authData?.role === ENUM_USER_ROLE.generalUser) {
       roleCreate = await GeneralUser.create([{ ...roleData, ...authData }], {
-        session,
-      });
-    } else if (authData?.role === ENUM_USER_ROLE.vendor) {
-      roleCreate = await Vendor.create([{ ...roleData, ...authData }], {
         session,
       });
     }

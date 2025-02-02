@@ -143,7 +143,7 @@ userSchema.statics.isUserFindMethod = async function (
   if (option?.password) {
     delete project.password;
   }
-  console.log(match, 'match');
+
   //general perpose
   if (!option?.populate) {
     const result = await User.aggregate([

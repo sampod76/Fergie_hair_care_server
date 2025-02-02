@@ -27,6 +27,7 @@ export type IGeneralUserFilters = {
 export type IGeneralUser = ICommonUser &
   z.infer<typeof UserValidation.generalUserZod_BodyData> & {
     authUserId: string | Types.ObjectId;
+    userId: string | Types.ObjectId;
   };
 export type GeneralUserModel = {
   isGeneralUserExistMethod(

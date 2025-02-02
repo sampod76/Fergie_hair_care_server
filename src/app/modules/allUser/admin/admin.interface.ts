@@ -1,4 +1,4 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { ICommonUser } from '../typesAndConst';
 import { I_USER_ROLE } from '../user/user.interface';
@@ -14,7 +14,10 @@ export type IAdminFilters = {
   author?: string;
 };
 
-export type IAdmin = ICommonUser;
+export type IAdmin = ICommonUser & {
+  authUserId: string | Types.ObjectId;
+  userId: string | Types.ObjectId;
+};
 export type AdminModel = {
   isAdminExistMethod(
     email: string,
