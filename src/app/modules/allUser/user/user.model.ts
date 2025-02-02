@@ -7,7 +7,6 @@ import config from '../../../../config';
 import {
   ENUM_SOCKET_STATUS,
   ENUM_STATUS,
-  ENUM_YN,
   SOCKET_STATUS_ARRAY,
   STATUS_ARRAY,
   YN_ARRAY,
@@ -297,7 +296,7 @@ const tempUserSchema = new Schema(
     isEmailVerify: {
       type: String,
       enum: YN_ARRAY,
-      default: ENUM_YN.NO,
+      default: false,
     },
     authentication: {
       type: {

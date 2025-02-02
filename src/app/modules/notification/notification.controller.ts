@@ -13,8 +13,6 @@ import { Notification_FilterableFields } from './notification.constant';
 import config from '../../../config';
 import { INotification } from './notification.interface';
 
-// import { ENUM_YN } from '../../../enums/globalEnums';
-
 const createNotification = catchAsync(async (req: Request, res: Response) => {
   const bodyData = req.body as INotification;
   //if another shop kipper add another shop kipper user id. then validation but the admin can add any shop to user-id

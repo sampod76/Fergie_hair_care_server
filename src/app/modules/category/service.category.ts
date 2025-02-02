@@ -7,7 +7,6 @@ import { IPaginationOption } from '../../interface/pagination';
 
 import { Request } from 'express';
 import httpStatus from 'http-status';
-import { ENUM_YN } from '../../../global/enum_constant_type';
 import ApiError from '../../errors/ApiError';
 import { CATEGORY_SEARCHABLE_FIELDS } from './consent.category';
 import { ICategory, ICategoryFilters } from './interface.category';
@@ -49,9 +48,7 @@ const getAllCategoryFromDb = async (
   //****************search and filters start************/
   const { searchTerm, ...filtersData } = filters;
 
-  filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete
-    : ENUM_YN.NO;
+  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
   const andConditions = [];
   if (searchTerm) {
     andConditions.push({
@@ -157,7 +154,7 @@ const getSingleCategoryFromDb = async (
 
   const result = await Category.aggregate(pipeline);
   if (result.length) {
-    if (result[0].isDelete === ENUM_YN.YES) {
+    if (result[0].isDelete === true) {
       result[0] = [];
     }
   }
@@ -200,24 +197,15 @@ const deleteCategoryByIdFromDb = async (
     throw new ApiError(httpStatus.NOT_FOUND, 'Category not found');
   }
 
-  let result;
-  if (query.delete == ENUM_YN.YES) {
-    result = await Category.findByIdAndDelete(id);
-    if (!result) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
-    }
-    return result;
-  } else {
-    result = await Category.findOneAndUpdate(
-      { _id: id },
-      { isDelete: ENUM_YN.YES },
-      { new: true, runValidators: true },
-    );
-    if (!result) {
-      throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
-    }
-    return result;
+  const result = await Category.findOneAndUpdate(
+    { _id: id },
+    { isDelete: true },
+    { new: true, runValidators: true },
+  );
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
   }
+  return result;
 };
 //
 const updateCategorySerialNumberFromDb = async (

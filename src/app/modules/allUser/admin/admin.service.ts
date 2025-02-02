@@ -4,7 +4,6 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import mongoose, { PipelineStage, Schema, Types } from 'mongoose';
 
-import { ENUM_YN } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
@@ -279,47 +278,34 @@ const deleteAdminFromDB = async (
 
   let data;
 
-  if (
-    query.delete == ENUM_YN.YES && // this is permanently delete but store trash collection
-    (req?.user?.role == ENUM_USER_ROLE.admin ||
-      req?.user?.role == ENUM_USER_ROLE.superAdmin)
-  ) {
-    data = await Admin.findOneAndDelete({ _id: id });
-  } else {
-    // data = await Admin.findOneAndUpdate(
-    //   { _id: id },
-    //   { isDelete: ENUM_YN.YES },
-    //   { new: true, runValidators: true },
-    // );
-
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      data = await Admin.findOneAndUpdate(
-        { _id: id },
-        { isDelete: ENUM_YN.YES },
-        { new: true, runValidators: true, session },
-      );
-      // console.log('🚀 ~ data:', data);
-      if (!data?.email) {
-        throw new ApiError(400, 'Felid to delete Admin');
-      }
-      const deleteUser = await User.findOneAndUpdate(
-        { email: isExist[0].email },
-        { isDelete: ENUM_YN.YES },
-        { new: true, runValidators: true, session },
-      );
-      if (!deleteUser?.email) {
-        throw new ApiError(400, 'Felid to delete Admin');
-      }
-      await session.commitTransaction();
-      await session.endSession();
-    } catch (error: any) {
-      await session.abortTransaction();
-      await session.endSession();
-      throw new Error(error?.message);
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    data = await Admin.findOneAndUpdate(
+      { _id: id },
+      { isDelete: true },
+      { new: true, runValidators: true, session },
+    );
+    // console.log('🚀 ~ data:', data);
+    if (!data?.email) {
+      throw new ApiError(400, 'Felid to delete Admin');
     }
+    const deleteUser = await User.findOneAndUpdate(
+      { email: isExist[0].email },
+      { isDelete: true },
+      { new: true, runValidators: true, session },
+    );
+    if (!deleteUser?.email) {
+      throw new ApiError(400, 'Felid to delete Admin');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error?.message);
   }
+
   return data;
 };
 

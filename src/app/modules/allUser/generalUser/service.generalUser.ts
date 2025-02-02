@@ -5,7 +5,6 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import mongoose, { PipelineStage, Schema, Types } from 'mongoose';
 
-import { ENUM_YN } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
@@ -39,9 +38,7 @@ const getAllGeneralUsersFromDB = async (
     needProperty,
     ...filtersData
   } = filters;
-  filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete
-    : ENUM_YN.NO;
+  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
   filtersData.verify = filtersData.verify
     ? filtersData.verify
     : ENUM_VERIFY.ACCEPT;
@@ -294,67 +291,33 @@ const deleteGeneralUserFromDB = async (
 
   let data;
 
-  if (
-    query.delete == ENUM_YN.YES && // this is permanently delete but store trash collection
-    (req?.user?.role == ENUM_USER_ROLE.admin ||
-      req?.user?.role == ENUM_USER_ROLE.superAdmin)
-  ) {
-    data = null;
-    // data = await GeneralUser.findOneAndDelete({ _id: id });
-    /*  const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      data = await GeneralUser.findOneAndDelete({ _id: id });
-      if (!data?.email) {
-        throw new ApiError(400, 'Felid to delete GeneralUser');
-      }
-      const deleteUser = (await User.findOneAndDelete({
-        email: isExist[0].email,
-      })) as IUser;
-      if (!deleteUser?.email) {
-        throw new ApiError(400, 'Felid to delete GeneralUser');
-      }
-      await session.commitTransaction();
-      await session.endSession();
-    } catch (error: any) {
-      await session.abortTransaction();
-      await session.endSession();
-      throw new ApiError(error?.statusCode || 400, error?.message);
-    } */
-  } else {
-    // data = await GeneralUser.findOneAndUpdate(
-    //   { _id: id },
-    //   { isDelete: ENUM_YN.YES },
-    //   { new: true, runValidators: true },
-    // );
-
-    const session = await mongoose.startSession();
-    try {
-      session.startTransaction();
-      data = await GeneralUser.findOneAndUpdate(
-        { _id: id },
-        { isDelete: ENUM_YN.YES },
-        { new: true, runValidators: true, session },
-      );
-      if (!data?.email) {
-        throw new ApiError(400, 'Felid to delete GeneralUser');
-      }
-      const deleteUser = await User.findOneAndUpdate(
-        { email: isExist[0].email },
-        { isDelete: ENUM_YN.YES },
-        { new: true, runValidators: true, session },
-      );
-      if (!deleteUser?.email) {
-        throw new ApiError(400, 'Felid to delete GeneralUser');
-      }
-      await session.commitTransaction();
-      await session.endSession();
-    } catch (error: any) {
-      await session.abortTransaction();
-      await session.endSession();
-      throw new Error(error?.message);
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+    data = await GeneralUser.findOneAndUpdate(
+      { _id: id },
+      { isDelete: true },
+      { new: true, runValidators: true, session },
+    );
+    if (!data?.email) {
+      throw new ApiError(400, 'Felid to delete GeneralUser');
     }
+    const deleteUser = await User.findOneAndUpdate(
+      { email: isExist[0].email },
+      { isDelete: true },
+      { new: true, runValidators: true, session },
+    );
+    if (!deleteUser?.email) {
+      throw new ApiError(400, 'Felid to delete GeneralUser');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error?.message);
   }
+
   return data;
 };
 

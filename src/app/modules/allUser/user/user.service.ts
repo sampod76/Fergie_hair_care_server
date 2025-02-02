@@ -4,7 +4,7 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import mongoose, { PipelineStage, Schema, Types } from 'mongoose';
 import { z } from 'zod';
-import { ENUM_STATUS, ENUM_YN } from '../../../../global/enum_constant_type';
+import { ENUM_STATUS } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
@@ -168,9 +168,7 @@ const getAllUsersFromDB = async (
     ...filtersData
   } = filters;
 
-  filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete
-    : ENUM_YN.NO;
+  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
 
   const andConditions = [];
 
@@ -296,9 +294,7 @@ const dashboardUsersFromDB = async (
 ): Promise<IGenericResponse<IUser[] | null>> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { searchTerm, needProperty, multipleRole, ...filtersData } = filters;
-  filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete
-    : ENUM_YN.NO;
+  filtersData.isDelete = filtersData.isDelete ? filtersData.isDelete : false;
 
   const andConditions = [];
 
@@ -495,7 +491,7 @@ const deleteUserFromDB = async (
     session.startTransaction();
     data = await User.findOneAndUpdate(
       { _id: id },
-      { isDelete: ENUM_YN.YES },
+      { isDelete: true },
       { new: true, runValidators: true, session },
     );
     if (!data?._id) {
@@ -505,7 +501,7 @@ const deleteUserFromDB = async (
     if (data?.role === ENUM_USER_ROLE.generalUser) {
       roleUser = await GeneralUser.findOneAndUpdate(
         { email: data?.email },
-        { isDelete: ENUM_YN.YES },
+        { isDelete: true },
         { runValidators: true, new: true },
       );
     } else if (
@@ -514,7 +510,7 @@ const deleteUserFromDB = async (
     ) {
       roleUser = await Admin.findOneAndUpdate(
         { email: data?.email },
-        { isDelete: ENUM_YN.YES },
+        { isDelete: true },
         { runValidators: true, new: true },
       );
     }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import httpStatus from 'http-status';
 import { Types } from 'mongoose';
-import { ENUM_STATUS, ENUM_YN } from '../../../../global/enum_constant_type';
+import { ENUM_STATUS } from '../../../../global/enum_constant_type';
 import ApiError from '../../../errors/ApiError';
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
 import { redisClient } from '../../../redis/redis';
@@ -208,7 +208,7 @@ export const validateUserInDbOrRedis = async (users: string[] | IUserRef[]) => {
 const validateUsers = (users: IUser[]) => {
   users.forEach(item => {
     // console.log('🚀 ~ validateUsers ~ item:', item);
-    if (item && item.isDelete === ENUM_YN.YES) {
+    if (item && item.isDelete === true) {
       throw new ApiError(httpStatus.NOT_FOUND, `${item.role} User is deleted`);
     } else if (item && item.status === ENUM_STATUS.INACTIVE) {
       throw new ApiError(
