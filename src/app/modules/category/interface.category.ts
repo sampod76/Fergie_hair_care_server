@@ -12,6 +12,7 @@ export type ICategoryFilters = {
   serialNumber?: number;
   delete?: I_YN;
   children?: string;
+  cache?: string;
   isDelete?: string | boolean;
 };
 

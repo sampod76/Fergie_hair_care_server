@@ -7,7 +7,7 @@ import { FriendShip } from '../../modules/messageingModules/friendship/friendshi
 import { IChatMessage } from '../../modules/messageingModules/message/messages.interface';
 import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
 import { redisClient } from '../../redis/redis';
-import { RedisAllCustomServiceOop } from '../../redis/service.redis';
+import { RedisAllQueryServiceOop } from '../../redis/service.redis';
 import { socketErrorHandler } from '../socket.service';
 import { ENUM_SOCKET_EMIT_ON_TYPE } from '../socketTypes';
 export const personalMessageSocket = (
@@ -134,7 +134,7 @@ export const personalMessageSocket = (
             );
           }
           // your single friend is running multiple devices in run same id. then all device in send message .
-          const redisOop = new RedisAllCustomServiceOop();
+          const redisOop = new RedisAllQueryServiceOop();
           const findSocketIds = await redisOop.findAllSocketsIdsFromUserId(
             messageData.receiver.userId.toString(),
           );

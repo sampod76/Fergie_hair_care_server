@@ -3,11 +3,11 @@ import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { Secret } from 'jsonwebtoken';
 import config from '../../config';
+import { ENUM_STATUS } from '../../global/enum_constant_type';
 import { jwtHelpers } from '../../helper/jwtHelpers';
 import ApiError from '../errors/ApiError';
 import { validateUserInDbOrRedis } from '../modules/allUser/user/user.utils';
 import { redisClient } from '../redis/redis';
-import { ENUM_STATUS } from '../../global/enum_constant_type';
 // Dedicated Redis service
 const getUserFromCache = async (token: string) => {
   const cachedUser = await redisClient.get(token);

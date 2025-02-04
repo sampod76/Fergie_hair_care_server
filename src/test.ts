@@ -15,7 +15,6 @@ const TestFile = async () => {
 
 const asyncFunction = async () => {
   try {
-    // console.log('first');
     return 1;
   } catch (error) {
     console.log(error);

@@ -7,4 +7,5 @@ export const CATEGORY_FILTERABLE_FIELDS = [
   'delete',
   'serialNumber',
   'isDelete',
+  'cache',
 ];

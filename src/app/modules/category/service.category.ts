@@ -8,6 +8,11 @@ import { IPaginationOption } from '../../interface/pagination';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
+import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
+import {
+  RedisAllQueryServiceOop,
+  RedisAllSetterServiceOop,
+} from '../../redis/service.redis';
 import { CATEGORY_SEARCHABLE_FIELDS } from './consent.category';
 import { ICategory, ICategoryFilters } from './interface.category';
 import { Category } from './model.category';
@@ -46,6 +51,22 @@ const getAllCategoryFromDb = async (
 ): Promise<IGenericResponse<ICategory[]>> => {
   //****************search and filters start************/
   const { searchTerm, ...filtersData } = filters;
+  //***********cache start************* */
+  const redisOop = new RedisAllQueryServiceOop();
+  const redisClient = redisOop.getGlobalRedis();
+  const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_All_Categories);
+  if (getRedis) {
+    const redisData = JSON.parse(getRedis);
+    return {
+      meta: {
+        page: 1,
+        limit: 99999,
+        total: redisData.length,
+      },
+      data: redisData,
+    };
+  }
+  //***********cache end************* */
 
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
@@ -101,18 +122,7 @@ const getAllCategoryFromDb = async (
 
   // const result = await Category.aggregate(pipeline);
   // const total = await Category.countDocuments(whereConditions);
-  // const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_Categories);
-  // if (getRedis) {
-  //   const redisData = JSON.parse(getRedis);
-  //   return {
-  //     meta: {
-  //       page: 1,
-  //       limit: 99999,
-  //       total: redisData.length,
-  //     },
-  //     data: redisData,
-  //   };
-  // }
+
   //!-- alternatively and faster
   const pipeLineResult = await Category.aggregate([
     {
@@ -133,6 +143,10 @@ const getAllCategoryFromDb = async (
   const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
   const result = pipeLineResult[0]?.data || []; // Extract data
   // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
+  const redisSetterOop = new RedisAllSetterServiceOop();
+  const red = await redisSetterOop.redisSetter([
+    { key: ENUM_REDIS_KEY.RIS_All_Categories, value: result },
+  ]);
 
   return {
     meta: {

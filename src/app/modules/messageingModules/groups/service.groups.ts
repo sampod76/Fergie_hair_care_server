@@ -18,7 +18,7 @@ import {
 import { produceUpdateGroupMemberListSortKafka } from '../../../kafka/producer.kafka';
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
 import { redisClient } from '../../../redis/redis';
-import { RedisAllCustomServiceOop } from '../../../redis/service.redis';
+import { RedisAllQueryServiceOop } from '../../../redis/service.redis';
 import { redisSetter } from '../../../redis/utls.redis';
 
 import { IUserRef, IUserRefAndDetails } from '../../allUser/typesAndConst';
@@ -86,7 +86,7 @@ const checkUserIdToExistGroupsFromDb = async (
   req: Request,
 ): Promise<IGroups | null> => {
   const user = req?.user as IUserRefAndDetails;
-  const redisOop = new RedisAllCustomServiceOop();
+  const redisOop = new RedisAllQueryServiceOop();
   //
   const whenMySender =
     ENUM_REDIS_KEY.RIS_senderId_receiverId + `:${requestUser.userId}:${userId}`;
