@@ -42,7 +42,7 @@ const childCategorySchema = new Schema(
 );
 const CategorySchema = new Schema<ICategory, CategoryModel>(
   {
-    title: {
+    value: {
       type: String,
       required: true,
       trim: true,

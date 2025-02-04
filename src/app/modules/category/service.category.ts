@@ -18,7 +18,7 @@ const createCategoryByDb = async (
 ): Promise<ICategory> => {
   const [findAlreadyExists, findIndex] = await Promise.all([
     Category.findOne({
-      title: { $regex: new RegExp(`^${payload.title}$`, 'i') },
+      value: { $regex: new RegExp(`^${payload.value}$`, 'i') },
 
       isDelete: false,
     }),

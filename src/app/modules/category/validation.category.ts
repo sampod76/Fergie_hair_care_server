@@ -3,29 +3,44 @@ import { I_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
 import { zodFileAfterUploadSchema } from '../../../global/schema/global.schema';
 
 const createCategoryBodyData = z.object({
-  title: z.string({
-    required_error: 'Title is required',
+  label: z
+    .string({
+      required_error: 'Value is required',
+    })
+    .optional(),
+  value: z.string({
+    required_error: 'Value is required',
   }),
   subTitle: z.string().optional(),
-  uid: z.string().optional(),
+  uid: z.string().or(z.string().uuid()).optional(),
   children: z.array(
     z
       .object({
-        title: z.string({
-          required_error: 'Title is required',
+        label: z
+          .string({
+            required_error: 'Value is required',
+          })
+          .optional(),
+        value: z.string({
+          required_error: 'Value is required',
         }),
         subTitle: z.string().optional(),
-        uid: z.string().optional(),
+        uid: z.string().or(z.string().uuid()).optional(),
         serialNumber: z.number().optional(),
         children: z
           .array(
             z
               .object({
-                title: z.string({
-                  required_error: 'Title is required',
+                label: z
+                  .string({
+                    required_error: 'Value is required',
+                  })
+                  .optional(),
+                value: z.string({
+                  required_error: 'Value is required',
                 }),
                 subTitle: z.string().optional(),
-                uid: z.string().optional(),
+                uid: z.string().or(z.string().uuid()).optional(),
                 serialNumber: z.number().optional(),
               })
               .optional(),
