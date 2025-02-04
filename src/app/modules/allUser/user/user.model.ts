@@ -171,8 +171,8 @@ userSchema.statics.isUserFindMethod = async function (
       collections: [
         {
           roleMatchFiledName: 'role',
-          idFiledName: '$email',
-          pipeLineMatchField: '$email',
+          idFiledName: '$_id',
+          pipeLineMatchField: '$userId',
           outPutFieldName: 'roleInfo',
         },
       ],
@@ -207,8 +207,6 @@ userSchema.pre('save', async function (next) {
     if (user.role === ENUM_USER_ROLE.generalUser) {
       roleUser = await GeneralUser.findOne({ email: user.email });
     } else if (user.role === ENUM_USER_ROLE.admin) {
-      roleUser = await Admin.findOne({ email: user.email });
-    } else if (user.role === ENUM_USER_ROLE.vendor) {
       roleUser = await Admin.findOne({ email: user.email });
     }
 

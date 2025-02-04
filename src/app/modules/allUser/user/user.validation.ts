@@ -65,7 +65,6 @@ const createUserZodSchema = z
       authData: authData,
       admin: adminZod_BodyData.optional(),
       generalUser: generalUserZod_BodyData.optional(),
-      vendor: vendorUserZod_BodyData.optional(),
     }),
   })
   .refine(

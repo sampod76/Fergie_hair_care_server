@@ -169,7 +169,7 @@ const createUserByGooglefromDb = async (
   };
 
   const roleData = data[authData?.role];
-  if (authData?.role !== ENUM_USER_ROLE.vendor) {
+  if (authData?.role !== ENUM_USER_ROLE.generalUser) {
     throw new ApiError(
       httpStatus.NOT_ACCEPTABLE,
       'Only vendor allowed google login',
@@ -334,8 +334,8 @@ const getAllUsersFromDB = async (
       collections: [
         {
           roleMatchFiledName: 'role',
-          idFiledName: '$email',
-          pipeLineMatchField: '$email',
+          idFiledName: '$userId',
+          pipeLineMatchField: '$_id',
           outPutFieldName: 'roleInfo',
         },
       ],

@@ -42,7 +42,7 @@ const updateNotificationZodSchema = z.object({
     .optional(),
   status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
   isSeen: z.boolean().optional(),
-  isDelete: z.boolean().optional().default(false),
+  isDelete: z.boolean().optional(),
 });
 
 export const NotificationValidation = {

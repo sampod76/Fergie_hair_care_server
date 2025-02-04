@@ -4,7 +4,7 @@
 export enum ENUM_USER_ROLE {
   superAdmin = 'superAdmin',
   admin = 'admin',
-  vendor = 'vendor',
+
   generalUser = 'generalUser',
 }
 export enum ENUM_GENDER {

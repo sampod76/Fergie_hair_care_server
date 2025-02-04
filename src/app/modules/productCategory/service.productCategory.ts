@@ -153,7 +153,7 @@ const getAllProductCategoryFromDb = async (
       ttl: 1 * 60 * 60,
     },
   ]);
-  // console.log('🚀 ~ red:', red);
+  console.log('🚀 ~ red:', red);
   return {
     meta: {
       page,
