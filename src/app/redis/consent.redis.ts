@@ -15,7 +15,7 @@ export enum ENUM_REDIS_KEY {
   REDIS_IN_SAVE_OTHER_DATA = 'redis:otherDate:',
   RIS_All_Categories = 'redis:All:Categories', //redis:Categories:67110262be5233078d7bff3a
   RIS_Categories = 'redis:Categories:', //redis:Categories:67110262be5233078d7bff3a
-  RIS_ProductsCategories = 'redis:ProductsCategories:', //redis:Categories:67110262be5233078d7bff3a
+  RIS_All_ProductsCategories = 'redis:All:ProductsCategories', //redis:Categories:67110262be5233078d7bff3a
   RIS_senderId_receiverId = 'redis:userIdToFriendShip:', //redis:userIdToFriendShip:sfd44sd:sdfsd4
   RIS_Testimonials = 'redis:Testimonials:', //redis:userIdToFriendShip:sfd44sd:sdfsd4
   RIS_Groups = 'redis:Groups:', //redis:userIdToFriendShip:sfd44sd:sdfsd4

@@ -145,8 +145,13 @@ const getAllCategoryFromDb = async (
   // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
   const redisSetterOop = new RedisAllSetterServiceOop();
   const red = await redisSetterOop.redisSetter([
-    { key: ENUM_REDIS_KEY.RIS_All_Categories, value: result },
+    {
+      key: ENUM_REDIS_KEY.RIS_All_Categories,
+      value: result,
+      ttl: 1 * 60 * 60,
+    },
   ]);
+  // console.log('🚀 ~ red:', red);
 
   return {
     meta: {

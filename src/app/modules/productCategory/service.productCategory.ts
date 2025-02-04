@@ -8,6 +8,11 @@ import { IPaginationOption } from '../../interface/pagination';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
+import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
+import {
+  RedisAllQueryServiceOop,
+  RedisAllSetterServiceOop,
+} from '../../redis/service.redis';
 import { productCategory_SEARCHABLE_FIELDS } from './consent.productCategory';
 import {
   IProductCategory,
@@ -102,20 +107,24 @@ const getAllProductCategoryFromDb = async (
     { $limit: Number(limit) || 10 },
   ];
 
-  // const result = await ProductCategory.aggregate(pipeline);
-  // const total = await ProductCategory.countDocuments(whereConditions);
-  // const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_Categories);
-  // if (getRedis) {
-  //   const redisData = JSON.parse(getRedis);
-  //   return {
-  //     meta: {
-  //       page: 1,
-  //       limit: 99999,
-  //       total: redisData.length,
-  //     },
-  //     data: redisData,
-  //   };
-  // }
+  //***********cache start************* */
+  const redisOop = new RedisAllQueryServiceOop();
+  const redisClient = redisOop.getGlobalRedis();
+  const getRedis = await redisClient.get(
+    ENUM_REDIS_KEY.RIS_All_ProductsCategories,
+  );
+  if (getRedis) {
+    const redisData = JSON.parse(getRedis);
+    return {
+      meta: {
+        page: 1,
+        limit: 99999,
+        total: redisData.length,
+      },
+      data: redisData,
+    };
+  }
+  //***********cache end************* */
   //!-- alternatively and faster
   const pipeLineResult = await ProductCategory.aggregate([
     {
@@ -136,7 +145,15 @@ const getAllProductCategoryFromDb = async (
   const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
   const result = pipeLineResult[0]?.data || []; // Extract data
   // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
-
+  const redisSetterOop = new RedisAllSetterServiceOop();
+  const red = await redisSetterOop.redisSetter([
+    {
+      key: ENUM_REDIS_KEY.RIS_All_ProductsCategories,
+      value: result,
+      ttl: 1 * 60 * 60,
+    },
+  ]);
+  // console.log('🚀 ~ red:', red);
   return {
     meta: {
       page,
