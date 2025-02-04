@@ -9,28 +9,34 @@ import { redisClient } from '../../redis/redis';
 import { CategoryModel, ICategory } from './interface.category';
 const childCategorySchema = new Schema(
   {
-    title: {
+    value: {
       type: String,
     },
-    subTitle: {
+    label: {
       type: String,
     },
     uid: {
       type: String,
+      trim: true,
+      index: true,
+      unique: true,
     },
     serialNumber: {
       type: Number,
     },
     children: [
       {
-        title: {
+        value: {
           type: String,
         },
-        subTitle: {
+        label: {
           type: String,
         },
         uid: {
           type: String,
+          trim: true,
+          index: true,
+          unique: true,
         },
         serialNumber: {
           type: Number,
@@ -48,7 +54,7 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
       trim: true,
       index: true,
     },
-    subTitle: {
+    label: {
       type: String,
     },
     children: [childCategorySchema],
@@ -56,6 +62,7 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
       type: String,
       trim: true,
       index: true,
+      unique: true,
       default: function () {
         const uuidGenerate = new UuidBuilder();
         return uuidGenerate.generateUuid();
