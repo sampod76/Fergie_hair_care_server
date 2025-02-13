@@ -63,7 +63,50 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
       type: Date,
       trim: true,
     },
-
+    category: [
+      {
+        value: {
+          type: String,
+        },
+        label: {
+          type: String,
+        },
+        uid: {
+          type: String,
+          trim: true,
+          index: true,
+          unique: true,
+        },
+        children: {
+          value: {
+            type: String,
+          },
+          label: {
+            type: String,
+          },
+          uid: {
+            type: String,
+            trim: true,
+            index: true,
+            unique: true,
+          },
+          children: {
+            value: {
+              type: String,
+            },
+            label: {
+              type: String,
+            },
+            uid: {
+              type: String,
+              trim: true,
+              index: true,
+              unique: true,
+            },
+          },
+        },
+      },
+    ],
     // gender: {
     //   type: String,
     //   enum: GENDER_ARRAY,

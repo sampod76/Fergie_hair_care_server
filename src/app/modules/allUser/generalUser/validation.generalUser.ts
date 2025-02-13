@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { I_STATUS, STATUS_ARRAY } from '../../../../global/enum_constant_type';
-import { CategoryValidation } from '../../category/validation.category';
 import { UserValidation } from '../user/user.validation';
 // const combinedBuyerZodData = UserValidation.BuyerZodData.merge(
 //   UserValidation.authData
@@ -23,7 +22,7 @@ const zodChildrenObject = z.object({
   uid: z.string().or(z.string().uuid()).optional(),
 });
 
-const otherProperties = z.object({
+const otherBodyData = z.object({
   category: z.array(
     zodChildrenObject.merge(
       z.object({
@@ -38,10 +37,12 @@ const otherProperties = z.object({
 });
 
 const updateGeneralUserSchema = z.object({
-  body: combinedGeneralUserZodData.merge(otherProperties).deepPartial(),
+  body: combinedGeneralUserZodData.merge(otherBodyData).deepPartial(),
 });
 
 export const GeneralUserValidation = {
   updateGeneralUserSchema,
   combinedGeneralUserZodData,
+  //
+  otherBodyData,
 };

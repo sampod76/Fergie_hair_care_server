@@ -5,6 +5,7 @@ import { I_STATUS, I_YN } from '../../../../global/enum_constant_type';
 import { ICommonUser } from '../typesAndConst';
 import { I_ROLE_TYPE, IACCOUNT_TYPE } from '../user/user.interface';
 import { UserValidation } from '../user/user.validation';
+import { GeneralUserValidation } from './validation.generalUser';
 
 export type IGeneralUserFilters = {
   searchTerm?: string;
@@ -26,7 +27,8 @@ export type IGeneralUserFilters = {
 };
 
 export type IGeneralUser = ICommonUser &
-  z.infer<typeof UserValidation.generalUserZod_BodyData> & {
+  z.infer<typeof UserValidation.generalUserZod_BodyData> &
+  z.infer<typeof GeneralUserValidation.otherBodyData> & {
     authUserId: string | Types.ObjectId;
     userId: string | Types.ObjectId;
     accountType: IACCOUNT_TYPE;

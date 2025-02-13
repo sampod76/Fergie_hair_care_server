@@ -60,13 +60,15 @@ const createCategoryZodSchema = z.object({
   body: createCategoryBodyData,
 });
 
-const updateCategoryZodSchema = createCategoryZodSchema
-  .merge(
-    z.object({
-      isDelete: z.boolean().optional(),
-    }),
-  )
-  .deepPartial();
+const updateCategoryZodSchema = z.object({
+  body: createCategoryBodyData
+    .merge(
+      z.object({
+        isDelete: z.boolean().optional(),
+      }),
+    )
+    .deepPartial(),
+});
 
 export const CategoryValidation = {
   createCategoryZodSchema,
