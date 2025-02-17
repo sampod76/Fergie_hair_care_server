@@ -50,11 +50,18 @@ const getAllCategoryFromDb = async (
   req: Request,
 ): Promise<IGenericResponse<ICategory[]>> => {
   //****************search and filters start************/
-  const { searchTerm, ...filtersData } = filters;
+  const {
+    searchTerm,
+    createdAtFrom,
+    createdAtTo,
+    needProperty,
+    ...filtersData
+  } = filters;
   //***********cache start************* */
   const redisOop = new RedisAllQueryServiceOop();
   const redisClient = redisOop.getGlobalRedis();
   const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_All_Categories);
+
   if (getRedis) {
     const redisData = JSON.parse(getRedis);
     return {
@@ -67,7 +74,7 @@ const getAllCategoryFromDb = async (
     };
   }
   //***********cache end************* */
-
+  console.log('🚀 ~ getRedis:', getRedis);
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
       ? true
@@ -86,10 +93,52 @@ const getAllCategoryFromDb = async (
   }
 
   if (Object.keys(filtersData).length) {
+    const condition = Object.entries(filtersData).map(
+      //@ts-ignore
+      ([field, value]: [keyof typeof filtersData, string]) => {
+        let modifyFiled;
+        /* 
+        if (field === 'userRoleBaseId' || field === 'referRoleBaseId') {
+        modifyFiled = { [field]: new Types.ObjectId(value) };
+        } else {
+         modifyFiled = { [field]: value };
+         } 
+       */
+        if (field === 'authorUserId') {
+          modifyFiled = {
+            [field]: new Types.ObjectId(value),
+          };
+        } else {
+          modifyFiled = { [field]: value };
+        }
+        // console.log(modifyFiled);
+        return modifyFiled;
+      },
+    );
+    //
+    if (createdAtFrom && !createdAtTo) {
+      const timeTo = new Date(createdAtFrom);
+      const createdAtToModify = new Date(timeTo.setHours(23, 59, 59, 999));
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtToModify),
+        },
+      });
+    } else if (createdAtFrom && createdAtTo) {
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtTo),
+        },
+      });
+    }
+
+    //
     andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => ({
-        [field]: value,
-      })),
+      $and: condition,
     });
   }
 
@@ -98,6 +147,7 @@ const getAllCategoryFromDb = async (
   //****************pagination start **************/
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
+  console.log('🚀 ~ skip:', skip);
 
   const sortConditions: { [key: string]: 1 | -1 } = {};
   if (sortBy && sortOrder) {
@@ -139,9 +189,12 @@ const getAllCategoryFromDb = async (
       },
     },
   ]);
+
   // Extract and format the pipeLineResults
   const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
+
   const result = pipeLineResult[0]?.data || []; // Extract data
+
   // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
   const redisSetterOop = new RedisAllSetterServiceOop();
   const red = await redisSetterOop.redisSetter([
@@ -170,17 +223,11 @@ const getSingleCategoryFromDb = async (
   req: Request,
 ): Promise<ICategory | null> => {
   const pipeline: PipelineStage[] = [
-    { $match: { _id: new Types.ObjectId(id) } },
+    { $match: { _id: new Types.ObjectId(id), isDelete: false } },
     ///***************** */ images field ******start
   ];
-
   const result = await Category.aggregate(pipeline);
-  if (result.length) {
-    if (result[0].isDelete === true) {
-      result[0] = [];
-    }
-  }
-  return result[0];
+  return result.length ? result[0] : null;
 };
 
 // update Categorye form db
@@ -189,16 +236,6 @@ const updateCategoryFromDb = async (
   payload: Partial<ICategory>,
   req: Request,
 ): Promise<ICategory | null> => {
-  if (payload.serialNumber) {
-    const updateAnotherSerialNumber = await Category.updateMany(
-      {
-        serialNumber: { $gte: payload.serialNumber },
-      },
-      {
-        $inc: { serialNumber: 1 },
-      },
-    );
-  }
   const result = await Category.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
