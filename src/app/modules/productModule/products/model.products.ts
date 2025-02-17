@@ -9,11 +9,8 @@ import {
 } from '../../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../../global/schema/global.schema';
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
-import { IUserSaveProduct, UserSaveProductModel } from './interface.products';
-const UserSaveProductSchema = new Schema<
-  IUserSaveProduct,
-  UserSaveProductModel
->(
+import { IProduct, ProductModel } from './interface.products';
+const ProductSchema = new Schema<IProduct, ProductModel>(
   {
     name: {
       type: String,
@@ -58,19 +55,19 @@ const UserSaveProductSchema = new Schema<
   },
 );
 
-UserSaveProductSchema.post('findOneAndDelete', async function () {
+ProductSchema.post('findOneAndDelete', async function () {
   try {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
     /*  
    const dataId = this.getFilter();
     // console.log(dataId); // { _id: '6607a2b70d0b8a202a1b81b4' }
-    const res = await UserSaveProduct.findOne({ _id: dataId?._id }).lean();
+    const res = await Product.findOne({ _id: dataId?._id }).lean();
     if (res) {
       // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       //@ts-ignore
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { status, isDelete, createdAt, updatedAt, ...otherData } = res;
-      await TrashUserSaveProduct.create({
+      await TrashProduct.create({
         ...otherData,
       });
     } else {
@@ -82,20 +79,20 @@ UserSaveProductSchema.post('findOneAndDelete', async function () {
     const redisSetterOop = new RedisAllSetterServiceOop();
     await redisSetterOop
       .getGlobalRedis()
-      .del(ENUM_REDIS_KEY.RIS_User_Save_Product + dataId._id.toString());
+      .del(ENUM_REDIS_KEY.RIS_Product + dataId._id.toString());
   } catch (error: any) {
     // console.log('🚀 ~ error:', error);
   }
 });
 // after findOneAndUpdate then data then call this hook
-UserSaveProductSchema.post(
+ProductSchema.post(
   'findOneAndUpdate',
-  async function (data: IUserSaveProduct & { _id: string }, next: any) {
+  async function (data: IProduct & { _id: string }, next: any) {
     try {
       const redisSetterOop = new RedisAllSetterServiceOop();
       await redisSetterOop
         .getGlobalRedis()
-        .del(ENUM_REDIS_KEY.RIS_User_Save_Product + data._id.toString());
+        .del(ENUM_REDIS_KEY.RIS_Product + data._id.toString());
       // console.log('update');
       next();
     } catch (error: any) {
@@ -103,7 +100,7 @@ UserSaveProductSchema.post(
     }
   },
 );
-UserSaveProductSchema.post(
+ProductSchema.post(
   'save',
   async function (data: any & { _id: string }, next: any) {
     try {
@@ -111,7 +108,7 @@ UserSaveProductSchema.post(
       await redisSetterOop.redisSetter([
         {
           value: data,
-          key: ENUM_REDIS_KEY.RIS_User_Save_Product + data._id.toString(),
+          key: ENUM_REDIS_KEY.RIS_Product + data._id.toString(),
           ttl: 1 * 60 * 60,
         },
       ]);
@@ -123,11 +120,8 @@ UserSaveProductSchema.post(
   },
 );
 
-export const UserSaveProduct = model<IUserSaveProduct, UserSaveProductModel>(
-  'UserSaveProduct',
-  UserSaveProductSchema,
+export const Product = model<IProduct, ProductModel>('Product', ProductSchema);
+export const TrashProduct = model<IProduct, ProductModel>(
+  'TrashProduct',
+  ProductSchema,
 );
-export const TrashUserSaveProduct = model<
-  IUserSaveProduct,
-  UserSaveProductModel
->('TrashUserSaveProduct', UserSaveProductSchema);

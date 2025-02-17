@@ -14,7 +14,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     FriendShipsController.getAllFriendShips,
@@ -23,7 +23,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
 
@@ -35,37 +35,33 @@ router.route('/check-userid-to-exist-friendship/:id').get(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.vendor,
+
     ENUM_USER_ROLE.generalUser,
   ),
 
   FriendShipsController.checkUserIdToExistFriendShip,
 );
 
-router
-  .route('/list-sort/:id')
-  .patch(
-    authMiddleware(
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
-      ENUM_USER_ROLE.generalUser,
-    ),
-    validateRequestZod(friendshipValidation.friendshipListSortDataZodSchema),
-    FriendShipsController.updateFriendShipListSort,
-  );
-router
-  .route('/block/:id')
-  .patch(
-    authMiddleware(
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
-      ENUM_USER_ROLE.generalUser,
-    ),
-    validateRequestZod(friendshipValidation.friendshipBlockZodSchema),
-    FriendShipsController.updateFriendShipBlock,
-  );
+router.route('/list-sort/:id').patch(
+  authMiddleware(
+    ENUM_USER_ROLE.admin,
+    ENUM_USER_ROLE.superAdmin,
+
+    ENUM_USER_ROLE.generalUser,
+  ),
+  validateRequestZod(friendshipValidation.friendshipListSortDataZodSchema),
+  FriendShipsController.updateFriendShipListSort,
+);
+router.route('/block/:id').patch(
+  authMiddleware(
+    ENUM_USER_ROLE.admin,
+    ENUM_USER_ROLE.superAdmin,
+
+    ENUM_USER_ROLE.generalUser,
+  ),
+  validateRequestZod(friendshipValidation.friendshipBlockZodSchema),
+  FriendShipsController.updateFriendShipBlock,
+);
 
 router
   .route('/:id')
@@ -74,7 +70,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(friendshipValidation.updatefriendshipZodSchema),
@@ -84,7 +80,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     FriendShipsController.deleteFriendShip,

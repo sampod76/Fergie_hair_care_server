@@ -14,7 +14,7 @@ router.get(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.vendor,
+
     ENUM_USER_ROLE.generalUser,
   ),
   NotificationController.getAllNotifications,
@@ -24,7 +24,7 @@ router.post(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.vendor,
+
     ENUM_USER_ROLE.generalUser,
   ),
 
@@ -39,7 +39,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     NotificationController.getSingleNotification,
@@ -48,7 +48,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
 
@@ -61,7 +61,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     NotificationController.deleteNotification,

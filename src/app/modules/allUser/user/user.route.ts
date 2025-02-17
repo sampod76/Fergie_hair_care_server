@@ -13,11 +13,7 @@ const router = express.Router();
 router
   .route('/')
   .get(
-    authMiddleware(
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.vendor,
-    ),
+    authMiddleware(ENUM_USER_ROLE.superAdmin, ENUM_USER_ROLE.admin),
     UserController.getAllUsers,
   )
   .post(
@@ -35,11 +31,7 @@ router.route('/create-account-google').post(
 router
   .route('/dashboard')
   .get(
-    authMiddleware(
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.vendor,
-    ),
+    authMiddleware(ENUM_USER_ROLE.superAdmin, ENUM_USER_ROLE.admin),
     UserController.dashboardUsers,
   );
 
@@ -69,7 +61,6 @@ router
       ENUM_USER_ROLE.superAdmin,
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.generalUser,
-      ENUM_USER_ROLE.vendor,
     ),
     validateRequestZod(UserValidation.updateUserZodSchema),
     UserController.updateUser,
@@ -78,7 +69,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.superAdmin,
       ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(

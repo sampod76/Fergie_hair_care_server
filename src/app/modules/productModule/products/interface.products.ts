@@ -4,9 +4,9 @@ import { z } from 'zod';
 import { IUserRef } from '../../allUser/typesAndConst';
 
 import { I_STATUS, I_YN } from '../../../../global/enum_constant_type';
-import { UserSaveProductValidation } from './validation.products';
+import { ProductValidation } from './validation.products';
 
-export type IUserSaveProductFilters = {
+export type IProductFilters = {
   searchTerm?: string;
 
   status?: I_STATUS;
@@ -25,15 +25,10 @@ export type IUserSaveProductFilters = {
   'author.roleBaseUserId'?: string;
 };
 
-export type IUserSaveProduct = z.infer<
-  typeof UserSaveProductValidation.createUserSaveProductBodyData
-> &
-  z.infer<typeof UserSaveProductValidation.updateUserSaveProductZodSchema> & {
+export type IProduct = z.infer<typeof ProductValidation.createProductBodyData> &
+  z.infer<typeof ProductValidation.updateProductZodSchema> & {
     isDelete: boolean;
     author: IUserRef;
   };
 
-export type UserSaveProductModel = Model<
-  IUserSaveProduct,
-  Record<string, unknown>
->;
+export type ProductModel = Model<IProduct, Record<string, unknown>>;

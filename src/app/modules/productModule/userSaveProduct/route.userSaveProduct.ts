@@ -15,9 +15,20 @@ const router = express.Router();
 router
   .route('/')
   // This route is open
-  .get(UserSaveProductController.getAllUserSaveProduct)
+  .get(
+    authMiddleware(
+      ENUM_USER_ROLE.admin,
+      ENUM_USER_ROLE.superAdmin,
+      ENUM_USER_ROLE.generalUser,
+    ),
+    UserSaveProductController.getAllUserSaveProduct,
+  )
   .post(
-    authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.superAdmin),
+    authMiddleware(
+      ENUM_USER_ROLE.admin,
+      ENUM_USER_ROLE.superAdmin,
+      ENUM_USER_ROLE.generalUser,
+    ),
     // uploadImage.single('image'),
     uploadAwsS3Bucket.array('images'),
     parseBodyData({}),
@@ -30,7 +41,7 @@ router.route('/serialnumber-update').patch(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    // ENUM_USER_ROLE.SELLER,
+    ENUM_USER_ROLE.generalUser,
   ),
   validateRequestZod(
     z.object({
@@ -43,9 +54,20 @@ router.route('/serialnumber-update').patch(
 router
   .route('/:id')
   // This route is open
-  .get(UserSaveProductController.getSingleUserSaveProduct)
+  .get(
+    authMiddleware(
+      ENUM_USER_ROLE.admin,
+      ENUM_USER_ROLE.superAdmin,
+      ENUM_USER_ROLE.generalUser,
+    ),
+    UserSaveProductController.getSingleUserSaveProduct,
+  )
   .patch(
-    authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.superAdmin),
+    authMiddleware(
+      ENUM_USER_ROLE.admin,
+      ENUM_USER_ROLE.superAdmin,
+      ENUM_USER_ROLE.generalUser,
+    ),
     uploadAwsS3Bucket.array('images'),
     parseBodyData({}),
     validateRequestZod(
@@ -54,7 +76,11 @@ router
     UserSaveProductController.updateUserSaveProduct,
   )
   .delete(
-    authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.superAdmin),
+    authMiddleware(
+      ENUM_USER_ROLE.admin,
+      ENUM_USER_ROLE.superAdmin,
+      ENUM_USER_ROLE.generalUser,
+    ),
     UserSaveProductController.deleteUserSaveProduct,
   );
 

@@ -595,7 +595,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
           hostUserInfo: [
             {
               $match: {
-                role: ENUM_USER_ROLE.vendor,
+                role:  
               },
             },
             //!--------------hostUser-------start----------

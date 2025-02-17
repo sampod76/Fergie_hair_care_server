@@ -8,24 +8,22 @@ import validateRequestZod from '../../middlewares/validateRequestZod';
 import { UserLoginHistoryValidation } from './loginHistory.validation';
 const router = express.Router();
 
-router
-  .route('/')
-  .get(
-    authMiddleware(
-      ENUM_USER_ROLE.generalUser,
-      ENUM_USER_ROLE.vendor,
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.superAdmin,
-    ),
-    UserLoginHistoryController.getAllUserLoginHistorys,
-  );
+router.route('/').get(
+  authMiddleware(
+    ENUM_USER_ROLE.generalUser,
+
+    ENUM_USER_ROLE.admin,
+    ENUM_USER_ROLE.superAdmin,
+  ),
+  UserLoginHistoryController.getAllUserLoginHistorys,
+);
 
 router
   .route('/:id')
   .get(
     authMiddleware(
       ENUM_USER_ROLE.generalUser,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),
@@ -34,7 +32,7 @@ router
   .patch(
     authMiddleware(
       ENUM_USER_ROLE.generalUser,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),
@@ -46,7 +44,7 @@ router
   .delete(
     authMiddleware(
       ENUM_USER_ROLE.generalUser,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
     ),

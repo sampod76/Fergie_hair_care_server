@@ -8,19 +8,16 @@ import ApiError from '../../../errors/ApiError';
 import { IGenericResponse } from '../../../interface/common';
 import { IPaginationOption } from '../../../interface/pagination';
 import { IUserRef, IUserRefAndDetails } from '../../allUser/typesAndConst';
-import { userSaveProduct_SEARCHABLE_FIELDS } from './consent.products';
-import {
-  IUserSaveProduct,
-  IUserSaveProductFilters,
-} from './interface.products';
-import { UserSaveProduct } from './model.products';
+import { Product_SEARCHABLE_FIELDS } from './consent.products';
+import { IProduct, IProductFilters } from './interface.products';
+import { Product } from './model.products';
 
-const createUserSaveProductByDb = async (
-  payload: IUserSaveProduct,
+const createProductByDb = async (
+  payload: IProduct,
   req: Request,
-): Promise<IUserSaveProduct> => {
+): Promise<IProduct> => {
   const [findIndex] = await Promise.all([
-    UserSaveProduct.findOne({
+    Product.findOne({
       isDelete: false,
     }).sort({ serialNumber: -1 }),
   ]);
@@ -29,16 +26,16 @@ const createUserSaveProductByDb = async (
     ? findIndex?.serialNumber + 1
     : 1;
 
-  const result = await UserSaveProduct.create(payload);
+  const result = await Product.create(payload);
   return result;
 };
 
-//getAllUserSaveProductFromDb
-const getAllUserSaveProductFromDb = async (
-  filters: IUserSaveProductFilters,
+//getAllProductFromDb
+const getAllProductFromDb = async (
+  filters: IProductFilters,
   paginationOptions: IPaginationOption,
   req: Request,
-): Promise<IGenericResponse<IUserSaveProduct[]>> => {
+): Promise<IGenericResponse<IProduct[]>> => {
   const user = req?.user as IUserRefAndDetails;
   //****************search and filters start************/
   const {
@@ -54,13 +51,11 @@ const getAllUserSaveProductFromDb = async (
       ? true
       : false
     : false;
-  if (user.role !== ENUM_USER_ROLE.admin) {
-    filtersData['author.userId'] = user.userId.toString();
-  }
+
   const andConditions = [];
   if (searchTerm) {
     andConditions.push({
-      $or: userSaveProduct_SEARCHABLE_FIELDS.map(field => ({
+      $or: Product_SEARCHABLE_FIELDS.map(field => ({
         [field]: {
           $regex: searchTerm,
           $options: 'i',
@@ -130,7 +125,7 @@ const getAllUserSaveProductFromDb = async (
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  // const result = await UserSaveProduct.find(whereConditions)
+  // const result = await Product.find(whereConditions)
   //   .populate('thumbnail')
   //   .sort(sortConditions)
   //   .skip(Number(skip))
@@ -143,7 +138,7 @@ const getAllUserSaveProductFromDb = async (
   ];
 
   //!-- alternatively and faster
-  const pipeLineResult = await UserSaveProduct.aggregate([
+  const pipeLineResult = await Product.aggregate([
     {
       $facet: {
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
@@ -172,18 +167,18 @@ const getAllUserSaveProductFromDb = async (
   };
 };
 
-// get single UserSaveProducte form db
-const getSingleUserSaveProductFromDb = async (
+// get single Producte form db
+const getSingleProductFromDb = async (
   id: string,
-  filters: IUserSaveProductFilters,
+  filters: IProductFilters,
   req: Request,
-): Promise<IUserSaveProduct | null> => {
+): Promise<IProduct | null> => {
   const pipeline: PipelineStage[] = [
     { $match: { _id: new Types.ObjectId(id) } },
     ///***************** */ images field ******start
   ];
 
-  const result = await UserSaveProduct.aggregate(pipeline);
+  const result = await Product.aggregate(pipeline);
   if (result.length) {
     if (result[0].isDelete === true) {
       result[0] = [];
@@ -192,18 +187,18 @@ const getSingleUserSaveProductFromDb = async (
   return result[0];
 };
 
-// update UserSaveProducte form db
-const updateUserSaveProductFromDb = async (
+// update Producte form db
+const updateProductFromDb = async (
   id: string,
-  payload: Partial<IUserSaveProduct>,
+  payload: Partial<IProduct>,
   user: IUserRef,
   req: Request,
-): Promise<IUserSaveProduct | null> => {
-  const isExist = (await UserSaveProduct.findById(id)) as IUserSaveProduct & {
+): Promise<IProduct | null> => {
+  const isExist = (await Product.findById(id)) as IProduct & {
     _id: Schema.Types.ObjectId;
   };
   if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'UserSaveProduct not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
   }
   if (
     user?.role !== ENUM_USER_ROLE.superAdmin &&
@@ -213,25 +208,25 @@ const updateUserSaveProductFromDb = async (
   ) {
     throw new ApiError(403, 'forbidden access');
   }
-  const result = await UserSaveProduct.findOneAndUpdate({ _id: id }, payload, {
+  const result = await Product.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
 
   return result;
 };
 
-// delete UserSaveProducte form db
-const deleteUserSaveProductByIdFromDb = async (
+// delete Producte form db
+const deleteProductByIdFromDb = async (
   id: string,
-  query: IUserSaveProductFilters,
+  query: IProductFilters,
   user: IUserRef,
   req: Request,
-): Promise<IUserSaveProduct | null> => {
-  const isExist = (await UserSaveProduct.findById(id)) as IUserSaveProduct & {
+): Promise<IProduct | null> => {
+  const isExist = (await Product.findById(id)) as IProduct & {
     _id: Schema.Types.ObjectId;
   };
   if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'UserSaveProduct not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'Product not found');
   }
   if (
     user?.role !== ENUM_USER_ROLE.superAdmin &&
@@ -242,7 +237,7 @@ const deleteUserSaveProductByIdFromDb = async (
     throw new ApiError(403, 'forbidden access');
   }
 
-  const result = await UserSaveProduct.findOneAndUpdate(
+  const result = await Product.findOneAndUpdate(
     { _id: id },
     { isDelete: true },
     { new: true, runValidators: true },
@@ -253,13 +248,13 @@ const deleteUserSaveProductByIdFromDb = async (
   return result;
 };
 //
-const updateUserSaveProductSerialNumberFromDb = async (
+const updateProductSerialNumberFromDb = async (
   payload: { _id: string; number: number }[],
-): Promise<IUserSaveProduct[] | null> => {
+): Promise<IProduct[] | null> => {
   const premissAll: any = [];
   for (let i = 0; i < payload.length; i++) {
     premissAll.push(
-      UserSaveProduct.findByIdAndUpdate(
+      Product.findByIdAndUpdate(
         payload[i]._id,
         { serialNumber: payload[i].number },
         { new: true, runValidators: true },
@@ -271,12 +266,12 @@ const updateUserSaveProductSerialNumberFromDb = async (
   return result;
 };
 
-export const UserSaveProductService = {
-  createUserSaveProductByDb,
-  getAllUserSaveProductFromDb,
-  getSingleUserSaveProductFromDb,
-  updateUserSaveProductFromDb,
-  deleteUserSaveProductByIdFromDb,
+export const ProductService = {
+  createProductByDb,
+  getAllProductFromDb,
+  getSingleProductFromDb,
+  updateProductFromDb,
+  deleteProductByIdFromDb,
   //
-  updateUserSaveProductSerialNumberFromDb,
+  updateProductSerialNumberFromDb,
 };

@@ -7,153 +7,135 @@ import catchAsync from '../../../share/catchAsync';
 import pick from '../../../share/pick';
 import sendResponse from '../../../share/sendResponse';
 import { IUserRef } from '../../allUser/typesAndConst';
-import { userSaveProduct_FILTERABLE_FIELDS } from './consent.products';
-import { IUserSaveProduct } from './interface.products';
-import { UserSaveProductService } from './service.products';
+import { Product_FILTERABLE_FIELDS } from './consent.products';
+import { IProduct } from './interface.products';
+import { ProductService } from './service.products';
 
 // import { z } from 'zod'
-const createUserSaveProduct = catchAsync(
-  async (req: Request, res: Response) => {
-    //-----------------------fil--upload--------------------------
-    //when single file upload. image:{} --> in the multer->fields-> in single file max:1
-    if (Array.isArray(req.body?.image) && req.body?.image?.length) {
-      const singleImage = req.body?.image[0];
-      req.body = {
-        ...req.body,
-        image: singleImage,
-      };
-    }
-    //----------------------------------------------------------------
-    const result = await UserSaveProductService.createUserSaveProductByDb(
-      req.body,
-      req,
-    );
+const createProduct = catchAsync(async (req: Request, res: Response) => {
+  //-----------------------fil--upload--------------------------
+  //when single file upload. image:{} --> in the multer->fields-> in single file max:1
+  if (Array.isArray(req.body?.image) && req.body?.image?.length) {
+    const singleImage = req.body?.image[0];
+    req.body = {
+      ...req.body,
+      image: singleImage,
+    };
+  }
+  //----------------------------------------------------------------
+  const result = await ProductService.createProductByDb(req.body, req);
 
-    sendResponse<IUserSaveProduct>(req, res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: 'successful create UserSaveProduct',
-      data: result,
-    });
-  },
-);
+  sendResponse<IProduct>(req, res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'successful create Product',
+    data: result,
+  });
+});
 
-const getAllUserSaveProduct = catchAsync(
-  async (req: Request, res: Response) => {
-    const filters = pick(req.query, userSaveProduct_FILTERABLE_FIELDS);
-    const paginationOptions = pick(req.query, PAGINATION_FIELDS);
+const getAllProduct = catchAsync(async (req: Request, res: Response) => {
+  const filters = pick(req.query, Product_FILTERABLE_FIELDS);
+  const paginationOptions = pick(req.query, PAGINATION_FIELDS);
 
-    const result = await UserSaveProductService.getAllUserSaveProductFromDb(
-      filters,
-      paginationOptions,
-      req,
-    );
+  const result = await ProductService.getAllProductFromDb(
+    filters,
+    paginationOptions,
+    req,
+  );
 
-    sendResponse<IUserSaveProduct[]>(req, res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: 'successfully Get all UserSaveProduct',
-      meta: result.meta,
-      data: result.data,
-    });
-    // next();
-  },
-);
+  sendResponse<IProduct[]>(req, res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'successfully Get all Product',
+    meta: result.meta,
+    data: result.data,
+  });
+  // next();
+});
 
-const getSingleUserSaveProduct = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
+const getSingleProduct = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
 
-    /*   if (!globalImport.ObjectId.isValid(id)) {
+  /*   if (!globalImport.ObjectId.isValid(id)) {
       throw new ApiError(400, 'invalid id sampod');
     } */
 
-    const filters = pick(req.query, userSaveProduct_FILTERABLE_FIELDS);
+  const filters = pick(req.query, Product_FILTERABLE_FIELDS);
 
-    const result = await UserSaveProductService.getSingleUserSaveProductFromDb(
-      id,
-      filters,
-      req,
+  const result = await ProductService.getSingleProductFromDb(id, filters, req);
+
+  sendResponse<IProduct>(req, res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'successfully get Product',
+    data: result,
+  });
+});
+const updateProduct = catchAsync(async (req: Request, res: Response) => {
+  //  await RequestToFileDecodeAddBodyHandle(req);
+  //-----------------------fil--upload--------------------------
+  //when single file upload. image:{} --> in the multer->fields-> in single file max:1
+  if (Array.isArray(req.body?.image) && req.body?.image?.length) {
+    const singleImage = req.body?.image[0];
+    req.body = {
+      ...req.body,
+      image: singleImage,
+    };
+  }
+  //----------------------------------------------------------------
+  const { id } = req.params;
+  const updateData = req.body;
+
+  const result = await ProductService.updateProductFromDb(
+    id,
+    updateData,
+    req.user as IUserRef,
+    req,
+  );
+
+  sendResponse<IProduct>(req, res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'successfully update Product',
+    data: result,
+  });
+});
+const updateProductSerialNumber = catchAsync(
+  async (req: Request, res: Response) => {
+    const result = await ProductService.updateProductSerialNumberFromDb(
+      req.body,
     );
 
-    sendResponse<IUserSaveProduct>(req, res, {
+    sendResponse<IProduct[]>(req, res, {
       success: true,
       statusCode: httpStatus.OK,
-      message: 'successfully get UserSaveProduct',
-      data: result,
-    });
-  },
-);
-const updateUserSaveProduct = catchAsync(
-  async (req: Request, res: Response) => {
-    //  await RequestToFileDecodeAddBodyHandle(req);
-    //-----------------------fil--upload--------------------------
-    //when single file upload. image:{} --> in the multer->fields-> in single file max:1
-    if (Array.isArray(req.body?.image) && req.body?.image?.length) {
-      const singleImage = req.body?.image[0];
-      req.body = {
-        ...req.body,
-        image: singleImage,
-      };
-    }
-    //----------------------------------------------------------------
-    const { id } = req.params;
-    const updateData = req.body;
-
-    const result = await UserSaveProductService.updateUserSaveProductFromDb(
-      id,
-      updateData,
-      req.user as IUserRef,
-      req,
-    );
-
-    sendResponse<IUserSaveProduct>(req, res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: 'successfully update UserSaveProduct',
-      data: result,
-    });
-  },
-);
-const updateUserSaveProductSerialNumber = catchAsync(
-  async (req: Request, res: Response) => {
-    const result =
-      await UserSaveProductService.updateUserSaveProductSerialNumberFromDb(
-        req.body,
-      );
-
-    sendResponse<IUserSaveProduct[]>(req, res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: 'successfully update UserSaveProduct',
+      message: 'successfully update Product',
       data: result,
     });
   },
 );
 
-const deleteUserSaveProduct = catchAsync(
-  async (req: Request, res: Response) => {
-    const { id } = req.params;
-    const result = await UserSaveProductService.deleteUserSaveProductByIdFromDb(
-      id,
-      req.query,
-      req.user as IUserRef,
-      req,
-    );
-    sendResponse<IUserSaveProduct>(req, res, {
-      success: true,
-      statusCode: httpStatus.OK,
-      message: 'successfully delete UserSaveProduct',
-      data: result,
-    });
-  },
-);
-export const UserSaveProductController = {
-  createUserSaveProduct,
-  getAllUserSaveProduct,
-  getSingleUserSaveProduct,
-  updateUserSaveProduct,
-  deleteUserSaveProduct,
+const deleteProduct = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const result = await ProductService.deleteProductByIdFromDb(
+    id,
+    req.query,
+    req.user as IUserRef,
+    req,
+  );
+  sendResponse<IProduct>(req, res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: 'successfully delete Product',
+    data: result,
+  });
+});
+export const ProductController = {
+  createProduct,
+  getAllProduct,
+  getSingleProduct,
+  updateProduct,
+  deleteProduct,
   //
-  updateUserSaveProductSerialNumber,
+  updateProductSerialNumber,
 };

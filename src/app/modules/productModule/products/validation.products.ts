@@ -1,9 +1,9 @@
+import { Types } from 'mongoose';
 import { z } from 'zod';
 import { I_STATUS, STATUS_ARRAY } from '../../../../global/enum_constant_type';
 import { zodFileAfterUploadSchema } from '../../../../global/schema/global.schema';
-import { Types } from 'mongoose';
 
-const createUserSaveProductBodyData = z.object({
+const createProductBodyData = z.object({
   name: z.string({
     required_error: 'Title is required',
   }),
@@ -17,12 +17,12 @@ const createUserSaveProductBodyData = z.object({
   status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
   serialNumber: z.number().optional(),
 });
-const createUserSaveProductZodSchema = z.object({
-  body: createUserSaveProductBodyData,
+const createProductZodSchema = z.object({
+  body: createProductBodyData,
 });
 
-const updateUserSaveProductZodSchema = z.object({
-  body: createUserSaveProductZodSchema
+const updateProductZodSchema = z.object({
+  body: createProductZodSchema
     .merge(
       z.object({
         isDelete: z.boolean().optional(),
@@ -31,9 +31,9 @@ const updateUserSaveProductZodSchema = z.object({
     .deepPartial(),
 });
 
-export const UserSaveProductValidation = {
-  createUserSaveProductZodSchema,
-  updateUserSaveProductZodSchema,
+export const ProductValidation = {
+  createProductZodSchema,
+  updateProductZodSchema,
   //
-  createUserSaveProductBodyData,
+  createProductBodyData,
 };

@@ -1,5 +1,5 @@
-export const userSaveProduct_SEARCHABLE_FIELDS = ['name'];
-export const userSaveProduct_FILTERABLE_FIELDS = [
+export const Product_SEARCHABLE_FIELDS = ['name'];
+export const Product_FILTERABLE_FIELDS = [
   'searchTerm',
   'status',
   'delete',

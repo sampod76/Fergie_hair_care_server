@@ -17,7 +17,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     GroupssController.getAllGroupss,
@@ -26,7 +26,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     uploadImage.fields([
@@ -42,25 +42,23 @@ router.route('/check-userid-to-exist-groups/:id').get(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.vendor,
+
     ENUM_USER_ROLE.generalUser,
   ),
 
   GroupssController.checkUserIdToExistGroups,
 );
 
-router
-  .route('/list-sort/:id')
-  .patch(
-    authMiddleware(
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
-      ENUM_USER_ROLE.generalUser,
-    ),
-    validateRequestZod(GroupsValidation.GroupsListSortDataZodSchema),
-    GroupssController.updateGroupsListSort,
-  );
+router.route('/list-sort/:id').patch(
+  authMiddleware(
+    ENUM_USER_ROLE.admin,
+    ENUM_USER_ROLE.superAdmin,
+
+    ENUM_USER_ROLE.generalUser,
+  ),
+  validateRequestZod(GroupsValidation.GroupsListSortDataZodSchema),
+  GroupssController.updateGroupsListSort,
+);
 
 router
   .route('/:id')
@@ -69,7 +67,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(GroupsValidation.updateGroupsZodSchema),
@@ -79,7 +77,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     GroupssController.deleteGroups,

@@ -14,7 +14,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     GroupMembersController.getAllGroupMembers,
@@ -23,7 +23,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
 
@@ -35,37 +35,33 @@ router.route('/check-userid-to-exist-GroupMember/:id').get(
   authMiddleware(
     ENUM_USER_ROLE.admin,
     ENUM_USER_ROLE.superAdmin,
-    ENUM_USER_ROLE.vendor,
+
     ENUM_USER_ROLE.generalUser,
   ),
 
   GroupMembersController.checkUserIdToExistGroupMember,
 );
 
-router
-  .route('/list-sort/:id')
-  .patch(
-    authMiddleware(
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
-      ENUM_USER_ROLE.generalUser,
-    ),
-    validateRequestZod(GroupMemberValidation.GroupMemberListSortDataZodSchema),
-    GroupMembersController.updateGroupMemberListSort,
-  );
-router
-  .route('/block/:id')
-  .patch(
-    authMiddleware(
-      ENUM_USER_ROLE.admin,
-      ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
-      ENUM_USER_ROLE.generalUser,
-    ),
-    validateRequestZod(GroupMemberValidation.GroupMemberBlockZodSchema),
-    GroupMembersController.updateGroupMemberBlock,
-  );
+router.route('/list-sort/:id').patch(
+  authMiddleware(
+    ENUM_USER_ROLE.admin,
+    ENUM_USER_ROLE.superAdmin,
+
+    ENUM_USER_ROLE.generalUser,
+  ),
+  validateRequestZod(GroupMemberValidation.GroupMemberListSortDataZodSchema),
+  GroupMembersController.updateGroupMemberListSort,
+);
+router.route('/block/:id').patch(
+  authMiddleware(
+    ENUM_USER_ROLE.admin,
+    ENUM_USER_ROLE.superAdmin,
+
+    ENUM_USER_ROLE.generalUser,
+  ),
+  validateRequestZod(GroupMemberValidation.GroupMemberBlockZodSchema),
+  GroupMembersController.updateGroupMemberBlock,
+);
 
 router
   .route('/:id')
@@ -74,7 +70,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     validateRequestZod(GroupMemberValidation.updateGroupMemberZodSchema),
@@ -84,7 +80,7 @@ router
     authMiddleware(
       ENUM_USER_ROLE.admin,
       ENUM_USER_ROLE.superAdmin,
-      ENUM_USER_ROLE.vendor,
+
       ENUM_USER_ROLE.generalUser,
     ),
     GroupMembersController.deleteGroupMember,
