@@ -146,6 +146,11 @@ CategorySchema.post(
   async function (data: any & { _id: string }, next: any) {
     try {
       const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
+      if (data?.categoryType) {
+        const res2 = await redisClient.del(
+          ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
+        );
+      }
       // console.log('update');
       next();
     } catch (error: any) {
@@ -157,7 +162,11 @@ CategorySchema.post(
 CategorySchema.post('save', async function (data: ICategory, next) {
   try {
     const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
-
+    if (data?.categoryType) {
+      const res2 = await redisClient.del(
+        ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
+      );
+    }
     next();
   } catch (error: any) {
     next(error);

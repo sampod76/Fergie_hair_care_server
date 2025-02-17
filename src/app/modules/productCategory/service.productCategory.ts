@@ -144,7 +144,7 @@ const getAllProductCategoryFromDb = async (
   // Extract and format the pipeLineResults
   const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
   const result = pipeLineResult[0]?.data || []; // Extract data
-  // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
+
   const redisSetterOop = new RedisAllSetterServiceOop();
   const red = await redisSetterOop.redisSetter([
     {

@@ -24,10 +24,11 @@ const createCategoryByDb = async (
   const [findAlreadyExists, findIndex] = await Promise.all([
     Category.findOne({
       value: { $regex: new RegExp(`^${payload.value}$`, 'i') },
-
+      categoryType: payload.categoryType,
       isDelete: false,
     }),
     Category.findOne({
+      categoryType: payload.categoryType,
       isDelete: false,
     }).sort({ serialNumber: -1 }),
   ]);
@@ -60,7 +61,11 @@ const getAllCategoryFromDb = async (
   //***********cache start************* */
   const redisOop = new RedisAllQueryServiceOop();
   const redisClient = redisOop.getGlobalRedis();
-  const getRedis = await redisClient.get(ENUM_REDIS_KEY.RIS_All_Categories);
+  const getRedis = await redisClient.get(
+    filters.categoryType
+      ? ENUM_REDIS_KEY.RIS_All_Categories + ':' + filters.categoryType
+      : ENUM_REDIS_KEY.RIS_All_Categories,
+  );
 
   if (getRedis) {
     const redisData = JSON.parse(getRedis);
@@ -195,11 +200,12 @@ const getAllCategoryFromDb = async (
 
   const result = pipeLineResult[0]?.data || []; // Extract data
 
-  // await redisClient.set(ENUM_REDIS_KEY.RIS_Categories, JSON.stringify(result));
   const redisSetterOop = new RedisAllSetterServiceOop();
   const red = await redisSetterOop.redisSetter([
     {
-      key: ENUM_REDIS_KEY.RIS_All_Categories,
+      key: filters.categoryType
+        ? ENUM_REDIS_KEY.RIS_All_Categories + ':' + filters.categoryType
+        : ENUM_REDIS_KEY.RIS_All_Categories,
       value: result,
       ttl: 1 * 60 * 60,
     },

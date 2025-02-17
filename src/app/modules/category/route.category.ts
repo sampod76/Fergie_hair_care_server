@@ -7,6 +7,7 @@ import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
 import { uploadAwsS3Bucket } from '../aws/utls.aws';
 import { CategoryController } from './constroller.category';
+import { CATEGORY_TYPE_ARRAY, I_CategoryType } from './interface.category';
 import { CategoryValidation } from './validation.category';
 
 const router = express.Router();
@@ -14,14 +15,25 @@ const router = express.Router();
 router
   .route('/')
   // This route is open
-  .get(CategoryController.getAllCategory)
+  .get(
+    validateRequestZod(
+      z.object({
+        query: z.object({
+          categoryType: z.enum(CATEGORY_TYPE_ARRAY as [I_CategoryType], {
+            required_error: 'Query parameters in must be provide categoryType',
+          }),
+        }),
+      }),
+    ),
+    CategoryController.getAllCategory,
+  )
   .post(
     authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.superAdmin),
-    // uploadImage.single('image'),
-    uploadAwsS3Bucket.fields([
-      { name: 'image', maxCount: 1 },
-      { name: 'files', maxCount: 10 },
-    ]),
+    uploadAwsS3Bucket.single('image'),
+    // uploadAwsS3Bucket.fields([
+    //   { name: 'image', maxCount: 1 },
+    //   { name: 'files', maxCount: 10 },
+    // ]),
     parseBodyData({}),
     validateRequestZod(CategoryValidation.createCategoryZodSchema),
     CategoryController.createCategory,
@@ -46,11 +58,11 @@ router
   .get(CategoryController.getSingleCategory)
   .patch(
     authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.superAdmin),
-    // uploadImage.single('image'),
-    uploadAwsS3Bucket.fields([
-      { name: 'image', maxCount: 1 },
-      { name: 'files', maxCount: 10 },
-    ]),
+    uploadAwsS3Bucket.single('image'),
+    // uploadAwsS3Bucket.fields([
+    //   { name: 'image', maxCount: 1 },
+    //   { name: 'files', maxCount: 10 },
+    // ]),
     parseBodyData({}),
     validateRequestZod(CategoryValidation.updateCategoryZodSchema),
     CategoryController.updateCategory,
