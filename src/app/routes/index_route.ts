@@ -19,6 +19,7 @@ import { ChatMessageRoute } from '../modules/messageingModules/message/messages.
 import { ProductCategoryRoute } from '../modules/productCategory/route.productCategory';
 import { ProductRoute } from '../modules/productModule/products/route.products';
 import { UserSaveProductRoute } from '../modules/productModule/userSaveProduct/route.userSaveProduct';
+import { AddToCartRoute } from '../modules/addToCart/route.addToCart';
 
 const router = express.Router();
 
@@ -61,6 +62,10 @@ const moduleRoutes = [
   {
     path: '/user-save-products',
     route: UserSaveProductRoute,
+  },
+  {
+    path: '/add-to-cart',
+    route: AddToCartRoute,
   },
 
   {
