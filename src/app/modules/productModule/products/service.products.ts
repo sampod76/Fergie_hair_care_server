@@ -141,6 +141,48 @@ const getAllProductFromDb = async (
     { $skip: Number(skip) || 0 },
     { $limit: Number(limit) || 10 },
   ];
+
+  if (needProperty && needProperty.includes('favorite')) {
+    const favoriteShop: PipelineStage[] = [
+      //----- is favorite shop --------
+      {
+        $lookup: {
+          from: 'favoriteproducts',
+          let: { id: '$_id' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ['$productId', '$$id'] },
+                    {
+                      $eq: ['$author.userId', new Types.ObjectId(user.userId)],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: 'favoriteProductsDetails',
+        },
+      },
+      {
+        $addFields: {
+          isFavorite: {
+            $cond: {
+              if: { $eq: [{ $size: '$favoriteProductsDetails' }, 0] },
+              then: [false],
+              else: true,
+            },
+          },
+        },
+      },
+      { $unwind: '$isFavorite' },
+      { $project: { favoriteProductsDetails: 0 } },
+      //------ is favorite shop end -----------
+    ];
+    pipeline.push(...favoriteShop);
+  }
   const [result, total] = await Promise.all([
     Product.aggregate(pipeline),
     Product.countDocuments(whereConditions),

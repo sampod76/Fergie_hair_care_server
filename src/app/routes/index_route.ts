@@ -13,13 +13,14 @@ import { adminRoutes } from '../modules/allUser/admin/admin.route';
 
 import { AdminSettingRoute } from '../modules/adminSetting/route.adminSetting';
 
+import { AddToCartRoute } from '../modules/addToCart/route.addToCart';
 import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalUser';
+import { FavoriteProductRoute } from '../modules/favoriteProduct/route.favoriteProduct';
 import { FriendShipsRoute } from '../modules/messageingModules/friendship/friendship.route';
 import { ChatMessageRoute } from '../modules/messageingModules/message/messages.route';
 import { ProductCategoryRoute } from '../modules/productCategory/route.productCategory';
 import { ProductRoute } from '../modules/productModule/products/route.products';
 import { UserSaveProductRoute } from '../modules/productModule/userSaveProduct/route.userSaveProduct';
-import { AddToCartRoute } from '../modules/addToCart/route.addToCart';
 
 const router = express.Router();
 
@@ -66,6 +67,10 @@ const moduleRoutes = [
   {
     path: '/add-to-cart',
     route: AddToCartRoute,
+  },
+  {
+    path: '/favorite-products',
+    route: FavoriteProductRoute,
   },
 
   {

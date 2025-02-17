@@ -15,7 +15,14 @@ const router = express.Router();
 router
   .route('/')
   // This route is open
-  .get(ProductController.getAllProduct)
+  .get(
+    authMiddleware(
+      ENUM_USER_ROLE.admin,
+      ENUM_USER_ROLE.superAdmin,
+      ENUM_USER_ROLE.generalUser,
+    ),
+    ProductController.getAllProduct,
+  )
   .post(
     authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.superAdmin),
     // uploadImage.single('image'),
