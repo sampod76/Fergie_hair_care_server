@@ -15,6 +15,7 @@ const AddToCartSchema = new Schema<IAddToCart, AddToCartModel>(
     serialNumber: {
       type: Number,
     },
+    quantity: { type: Number, default: 1 },
     status: {
       type: String,
       enum: STATUS_ARRAY,

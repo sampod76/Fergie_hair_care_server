@@ -8,6 +8,11 @@ import { IPaginationOption } from '../../interface/pagination';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
+import {
+  ILookupCollection,
+  LookupAnyRoleDetailsReusable,
+  LookupReusable,
+} from '../../../helper/lookUpResuable';
 import ApiError from '../../errors/ApiError';
 import { IUserRef } from '../allUser/typesAndConst';
 import { AddToCart_SEARCHABLE_FIELDS } from './consent.addToCart';
@@ -131,7 +136,6 @@ const getAllAddToCartFromDb = async (
   //****************pagination start **************/
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
-  console.log('🚀 ~ skip:', skip);
 
   const sortConditions: { [key: string]: 1 | -1 } = {};
   if (sortBy && sortOrder) {
@@ -153,32 +157,42 @@ const getAllAddToCartFromDb = async (
     { $skip: Number(skip) || 0 },
     { $limit: Number(limit) || 10 },
   ];
+  const collections: ILookupCollection<any>[] = []; // Use the correct type here
+  if (needProperty?.includes('productId')) {
+    const pipelineConnection: ILookupCollection<any> = {
+      connectionName: 'products',
+      idFiledName: 'productId',
+      pipeLineMatchField: '_id',
+      outPutFieldName: 'productDetails',
+    };
+    collections.push(pipelineConnection);
+  }
+  if (needProperty && needProperty.includes('author')) {
+    LookupAnyRoleDetailsReusable(pipeline, {
+      collections: [
+        {
+          roleMatchFiledName: 'author.role',
+          idFiledName: '$author.roleBaseUserId',
+          pipeLineMatchField: '$_id',
+          outPutFieldName: 'details',
+          margeInField: 'author',
+        },
+      ],
+    });
+  }
+  if (collections.length) {
+    // Use the collections in LookupReusable
+    LookupReusable<any, any>(pipeline, {
+      collections: collections,
+    });
+  }
 
   // const result = await AddToCart.aggregate(pipeline);
   // const total = await AddToCart.countDocuments(whereConditions);
-
-  //!-- alternatively and faster
-  const pipeLineResult = await AddToCart.aggregate([
-    {
-      $facet: {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        data: pipeline,
-        countDocuments: [
-          {
-            $match: whereConditions,
-          },
-          { $count: 'totalData' },
-        ],
-      },
-    },
+  const [result, total] = await Promise.all([
+    AddToCart.aggregate(pipeline),
+    AddToCart.countDocuments(whereConditions),
   ]);
-
-  // Extract and format the pipeLineResults
-  const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
-
-  const result = pipeLineResult[0]?.data || []; // Extract data
-
   return {
     meta: {
       page,

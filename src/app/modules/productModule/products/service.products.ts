@@ -141,26 +141,10 @@ const getAllProductFromDb = async (
     { $skip: Number(skip) || 0 },
     { $limit: Number(limit) || 10 },
   ];
-
-  //!-- alternatively and faster
-  const pipeLineResult = await Product.aggregate([
-    {
-      $facet: {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        data: pipeline,
-        countDocuments: [
-          {
-            $match: whereConditions,
-          },
-          { $count: 'totalData' },
-        ],
-      },
-    },
+  const [result, total] = await Promise.all([
+    Product.aggregate(pipeline),
+    Product.countDocuments(whereConditions),
   ]);
-  // Extract and format the pipeLineResults
-  const total = pipeLineResult[0]?.countDocuments[0]?.totalData || 0; // Extract total count
-  const result = pipeLineResult[0]?.data || []; // Extract data
 
   return {
     meta: {
