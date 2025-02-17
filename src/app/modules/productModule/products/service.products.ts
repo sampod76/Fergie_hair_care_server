@@ -43,6 +43,7 @@ const getAllProductFromDb = async (
     createdAtTo,
     createdAtFrom,
     needProperty,
+
     ...filtersData
   } = filters;
 
@@ -76,6 +77,10 @@ const getAllProductFromDb = async (
           field === 'productCategoryId'
         ) {
           modifyFiled = { [field]: new Types.ObjectId(value) };
+        } else if (field === 'minPrice') {
+          modifyFiled = { ['pricing.price']: { $gte: parseFloat(value) } };
+        } else if (field === 'maxPrice') {
+          modifyFiled = { ['pricing.price']: { $lte: parseFloat(value) } };
         } else {
           modifyFiled = { [field]: value };
         }
@@ -88,16 +93,16 @@ const getAllProductFromDb = async (
       const timeTo = new Date(createdAtFrom);
       const createdAtToModify = new Date(timeTo.setHours(23, 59, 59, 999));
       condition.push({
+        //@ts-ignore
         createdAt: {
-          //@ts-ignore
           $gte: new Date(createdAtFrom),
           $lte: new Date(createdAtToModify),
         },
       });
     } else if (createdAtFrom && createdAtTo) {
       condition.push({
+        //@ts-ignore
         createdAt: {
-          //@ts-ignore
           $gte: new Date(createdAtFrom),
           $lte: new Date(createdAtTo),
         },

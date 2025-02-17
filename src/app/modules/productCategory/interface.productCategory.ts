@@ -13,6 +13,11 @@ export type IProductCategoryFilters = {
   delete?: I_YN;
   children?: string;
   isDelete?: string | boolean;
+  'author.userId': string;
+  //
+  createdAtFrom?: string;
+  createdAtTo?: string;
+  needProperty?: string;
 };
 
 export type IProductCategory = z.infer<

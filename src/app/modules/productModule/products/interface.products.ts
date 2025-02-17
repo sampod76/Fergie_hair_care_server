@@ -17,6 +17,9 @@ export type IProductFilters = {
   isDelete?: string | boolean;
   productCategoryId?: string;
   //
+  maxPrice?: string;
+  minPrice?: string;
+  //
   createdAtFrom?: string;
   createdAtTo?: string;
   needProperty?: string;

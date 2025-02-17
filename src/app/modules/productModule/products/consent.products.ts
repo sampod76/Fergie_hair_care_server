@@ -1,4 +1,4 @@
-export const Product_SEARCHABLE_FIELDS = ['name'];
+export const Product_SEARCHABLE_FIELDS = ['name', 'productCategoryName'];
 export const Product_FILTERABLE_FIELDS = [
   'searchTerm',
   'status',
@@ -8,6 +8,9 @@ export const Product_FILTERABLE_FIELDS = [
   'author.userId',
   'author.roleBaseUserId',
   'productCategoryId',
+  //
+  'minPrice',
+  'maxPrice',
   //
   'needProperty',
   'createdAtFrom',

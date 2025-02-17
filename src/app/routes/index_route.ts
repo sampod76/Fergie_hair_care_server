@@ -17,6 +17,7 @@ import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalU
 import { FriendShipsRoute } from '../modules/messageingModules/friendship/friendship.route';
 import { ChatMessageRoute } from '../modules/messageingModules/message/messages.route';
 import { ProductCategoryRoute } from '../modules/productCategory/route.productCategory';
+import { ProductRoute } from '../modules/productModule/products/route.products';
 import { UserSaveProductRoute } from '../modules/productModule/userSaveProduct/route.userSaveProduct';
 
 const router = express.Router();
@@ -52,6 +53,10 @@ const moduleRoutes = [
   {
     path: '/products-category',
     route: ProductCategoryRoute,
+  },
+  {
+    path: '/products',
+    route: ProductRoute,
   },
   {
     path: '/user-save-products',

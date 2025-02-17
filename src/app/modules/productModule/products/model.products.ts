@@ -31,6 +31,10 @@ const ProductSchema = new Schema<IProduct, ProductModel>(
       type: Schema.Types.ObjectId,
       ref: 'ProductCategory',
     },
+    productCategoryName: {
+      type: String,
+    },
+    pricing: { price: Number, currency: String, discount: Number, vat: Number },
     serialNumber: {
       type: Number,
       default: 0,

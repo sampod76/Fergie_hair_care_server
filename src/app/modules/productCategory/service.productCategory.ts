@@ -53,7 +53,7 @@ const getAllProductCategoryFromDb = async (
   req: Request,
 ): Promise<IGenericResponse<IProductCategory[]>> => {
   //****************search and filters start************/
-  const { searchTerm, ...filtersData } = filters;
+  const { searchTerm, createdAtFrom, createdAtTo, ...filtersData } = filters;
 
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
@@ -73,10 +73,44 @@ const getAllProductCategoryFromDb = async (
   }
 
   if (Object.keys(filtersData).length) {
+    const condition = Object.entries(filtersData).map(
+      //@ts-ignore
+      ([field, value]: [keyof typeof filtersData, string]) => {
+        let modifyFiled;
+
+        if (field === 'author.userId') {
+          modifyFiled = { [field]: new Types.ObjectId(value) };
+        } else {
+          modifyFiled = { [field]: value };
+        }
+        return modifyFiled;
+      },
+    );
+
+    if (createdAtFrom && !createdAtTo) {
+      //only single data in register all data -> 2022-02-25_12:00 am to 2022-02-25_11:59 pm minutes
+      const timeTo = new Date(createdAtFrom);
+      const createdAtToModify = new Date(timeTo.setHours(23, 59, 59, 999));
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtToModify),
+        },
+      });
+    } else if (createdAtFrom && createdAtTo) {
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtTo),
+        },
+      });
+    }
+
+    //
     andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) => ({
-        [field]: value,
-      })),
+      $and: condition,
     });
   }
 
@@ -153,7 +187,6 @@ const getAllProductCategoryFromDb = async (
       ttl: 1 * 60 * 60,
     },
   ]);
-  console.log('🚀 ~ red:', red);
   return {
     meta: {
       page,
@@ -245,7 +278,6 @@ const updateProductCategorySerialNumberFromDb = async (
     );
   }
   const result = await Promise.all(premissAll);
-  // console.log('🚀 ~ result:', result);
   return result;
 };
 
