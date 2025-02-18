@@ -8,7 +8,7 @@ import catchAsync from '../../share/catchAsync';
 import pick from '../../share/pick';
 import sendResponse from '../../share/sendResponse';
 
-import { CATEGORY_FILTERABLE_FIELDS } from './consent.category';
+import { CATEGORY_FILTERABLE_FIELDS } from './constant.category';
 import { ICategory } from './interface.category';
 import { CategoryService } from './service.category';
 

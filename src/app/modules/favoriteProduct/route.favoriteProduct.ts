@@ -4,7 +4,7 @@ import authMiddleware from '../../middlewares/authMiddleware';
 
 import { z } from 'zod';
 import validateRequestZod from '../../middlewares/validateRequestZod';
-import { FavoriteProductController } from './constroller.favoriteProduct';
+import { FavoriteProductController } from './controller.favoriteProduct';
 import { FavoriteProductValidation } from './validation.favoriteProduct';
 
 const router = express.Router();

@@ -8,7 +8,7 @@ import catchAsync from '../../share/catchAsync';
 import pick from '../../share/pick';
 import sendResponse from '../../share/sendResponse';
 
-import { adminSetting_FILTERABLE_FIELDS } from './consent.adminSetting';
+import { adminSetting_FILTERABLE_FIELDS } from './constant.adminSetting';
 import { IAdminSetting } from './interface.adminSetting';
 import { AdminSettingService } from './service.adminSetting';
 

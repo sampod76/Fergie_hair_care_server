@@ -5,7 +5,7 @@ import authMiddleware from '../../middlewares/authMiddleware';
 import { uploadImage } from '../../middlewares/uploader.multer';
 import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
-import { AllTextFieldController } from './constroller.AllTextField';
+import { AllTextFieldController } from './controller.AllTextField';
 import { AllTextFieldValidation } from './validation.AllTextField';
 
 const router = express.Router();

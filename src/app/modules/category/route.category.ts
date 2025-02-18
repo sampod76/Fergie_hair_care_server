@@ -6,7 +6,7 @@ import { z } from 'zod';
 import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
 import { uploadAwsS3Bucket } from '../aws/utls.aws';
-import { CategoryController } from './constroller.category';
+import { CategoryController } from './controller.category';
 import { CATEGORY_TYPE_ARRAY, I_CategoryType } from './interface.category';
 import { CategoryValidation } from './validation.category';
 

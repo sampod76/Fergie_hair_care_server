@@ -2,7 +2,7 @@ import express from 'express';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import { apiLimiter } from '../../middlewares/api-limited-hite';
 import validateRequestZod from '../../middlewares/validateRequestZod';
-import { AWSController } from './constroller.AWS';
+import { AWSController } from './controller.AWS';
 import { AWSValidation } from './validation.AWS';
 const router = express.Router();
 

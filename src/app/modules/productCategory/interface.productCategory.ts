@@ -13,7 +13,7 @@ export type IProductCategoryFilters = {
   delete?: I_YN;
   children?: string;
   isDelete?: string | boolean;
-  'author.userId': string;
+  'author.userId'?: string;
   //
   createdAtFrom?: string;
   createdAtTo?: string;

@@ -8,7 +8,7 @@ import { IPaginationOption } from '../../interface/pagination';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import ApiError from '../../errors/ApiError';
-import { adminSetting_SEARCHABLE_FIELDS } from './consent.adminSetting';
+import { adminSetting_SEARCHABLE_FIELDS } from './constant.adminSetting';
 import { IAdminSetting, IAdminSettingFilters } from './interface.adminSetting';
 import { AdminSetting } from './model.adminSetting';
 

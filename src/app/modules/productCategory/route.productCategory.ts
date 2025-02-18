@@ -6,7 +6,7 @@ import { z } from 'zod';
 import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
 import { uploadAwsS3Bucket } from '../aws/utls.aws';
-import { ProductCategoryController } from './constroller.productCategory';
+import { ProductCategoryController } from './controller.productCategory';
 import { ProductCategoryValidation } from './validation.productCategory';
 
 const router = express.Router();

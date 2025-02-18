@@ -10,7 +10,7 @@ import sendResponse from '../../share/sendResponse';
 
 import { IUserRef } from '../allUser/typesAndConst';
 import { RequestToRefUserObject } from '../allUser/user/user.utils';
-import { AddToCart_FILTERABLE_FIELDS } from './consent.addToCart';
+import { AddToCart_FILTERABLE_FIELDS } from './constant.addToCart';
 import { IAddToCart } from './interface.addToCart';
 import { AddToCartService } from './service.addToCart';
 

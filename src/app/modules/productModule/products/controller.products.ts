@@ -7,7 +7,7 @@ import catchAsync from '../../../share/catchAsync';
 import pick from '../../../share/pick';
 import sendResponse from '../../../share/sendResponse';
 import { IUserRef } from '../../allUser/typesAndConst';
-import { Product_FILTERABLE_FIELDS } from './consent.products';
+import { Product_FILTERABLE_FIELDS } from './constant.products';
 import { IProduct } from './interface.products';
 import { ProductService } from './service.products';
 

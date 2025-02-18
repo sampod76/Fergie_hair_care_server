@@ -8,7 +8,7 @@ import ApiError from '../../../errors/ApiError';
 import { IGenericResponse } from '../../../interface/common';
 import { IPaginationOption } from '../../../interface/pagination';
 import { IUserRef, IUserRefAndDetails } from '../../allUser/typesAndConst';
-import { userSaveProduct_SEARCHABLE_FIELDS } from './consent.userSaveProduct';
+import { userSaveProduct_SEARCHABLE_FIELDS } from './constant.userSaveProduct';
 import {
   IUserSaveProduct,
   IUserSaveProductFilters,

@@ -13,7 +13,7 @@ import {
   RedisAllQueryServiceOop,
   RedisAllSetterServiceOop,
 } from '../../redis/service.redis';
-import { productCategory_SEARCHABLE_FIELDS } from './consent.productCategory';
+import { productCategory_SEARCHABLE_FIELDS } from './constant.productCategory';
 import {
   IProductCategory,
   IProductCategoryFilters,

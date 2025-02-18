@@ -21,7 +21,6 @@ const FavoriteProductSchema = new Schema<
     serialNumber: {
       type: Number,
     },
-
     status: {
       type: String,
       enum: STATUS_ARRAY,
@@ -41,7 +40,7 @@ const FavoriteProductSchema = new Schema<
     },
   },
 );
-
+// after findOneAndDelete then data then call this hook
 FavoriteProductSchema.post('findOneAndDelete', async function () {
   try {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -81,17 +80,13 @@ FavoriteProductSchema.post(
     }
   },
 );
-
+// before save/create then data then call this hook
 FavoriteProductSchema.post(
   'save',
   async function (data: IFavoriteProduct, next) {
     try {
       // const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
-      // if (data?.author) {
-      //   const res2 = await redisClient.del(
-      //     ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.FavoriteProductType}`,
-      //   );
-      // }
+
       next();
     } catch (error: any) {
       next(error);
@@ -103,7 +98,7 @@ export const FavoriteProduct = model<IFavoriteProduct, FavoriteProductModel>(
   'FavoriteProduct',
   FavoriteProductSchema,
 );
-export const TrashFavoriteProduct = model<
-  IFavoriteProduct,
-  FavoriteProductModel
->('TrashFavoriteProduct', FavoriteProductSchema);
+// export const TrashFavoriteProduct = model<
+//   IFavoriteProduct,
+//   FavoriteProductModel
+// >('TrashFavoriteProduct', FavoriteProductSchema);

@@ -10,7 +10,7 @@ import sendResponse from '../../share/sendResponse';
 
 import { IUserRef } from '../allUser/typesAndConst';
 import { RequestToRefUserObject } from '../allUser/user/user.utils';
-import { FavoriteProduct_FILTERABLE_FIELDS } from './consent.favoriteProduct';
+import { FavoriteProduct_FILTERABLE_FIELDS } from './constant.favoriteProduct';
 import { IFavoriteProduct } from './interface.favoriteProduct';
 import { FavoriteProductService } from './service.favoriteProduct';
 

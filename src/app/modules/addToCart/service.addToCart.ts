@@ -15,7 +15,7 @@ import {
 } from '../../../helper/lookUpResuable';
 import ApiError from '../../errors/ApiError';
 import { IUserRef } from '../allUser/typesAndConst';
-import { AddToCart_SEARCHABLE_FIELDS } from './consent.addToCart';
+import { AddToCart_SEARCHABLE_FIELDS } from './constant.addToCart';
 import { IAddToCart, IAddToCartFilters } from './interface.addToCart';
 import { AddToCart } from './model.addToCart';
 

@@ -15,7 +15,7 @@ import {
 } from '../../../helper/lookUpResuable';
 import ApiError from '../../errors/ApiError';
 import { IUserRef } from '../allUser/typesAndConst';
-import { FavoriteProduct_SEARCHABLE_FIELDS } from './consent.favoriteProduct';
+import { FavoriteProduct_SEARCHABLE_FIELDS } from './constant.favoriteProduct';
 import {
   IFavoriteProduct,
   IFavoriteProductFilters,

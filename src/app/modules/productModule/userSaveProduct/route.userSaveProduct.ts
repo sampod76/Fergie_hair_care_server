@@ -7,7 +7,7 @@ import authMiddleware from '../../../middlewares/authMiddleware';
 import parseBodyData from '../../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../../middlewares/validateRequestZod';
 import { uploadAwsS3Bucket } from '../../aws/utls.aws';
-import { UserSaveProductController } from './constroller.userSaveProduct';
+import { UserSaveProductController } from './controller.userSaveProduct';
 import { UserSaveProductValidation } from './validation.userSaveProduct';
 
 const router = express.Router();

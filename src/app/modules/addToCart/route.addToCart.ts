@@ -4,7 +4,7 @@ import authMiddleware from '../../middlewares/authMiddleware';
 
 import { z } from 'zod';
 import validateRequestZod from '../../middlewares/validateRequestZod';
-import { AddToCartController } from './constroller.addToCart';
+import { AddToCartController } from './controller.addToCart';
 import { AddToCartValidation } from './validation.addToCart';
 
 const router = express.Router();

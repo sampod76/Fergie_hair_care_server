@@ -8,7 +8,7 @@ import catchAsync from '../../share/catchAsync';
 import pick from '../../share/pick';
 import sendResponse from '../../share/sendResponse';
 
-import { ALL_TEXT_FIELD_FILTERABLE_FIELDS } from './consent.AllTextField';
+import { ALL_TEXT_FIELD_FILTERABLE_FIELDS } from './constant.AllTextField';
 import { IAllTextField } from './interface.AllTextField';
 import { AllTextFieldService } from './service.AllTextField';
 

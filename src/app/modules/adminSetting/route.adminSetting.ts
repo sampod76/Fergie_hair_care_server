@@ -5,7 +5,7 @@ import authMiddleware from '../../middlewares/authMiddleware';
 import { uploadImage } from '../../middlewares/uploader.multer';
 import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
-import { AdminSettingController } from './constroller.adminSetting';
+import { AdminSettingController } from './controller.adminSetting';
 import { AdminSettingValidation } from './validation.adminSetting';
 
 const router = express.Router();
