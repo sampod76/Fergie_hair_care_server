@@ -83,8 +83,14 @@ export default {
     api_secret: process.env.CLOUDINARY_API_SECRET,
   },
   stripe: {
-    secret_key: process.env.STRIPE_SECRET_KEY,
-    publishable_key: process.env.STRIPE_PUBLISHABLE_KEY,
+    publishable_key:
+      process.env.NODE_ENV === 'development'
+        ? process.env.STRIPE_PUBLISHABLE_KEY_TEST
+        : process.env.STRIPE_PUBLISHABLE_KEY_PRODUCTION,
+    secret_key:
+      process.env.NODE_ENV === 'development'
+        ? process.env.STRIPE_SECRET_KEY_TEST
+        : process.env.STRIPE_SECRET_KEY_PRODUCTION,
   },
   payment_url: {
     stripe_success_url:
@@ -105,8 +111,18 @@ export default {
         : process.env.PAYPAL_CANCEL_URL,
   },
   paypal: {
-    client: process.env.PAYPAL_CLIENT_ID,
-    secret: process.env.PAYPAL_SECRET_KEY,
+    client:
+      process.env.NODE_ENV === 'development'
+        ? process.env.PAYPAL_CLIENT_ID
+        : process.env.PAYPAL_CLIENT_ID_LIVE,
+    secret:
+      process.env.NODE_ENV === 'development'
+        ? process.env.PAYPAL_SECRET_KEY
+        : process.env.PAYPAL_SECRET_KEY_LIVE,
+    mode:
+      process.env.NODE_ENV === 'development'
+        ? process.env.PAYPAL_MODE
+        : process.env.PAYPAL_MODE_LIVE,
   },
   nodemailer: {
     auth_user: process.env.NODEMAILER_AUTH_EMAIL,

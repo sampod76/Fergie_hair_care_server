@@ -9,7 +9,7 @@ const combinedGeneralUserZodData = UserValidation.generalUserZod_BodyData.merge(
   UserValidation.authData.pick({ email: true }),
 );
 
-const zodChildrenObject = z.object({
+export const zodCategoryChildrenObject = z.object({
   label: z
     .string({
       required_error: 'Value is required',
@@ -19,15 +19,15 @@ const zodChildrenObject = z.object({
     required_error: 'Value is required',
   }),
   subTitle: z.string().optional(),
-  uid: z.string().or(z.string().uuid()).optional(),
+  uid: z.string().or(z.string().uuid()),
 });
 
 const otherBodyData = z.object({
   category: z.array(
-    zodChildrenObject.merge(
+    zodCategoryChildrenObject.merge(
       z.object({
-        children: zodChildrenObject.merge(
-          z.object({ children: zodChildrenObject }),
+        children: zodCategoryChildrenObject.merge(
+          z.object({ children: zodCategoryChildrenObject }),
         ),
       }),
     ),

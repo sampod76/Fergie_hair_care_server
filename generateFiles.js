@@ -7,7 +7,7 @@ const capitalize = str => str.charAt(0).toUpperCase() + str.slice(1);
 
 const files = [
   {
-    name: 'constants.ts',
+    name: 'constant.ts',
     getCode: folderName =>
       `
 export const ${capitalize(folderName)}_SEARCHABLE_FIELDS = ['productTitle'];
@@ -48,7 +48,7 @@ import sendResponse from '../../share/sendResponse';
 
 import { IUserRef } from '../allUser/typesAndConst';
 import { RequestToRefUserObject } from '../allUser/user/user.utils';
-import { ${capitalize(folderName)}_FILTERABLE_FIELDS } from './constants.${capitalize(folderName)}';
+import { ${capitalize(folderName)}_FILTERABLE_FIELDS } from './constant.${capitalize(folderName)}';
 import { I${capitalize(folderName)} } from './interface.${capitalize(folderName)}';
 import { ${capitalize(folderName)}Service } from './service.${capitalize(folderName)}';
 
@@ -444,7 +444,7 @@ import {
 } from '../../../helper/lookUpResuable';
 import ApiError from '../../errors/ApiError';
 import { IUserRef } from '../allUser/typesAndConst';
-import { ${capitalize(folderName)}_SEARCHABLE_FIELDS } from './constants.${capitalize(folderName)}';
+import { ${capitalize(folderName)}_SEARCHABLE_FIELDS } from './constant.${capitalize(folderName)}';
 import {
   I${capitalize(folderName)},
   I${capitalize(folderName)}Filters,
