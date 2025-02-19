@@ -8,6 +8,7 @@ import catchAsync from '../../share/catchAsync';
 import pick from '../../share/pick';
 import sendResponse from '../../share/sendResponse';
 
+import { CacheKeyGenerator } from '../../redis/utls.redis';
 import { IUserRef } from '../allUser/typesAndConst';
 import { RequestToRefUserObject } from '../allUser/user/user.utils';
 import { FavoriteProduct_FILTERABLE_FIELDS } from './constant.favoriteProduct';
@@ -36,6 +37,8 @@ const createFavoriteProduct = catchAsync(
 
 const getAllFavoriteProduct = catchAsync(
   async (req: Request, res: Response) => {
+    const cashKey = new CacheKeyGenerator(req);
+    console.log(cashKey.generateKey(), 'cashKey.generateKey()');
     const filters = pick(req.query, FavoriteProduct_FILTERABLE_FIELDS);
     const paginationOptions = pick(req.query, PAGINATION_FIELDS);
 

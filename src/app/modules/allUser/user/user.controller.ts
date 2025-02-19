@@ -56,6 +56,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 const createUserTempUser = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
+
   let user;
   //! ------ validate admin or super admin -----if create admin or supper admin create then must be send token
   if (data.role === ENUM_USER_ROLE.admin) {
@@ -99,6 +100,7 @@ const createUserByGoogle = catchAsync(async (req: Request, res: Response) => {
   });
 });
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.path);
   const filters = pick(req.query, userFilterableFields);
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
   const result = await UserService.getAllUsersFromDB(

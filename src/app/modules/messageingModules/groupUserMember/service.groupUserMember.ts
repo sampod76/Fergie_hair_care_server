@@ -18,8 +18,10 @@ import {
 import { produceUpdateGroupMemberListSortKafka } from '../../../kafka/producer.kafka';
 import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
 import { redisClient } from '../../../redis/redis';
-import { RedisAllQueryServiceOop } from '../../../redis/service.redis';
-import { redisSetter } from '../../../redis/utls.redis';
+import {
+  RedisAllQueryServiceOop,
+  RedisAllSetterServiceOop,
+} from '../../../redis/service.redis';
 
 import { IUserRef, IUserRefAndDetails } from '../../allUser/typesAndConst';
 import { IUser } from '../../allUser/user/user.interface';
@@ -205,7 +207,8 @@ const checkUserIdToExistGroupMemberFromDb = async (
   const findData = findDataArray[0];
 
   if (findData) {
-    await redisSetter<IGroupMember>([
+    const redisSetterOop = new RedisAllSetterServiceOop();
+    await redisSetterOop.redisSetter([
       { key: whenMySender, value: findData, ttl: 24 * 60 },
       { key: whenMyReceiver, value: findData, ttl: 24 * 60 },
     ]);

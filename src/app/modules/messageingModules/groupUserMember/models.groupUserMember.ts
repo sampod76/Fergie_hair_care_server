@@ -169,31 +169,6 @@ GroupMemberSchema.post(
   'findOneAndUpdate',
   async function (data: IGroupMember, next: any) {
     try {
-      // await redisClient.set(
-      //   ENUM_REDIS_KEY.REDIS_IN_SAVE_GroupMember + data?._id,
-      //   JSON.stringify(data),
-      //   'EX',
-      //   24 * 60 * 60, // 1 day to second
-      // );
-      //
-      /*  // --baseuse frindShip data in populate details-- but this details in not details
-     const whenMySender =
-        ENUM_REDIS_KEY.RIS_senderId_receiverId +
-        `:${data.receiver.userId}:${data.sender.userId}`;
-      const whenMyReceiver =
-        ENUM_REDIS_KEY.RIS_senderId_receiverId +
-        `:${data.sender.userId}:${data.receiver.userId}`;
-      //
-      await redisSetter<IGroupMember>([
-        { key: whenMySender, value: data, ttl: 24 * 60 * 60 },
-        { key: whenMyReceiver, value: data, ttl: 24 * 60 * 60 },
-        {
-          key: ENUM_REDIS_KEY.REDIS_IN_SAVE_GroupMember + data?._id,
-          value: data,
-          ttl: 24 * 60 * 60,
-        },
-      ]);
-       */
       const delDate = [
         ENUM_REDIS_KEY.REDIS_IN_SAVE_GroupMemberAndUserId +
           data.receiver.userId +

@@ -142,6 +142,7 @@ const waitAndRespond = async function (waitTimeInMilliseconds = 30000) {
 app.get('/api/v1/server-test', async (req, res, next) => {
   try {
     const query = req.query;
+    console.log(req.path);
     if (query.error) {
       const errorMessages = [
         'Unexpected server error occurred.',
