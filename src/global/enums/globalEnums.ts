@@ -7,3 +7,18 @@ export enum ENUM_MIMETYPE {
   xls1 = 'application/vnd.ms-excel',
   xls2 = 'application/vnd.openxmlformats-officedocument.spreadsheetml',
 }
+
+export enum ENUM_MONTH {
+  January = 'January',
+  February = 'February',
+  March = 'March',
+  April = 'April',
+  May = 'May',
+  June = 'June',
+  July = 'July',
+  August = 'August',
+  September = 'September',
+  October = 'October',
+  November = 'November',
+  December = 'December',
+}
