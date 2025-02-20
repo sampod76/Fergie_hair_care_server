@@ -36,6 +36,7 @@ const uploadToCloudinary = async (
             const response = {
               mimetype: file.mimetype,
               filename: file.filename,
+              name: file.filename,
               fieldname: file.fieldname,
               server_url: `images/${file.filename}`,
               url: result?.url,

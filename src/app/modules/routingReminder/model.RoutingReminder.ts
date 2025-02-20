@@ -1,12 +1,16 @@
 import { Schema, model } from 'mongoose';
 
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
+import {
+  ENUM_DAYS_OF_WEEK,
+  ENUM_MONTH,
+} from '../../../global/enums/globalEnums';
 import { mongooseIUserRef } from '../allUser/typesAndConst';
+import { LOG_TYPE_ARRAY } from '../serviceLogger/constant.serviceLogger';
 import {
   IRoutingReminder,
   RoutingReminderModel,
 } from './interface.RoutingReminder';
-import { LOG_TYPE_ARRAY } from '../serviceLogger/constant.serviceLogger';
 
 const RoutingReminderSchema = new Schema<
   IRoutingReminder,
@@ -23,9 +27,18 @@ const RoutingReminderSchema = new Schema<
     },
     month: {
       type: String,
+      enum: Object.values(ENUM_MONTH),
     },
     pickDate: {
-      type: Schema.Types.Mixed, // Allow different formats: string, datetime, or date
+      type: Date, // Allow different formats: string, datetime, or date
+    },
+    // weeksOfMonth: {
+    //   type: String,
+    //   enum: Object.values(ENUM_DAYS_OF_WEEK), // Enum array for weeks
+    // },
+    daysOfWeek: {
+      type: [String],
+      enum: Object.values(ENUM_DAYS_OF_WEEK), // Enum array for days
     },
     startTime: {
       type: String,
@@ -117,6 +130,7 @@ export const RoutingReminder = model<IRoutingReminder, RoutingReminderModel>(
   'RoutingReminder',
   RoutingReminderSchema,
 );
+
 // export const TrashRoutingReminder = model<
 //   IRoutingReminder,
 //   RoutingReminderModel

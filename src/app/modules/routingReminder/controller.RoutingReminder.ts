@@ -1,5 +1,4 @@
-
-      /* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { PAGINATION_FIELDS } from '../../../global/constant/pagination';
@@ -141,4 +140,3 @@ export const RoutingReminderController = {
   //
   updateRoutingReminderSerialNumber,
 };
-

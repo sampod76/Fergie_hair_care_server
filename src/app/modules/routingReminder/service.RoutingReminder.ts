@@ -1,5 +1,4 @@
-
-      /* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { PipelineStage, Schema, Types } from 'mongoose';
 import { paginationHelper } from '../../../helper/paginationHelper';
 
@@ -316,4 +315,3 @@ export const RoutingReminderService = {
   //
   updateRoutingReminderSerialNumberFromDb,
 };
-

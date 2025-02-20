@@ -1,4 +1,3 @@
-
 import express from 'express';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import authMiddleware from '../../middlewares/authMiddleware';
@@ -82,4 +81,3 @@ router
   );
 
 export const RoutingReminderRoute = router;
-

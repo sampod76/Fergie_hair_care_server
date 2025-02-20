@@ -351,6 +351,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `images/${file?.filename}`,
                           platform: 'server',
                         };
@@ -360,6 +361,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `pdfs/${file?.filename}`,
                           platform: 'server',
                         };
@@ -369,6 +371,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `audios/${file?.filename}`,
                           platform: 'server',
                         };
@@ -378,6 +381,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `videos/${file?.filename}`,
                           platform: 'server',
                         };
@@ -387,6 +391,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `docs/${file?.filename}`,
                           platform: 'server',
                         };
@@ -396,6 +401,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `others/${file?.filename}`,
                           platform: 'server',
                         };
@@ -431,6 +437,7 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
       bodyData[file.fieldname] = {
         mimetype: file.mimetype,
         filename: file.originalname,
+        name: file.originalname,
         path: file.key,
         url: config.aws.s3.cloudfrontCDN + '/' + file.key,
         originalUrl: file.location,
@@ -458,6 +465,7 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
           obj[file.fieldname].push({
             mimetype: file.mimetype,
             filename: file.originalname,
+            name: file.originalname,
             path: file.key,
             url: config.aws.s3.cloudfrontCDN + '/' + file.key,
             originalUrl: file.location,
@@ -487,6 +495,7 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
                 (file: IAws_MulterUploadFile) => ({
                   mimetype: file.mimetype,
                   filename: file.originalname,
+                  name: file.originalname,
                   path: file.key,
                   url: config.aws.s3.cloudfrontCDN + '/' + file.key,
                   originalUrl: file.location,
