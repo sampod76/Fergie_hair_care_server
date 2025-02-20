@@ -11,7 +11,10 @@ import sendResponse from '../../share/sendResponse';
 import { Notification_FilterableFields } from './notification.constant';
 
 import config from '../../../config';
+import { ENUM_YN } from '../../../global/enum_constant_type';
 import { INotification } from './notification.interface';
+
+// import { ENUM_YN } from '../../../enums/globalEnums';
 
 const createNotification = catchAsync(async (req: Request, res: Response) => {
   const bodyData = req.body as INotification;
@@ -23,19 +26,9 @@ const createNotification = catchAsync(async (req: Request, res: Response) => {
   }
   const result = await NotificationService.createNotificationToDB(
     bodyData,
+    ENUM_YN.NO,
     req,
   );
-
-  // if (
-  //   req.query.isSendNotification === true &&
-  //   Array.isArray(result?.userIds) &&
-  //   result?.userIds.length > 0
-  // ) {
-  //   sendNotificationFromDB(
-  //     { multipleUser: result?.userIds as string[] },
-  //     result,
-  //   );
-  // }
 
   sendResponse<INotification>(req, res, {
     statusCode: httpStatus.OK,
@@ -44,6 +37,29 @@ const createNotification = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
+const sendNotificationByUser = catchAsync(
+  async (req: Request, res: Response) => {
+    const bodyData = req.body as INotification;
+    //if another shop kipper add another shop kipper user id. then validation but the admin can add any shop to user-id
+    if (!req.file?.filename) {
+      req.body.image = {
+        url: config.logo,
+      };
+    }
+    const result = await NotificationService.createNotificationToDB(
+      bodyData,
+      ENUM_YN.NO,
+      req,
+    );
+
+    sendResponse<INotification>(req, res, {
+      statusCode: httpStatus.OK,
+      success: true,
+      message: 'notification create successfully',
+      data: result,
+    });
+  },
+);
 
 const getAllNotifications = catchAsync(async (req: Request, res: Response) => {
   const filters = pick(req.query, Notification_FilterableFields);
@@ -114,4 +130,6 @@ export const NotificationController = {
   updateNotification,
   getSingleNotification,
   deleteNotification,
+  //
+  sendNotificationByUser,
 };

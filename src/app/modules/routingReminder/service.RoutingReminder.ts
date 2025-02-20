@@ -27,17 +27,6 @@ const createRoutingReminderByDb = async (
   req: Request,
 ): Promise<IRoutingReminder | null> => {
   const user = req.user as IUserRef;
-  const [findAlreadyExists] = await Promise.all([
-    RoutingReminder.findOne({
-      'author.userId': new Types.ObjectId(user.userId),
-      productId: new Types.ObjectId(payload.productId),
-      isDelete: false,
-    }).sort({ serialNumber: -1 }),
-  ]);
-
-  if (findAlreadyExists) {
-    throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Product is already added ');
-  }
   const result = await RoutingReminder.create(payload);
   return result;
 };

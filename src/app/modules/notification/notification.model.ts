@@ -2,7 +2,12 @@ import { Schema, model } from 'mongoose';
 
 import { INotification, NotificationModel } from './notification.interface';
 
-import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
+import {
+  ENUM_STATUS,
+  ENUM_YN,
+  STATUS_ARRAY,
+  YN_ARRAY,
+} from '../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../global/schema/global.schema';
 import { USER_ROLE_ARRAY } from '../allUser/user/user.interface';
 
@@ -25,8 +30,9 @@ const NotificationSchema = new Schema<INotification>(
     role: { type: String, enum: USER_ROLE_ARRAY },
     image: mongooseFileSchema,
     isSeen: {
-      type: Boolean,
-      default: false,
+      type: String,
+      enum: YN_ARRAY,
+      default: ENUM_YN.NO,
     },
     status: {
       type: String,
@@ -36,6 +42,7 @@ const NotificationSchema = new Schema<INotification>(
     isDelete: {
       type: Boolean,
       default: false,
+      index: true,
     },
   },
   {

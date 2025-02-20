@@ -44,7 +44,7 @@ export type IFileAfterUpload = {
   durl?: string;
   platform: IImagePlatform;
   cdn?: string; //https://www.youtube.com/watch?v=kbI7kRWAU-w
-  // fileId: Types.ObjectId | string | IFileUploade;
+  // productId: Types.ObjectId | string | IFileUploade;
 };
 
 /* 

@@ -4,7 +4,7 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import { PipelineStage, Types } from 'mongoose';
 
-import { I_YN } from '../../../global/enum_constant_type';
+import { ENUM_YN, I_YN } from '../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import { paginationHelper } from '../../../helper/paginationHelper';
 import ApiError from '../../errors/ApiError';
@@ -17,10 +17,13 @@ import { sendNotificationFromDB } from './notification.utls';
 
 const createNotificationToDB = async (
   data: INotification,
-  req?: Request,
   sendNotificationByService?: I_YN,
+  req?: Request,
 ): Promise<INotification | null> => {
-  if (req?.query?.isSendNotification === 'yes' || sendNotificationByService) {
+  if (
+    req?.query?.isSendNotification === ENUM_YN.YES ||
+    sendNotificationByService // manually any service to send notification
+  ) {
     if (data.userIds && data?.userIds?.length > 0) {
       sendNotificationFromDB<INotification>(
         data.userIds.map(userId => {
@@ -72,16 +75,33 @@ const getAllNotificationsFromDB = async (
   }
 
   if (Object.keys(filtersData).length) {
+    const condition = Object.entries(filtersData).map(
+      //@ts-ignore
+      ([field, value]: [keyof typeof filtersData, string]) => {
+        let modifyFiled;
+        /* 
+        if (field === 'userRoleBaseId' || field === 'referRoleBaseId') {
+        modifyFiled = { [field]: new Types.ObjectId(value) };
+        } else {
+         modifyFiled = { [field]: value };
+         } 
+       */
+        if (field === 'userId') {
+          modifyFiled = {
+            [field]: new Types.ObjectId(value),
+          };
+        } else {
+          modifyFiled = { [field]: value };
+        }
+        // console.log(modifyFiled);
+        return modifyFiled;
+      },
+    );
+    //
+
+    //
     andConditions.push({
-      $and: Object.entries(filtersData).map(([field, value]) =>
-        field === 'userId'
-          ? {
-              ['userIds']: { $in: [new Types.ObjectId(value as string)] },
-            }
-          : {
-              [field]: value,
-            },
-      ),
+      $and: condition,
     });
   }
   const { page, limit, skip, sortBy, sortOrder } =
