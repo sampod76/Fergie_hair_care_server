@@ -1,3 +1,4 @@
+import { Types } from 'mongoose';
 import { z } from 'zod';
 
 // Define the schema for a non-subscription transaction
@@ -43,7 +44,7 @@ const PurchaseData = z.object({
 });
 const Purchase_Body_Data = z.object({
   metaData: PurchaseData.deepPartial(),
-  productId: z.string().optional(),
+  productIds: z.array(z.string().or(z.instanceof(Types.ObjectId))),
   packageId: z.string().optional(),
   // only works package renewal
   isRenew: z.boolean().optional(),
@@ -55,9 +56,6 @@ const createManualPayment = z
     body: Purchase_Body_Data,
   })
   .refine(({ body }) => {
-    if (!body.productId && !body.packageId) {
-      throw new Error('Either productId or packageId should be provided');
-    }
     return true;
   });
 

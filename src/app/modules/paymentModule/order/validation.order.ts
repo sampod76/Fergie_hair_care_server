@@ -15,6 +15,8 @@ const OrderBodyData = z.object({
     .string({ required_error: 'productId is required' })
     .or(z.instanceof(Types.ObjectId)),
   paymentId: z.string().or(z.instanceof(Types.ObjectId)).optional(), //!set by service auto
+  quantity: z.number().default(1),
+  totalPrice: z.number(),
   note: z.string().max(5000).trim().optional(),
 });
 

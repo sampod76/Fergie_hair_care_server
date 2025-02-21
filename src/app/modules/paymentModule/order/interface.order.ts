@@ -29,6 +29,7 @@ export type IOrder = z.infer<typeof OrderValidation.OrderBodyData> &
     author: IUserRef;
     orderStatus: I_OrderStatus;
     cs_id?: string;
+    pi_id?: string;
     productId: Types.ObjectId | string;
     paymentBy: 'stripe' | 'paypal' | 'manual';
     _id: string;

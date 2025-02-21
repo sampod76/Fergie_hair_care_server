@@ -12,7 +12,9 @@ import { IPaginationOption } from '../../../interface/pagination';
 import httpStatus from 'http-status';
 import { LookupAnyRoleDetailsReusable } from '../../../../helper/lookUpResuable';
 import { IUserRef } from '../../allUser/typesAndConst';
+import { ENUM_ORDER_STATUS } from '../order/constants.order';
 import { Order } from '../order/models.order';
+import { IStripeProductMetaData } from '../payment/payment.service';
 import {
   IPaymentIntentAndSessionResponse,
   refundFunc,
@@ -84,26 +86,35 @@ const createPaymentHistoryByDb = async (
     paymentBy: 'stripe',
     ...paymentIntentResponse.metadata, // automatically set all metadata in values
   };
+  const products = JSON.parse(
+    paymentIntentResponse.metadata.products,
+  ) as IStripeProductMetaData[];
+  data['productIds'] = products.map(p => p.productId);
+
   const session = await mongoose.startSession();
   session.startTransaction();
-  let result;
+  let result: IPaymentHistory[];
   try {
     // Create Payment History within the transaction
     result = await PaymentHistory.create([data], { session });
 
-    const cre = await Order.create(
-      [
-        {
-          author: author,
-          cs_id: data.cs_id,
-          productId: data.productId,
-          paymentId: result[0]._id,
-          paymentBy: 'stripe',
-        },
-      ],
-      { session },
-    );
+    const orderData = products.map(product => {
+      return {
+        author: author,
+        cs_id: data.cs_id,
+        pi_id: data.pi_id,
+        productId: product.productId,
+        paymentId: result[0]._id,
+        quantity: product.quantity,
+        orderStatus: ENUM_ORDER_STATUS.completed,
+        paymentBy: 'stripe',
+        totalPrice: product.quantity * product.price,
+      };
+    });
 
+    const cre = await Order.create(orderData, { session });
+
+    console.log('🚀 ~ cre:', cre);
     // Commit the transaction if all operations are successful
     await session.commitTransaction();
     session.endSession();
@@ -124,10 +135,8 @@ const createPaymentHistoryByDb = async (
     });
     throw new Error(error?.message); // Rethrow the error after aborting the transaction
   }
-  if (Array.isArray(result)) {
-    result = result[0];
-  }
-  return { result, sessionDetails: balanceTransaction };
+
+  return { result: result[0], sessionDetails: balanceTransaction };
 };
 
 //getAllPaymentHistoryFromDb//getAllPaymentHistoryFromDb

@@ -13,7 +13,20 @@ import { IUserRef } from '../../allUser/typesAndConst';
 
 import { Types } from 'mongoose';
 import { Product } from '../../productModule/products/model.products';
-
+export type IStripeMetaData = {
+  products: string;
+  userId: string;
+  roleBaseUserId: string;
+  role: string;
+  currency: string;
+};
+export type IStripeProductMetaData = {
+  productId: string;
+  currency: string;
+  name: string;
+  quantity: number;
+  price: number;
+};
 const createPaymentStripeService = async (
   payload: IStripePaymentData,
   req: Request,
@@ -60,10 +73,12 @@ const createPaymentStripeService = async (
     };
     quantity: number;
   }[] = [];
+  const metaProducts: Array<IStripeProductMetaData> = [];
   result.forEach(item => {
     const amount = item.pricing.price;
     const findProduct = products.find(p => p.productId === item._id.toString());
     // console.log(orderDetails?.gigDetails?.images[0]?.url, 'orderDetails');
+
     items.push({
       price_data: {
         currency: item.pricing.currency || 'usd',
@@ -80,10 +95,17 @@ const createPaymentStripeService = async (
       },
       quantity: findProduct?.quantity || 1,
     });
+    metaProducts.push({
+      productId: item._id.toString(),
+      currency: item.pricing.currency || 'usd',
+      name: findProduct?.name || `${item?.name}`,
+      quantity: findProduct?.quantity || 1,
+      price: item.pricing.price,
+    });
   });
 
-  const metadata: any = {
-    products: JSON.stringify(products),
+  const metadata: IStripeMetaData = {
+    products: JSON.stringify(metaProducts),
     userId: user?.userId?.toString() || '',
     roleBaseUserId: user?.roleBaseUserId?.toString() || '',
     role: user?.role || '',

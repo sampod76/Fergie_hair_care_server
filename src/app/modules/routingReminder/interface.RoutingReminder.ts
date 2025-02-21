@@ -6,20 +6,25 @@ import { RoutingReminderValidation } from './validation.RoutingReminder';
 
 export type IRoutingReminderFilters = {
   searchTerm?: string;
+  reminderType?: string; // Added reminderType
   status?: I_STATUS;
-  serialNumber?: number;
   delete?: string;
-  children?: string;
-  cache?: string;
+  serialNumber?: number;
   isDelete?: string | boolean;
-  productId?: string;
-  'author.userId'?: string;
-  'author.roleBaseUserId'?: string;
-  //
+  month?: string; // Added month
+  scheduleType?: string; // Added scheduleType
+  pickDateFrom?: string; // Added pickDateFrom
+  pickDateTo?: string; // Added pickDateTo
+  startTime?: string; // Added startTime
+  endTime?: string; // Added endTime
+  needProperty?: string;
   createdAtFrom?: string;
   createdAtTo?: string;
-  needProperty?: string;
-  //
+  'author.userId'?: string;
+  'author.roleBaseUserId'?: string;
+  children?: string; // Added children
+  cache?: string; // Added cache
+  productId?: string; // Added productId
 };
 
 export type IRoutingReminder = z.infer<

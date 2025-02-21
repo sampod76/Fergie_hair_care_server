@@ -3,14 +3,23 @@ import Redis from 'ioredis';
 import config from '../../config';
 
 export const redisConnectionString: ConnectionOptions = {
-  host: config.redis.host, // Provide a default value if undefined
-  port: Number(config.redis.port), // Ensure port is a number and provide a default value
+  host: config.redis.queue.host, // Provide a default value if undefined
+  port: Number(config.redis.queue.port), // Ensure port is a number and provide a default value
   //   username: config.redis.userName,
   //   password: config.redis.password,
 };
-export const redisClient = new Redis(config.redis.url as string);
-export const pubRedis = new Redis(config.redis.url as string);
-export const subRedis = new Redis(config.redis.url as string);
+export const redisClient = new Redis({
+  host: config.redis.host as string,
+  port: Number(config.redis.port) as number,
+});
+export const pubRedis = new Redis({
+  host: config.redis.host as string,
+  port: Number(config.redis.port) as number,
+});
+export const subRedis = new Redis({
+  host: config.redis.host as string,
+  port: Number(config.redis.port) as number,
+});
 // export const redisConnectionString: ConnectionOptions = {
 //   host: 'localhost',
 //   port: 6379,

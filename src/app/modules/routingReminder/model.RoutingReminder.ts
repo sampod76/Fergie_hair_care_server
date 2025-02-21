@@ -28,17 +28,15 @@ const RoutingReminderSchema = new Schema<
     month: {
       type: String,
       enum: Object.values(ENUM_MONTH),
+      lowercase: true,
     },
     pickDate: {
       type: Date, // Allow different formats: string, datetime, or date
     },
-    // weeksOfMonth: {
-    //   type: String,
-    //   enum: Object.values(ENUM_DAYS_OF_WEEK), // Enum array for weeks
-    // },
     daysOfWeek: {
       type: [String],
       enum: Object.values(ENUM_DAYS_OF_WEEK), // Enum array for days
+      lowercase: true,
     },
     startTime: {
       type: String,

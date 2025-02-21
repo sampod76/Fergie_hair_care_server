@@ -43,6 +43,10 @@ const getAllRoutingReminderFromDb = async (
     searchTerm,
     createdAtFrom,
     createdAtTo,
+    //
+    pickDateFrom,
+    pickDateTo,
+    //
     needProperty,
     ...filtersData
   } = filters;
@@ -113,6 +117,30 @@ const getAllRoutingReminderFromDb = async (
           //@ts-ignore
           $gte: new Date(createdAtFrom),
           $lte: new Date(createdAtTo),
+        },
+      });
+    }
+
+    //
+    //
+    if (pickDateFrom && !pickDateTo) {
+      const timeTo = new Date(pickDateFrom);
+      const pickDateToModify = new Date(timeTo.setHours(23, 59, 59, 999));
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          //@ts-ignore
+          $gte: new Date(pickDateFrom),
+          $lte: new Date(pickDateToModify),
+        },
+      });
+    } else if (pickDateFrom && pickDateTo) {
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          //@ts-ignore
+          $gte: new Date(pickDateFrom),
+          $lte: new Date(pickDateTo),
         },
       });
     }

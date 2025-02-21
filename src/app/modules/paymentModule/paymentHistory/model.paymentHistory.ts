@@ -24,7 +24,7 @@ const PaymentHistorySchema = new Schema<IPaymentHistory, PaymentHistoryModel>(
     //
     revenuecatPayment: Object,
     //
-    productId: { type: Schema.Types.ObjectId, ref: 'Product' },
+    productIds: [{ type: Schema.Types.ObjectId, ref: 'Product' }],
     //
     orderId: {
       type: Schema.Types.ObjectId,

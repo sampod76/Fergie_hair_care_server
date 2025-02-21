@@ -1,13 +1,24 @@
-export const RoutingReminder_SEARCHABLE_FIELDS = ['productTitle'];
+export const RoutingReminder_SEARCHABLE_FIELDS = [
+  'productUseDetails',
+  'applicationStepsDetails',
+];
 export const RoutingReminder_FILTERABLE_FIELDS = [
   'searchTerm',
-  'productId',
+  'reminderType',
 
   'status',
   'delete',
   'serialNumber',
   'isDelete',
-  'cache',
+  'month',
+  'scheduleType',
+  //
+  'pickDateFrom',
+  'pickDateTo',
+  //
+  //
+  'startTime',
+  'endTime',
   //
   'needProperty',
   'createdAtFrom',

@@ -14,14 +14,20 @@ import { logger } from '../../../share/logger';
 import { mongooseIUserRef } from '../../allUser/typesAndConst';
 import { NotificationService } from '../../notification/notification.service';
 import { IOrder, OrderModel } from './interface.order';
+import { ORDER_STATUS_ARRAY } from './validation.order';
 
 const OrderSchema = new Schema<IOrder, OrderModel>(
   {
     author: mongooseIUserRef,
     cs_id: { type: String }, //when buyer try payment first time create session then set session to session.id-->  cs_id
+    pi_id: { type: String },
     paymentId: { type: Schema.Types.ObjectId, ref: 'Payment' }, //when successfully payment then set paymentId(my database)
     paymentBy: { type: String, enum: ['stripe', 'paypal', 'manual'] },
     productId: { type: Schema.Types.ObjectId, ref: 'Product' },
+    quantity: { type: Number, default: 1 },
+    note: String,
+    orderStatus: { type: String, enum: ORDER_STATUS_ARRAY },
+    totalPrice: { type: Number },
     status: {
       type: String,
       enum: STATUS_ARRAY,

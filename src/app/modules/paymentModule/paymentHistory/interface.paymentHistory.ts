@@ -47,7 +47,7 @@ export type IPaymentHistory = {
   //
   revenuecatPayment?: Partial<z.infer<typeof NonSubscriptionTransaction>>;
   //
-  productId?: string | Types.ObjectId;
+  productIds?: Array<string | Types.ObjectId>;
   //
   author: IUserRef;
   //
