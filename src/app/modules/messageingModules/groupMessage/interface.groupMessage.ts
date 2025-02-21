@@ -15,7 +15,7 @@ export type IGroupMessageFilters = {
   uuid?: string;
   //
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   status?: I_STATUS;
   isDelete?: boolean | string;
   isSeen?: boolean | string;

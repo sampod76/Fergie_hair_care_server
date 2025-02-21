@@ -1,6 +1,6 @@
 import { Model } from 'mongoose';
 import { z } from 'zod';
-import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { I_STATUS } from '../../../global/enum_constant_type';
 import { IUserRef } from '../allUser/typesAndConst';
 import { ServiceLoggerValidation } from './validation.serviceLogger';
 
@@ -8,7 +8,7 @@ export type IServiceLoggerFilters = {
   searchTerm?: string;
   status?: I_STATUS;
   serialNumber?: number;
-  delete?: I_YN;
+
   children?: string;
   cache?: string;
   isDelete?: string | boolean;

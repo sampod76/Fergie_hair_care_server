@@ -18,7 +18,7 @@ export type IPaymentHistoryFilters = {
   isRefund?: string | boolean;
   //
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   status?: I_STATUS;
   isDelete?: string | boolean;
   createdAtFrom?: string;
@@ -43,16 +43,12 @@ export type IPaymentHistory = {
   customer_details?: object;
   status: 'succeeded' | string;
   orderId?: string | Types.ObjectId;
+  paymentBy: 'stripe' | 'paypal' | 'manual';
   //
   revenuecatPayment?: Partial<z.infer<typeof NonSubscriptionTransaction>>;
   //
   productId?: string | Types.ObjectId;
-
   //
-  packageId?: string | Types.ObjectId;
-  packageType?: string;
-  packageName?: string;
-
   author: IUserRef;
   //
   queue?: {
@@ -60,7 +56,7 @@ export type IPaymentHistory = {
     types: I_STATUS;
   };
   refund?: {
-    isRefund: I_YN;
+    isRefund: boolean;
     stripeRefundId?: string;
     balance_transaction?: string;
     ch_id?: string;

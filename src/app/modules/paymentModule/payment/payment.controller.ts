@@ -90,7 +90,7 @@ const test = catchAsync(async (req: Request, res: Response) => {
 
 const successStripePayment = catchAsync(async (req: Request, res: Response) => {
   const { sessionId, metadata, metadataV2 } = req.query;
-  if (!sessionId || !metadata || !metadataV2) {
+  if (!sessionId || !metadataV2) {
     throw new ApiError(404, 'Session not found');
   }
   const { result, sessionDetails } =

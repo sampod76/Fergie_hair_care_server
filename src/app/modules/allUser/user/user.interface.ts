@@ -26,7 +26,7 @@ export const I_AccountTypeArray = Object.values(ENUM_ACCOUNT_TYPE);
 //
 export type IUserFilters = {
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   role?: I_USER_ROLE;
   company?: I_ROLE_TYPE;
   multipleRole?: I_USER_ROLE[];

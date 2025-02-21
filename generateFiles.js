@@ -195,7 +195,7 @@ export type I${capitalize(folderName)}Filters = {
   searchTerm?: string;
   status?: I_STATUS;
   serialNumber?: number;
-  delete?: I_YN;
+  delete?: string;
   children?: string;
   cache?: string;
   isDelete?: string | boolean;

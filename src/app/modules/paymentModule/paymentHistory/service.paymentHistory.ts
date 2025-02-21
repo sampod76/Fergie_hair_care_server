@@ -81,6 +81,7 @@ const createPaymentHistoryByDb = async (
     author: author,
     amount: paymentIntentResponse.amount / 100,
     amount_received: paymentIntentResponse.amount_received / 100,
+    paymentBy: 'stripe',
     ...paymentIntentResponse.metadata, // automatically set all metadata in values
   };
   const session = await mongoose.startSession();
@@ -90,7 +91,18 @@ const createPaymentHistoryByDb = async (
     // Create Payment History within the transaction
     result = await PaymentHistory.create([data], { session });
 
-    const cre = await Order.create([{}], { session });
+    const cre = await Order.create(
+      [
+        {
+          author: author,
+          cs_id: data.cs_id,
+          productId: data.productId,
+          paymentId: result[0]._id,
+          paymentBy: 'stripe',
+        },
+      ],
+      { session },
+    );
 
     // Commit the transaction if all operations are successful
     await session.commitTransaction();

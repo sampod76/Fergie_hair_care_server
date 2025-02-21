@@ -2,15 +2,15 @@ import { Model, Types } from 'mongoose';
 
 import { IUser, I_USER_ROLE } from '../allUser/user/user.interface';
 
-import { IFileAfterUpload } from '../../interface/fileUpload';
 import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { IFileAfterUpload } from '../../interface/fileUpload';
 
 export type INotificationFilters = {
   userId?: string;
   role?: string;
   //
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   status?: I_STATUS;
   isDelete?: string | boolean;
 };

@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { z } from 'zod';
-import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { I_STATUS } from '../../../global/enum_constant_type';
 import { I_ROLE_TYPE } from '../allUser/user/user.interface';
 import { CategoryValidation } from './validation.category';
 //
@@ -21,7 +21,7 @@ export type ICategoryFilters = {
   status?: I_STATUS;
   company?: I_ROLE_TYPE;
   serialNumber?: number;
-  delete?: I_YN;
+  delete?: string;
   children?: string;
   cache?: string;
   isDelete?: string | boolean;

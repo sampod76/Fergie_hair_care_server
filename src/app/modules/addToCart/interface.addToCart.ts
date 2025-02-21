@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { z } from 'zod';
-import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { I_STATUS } from '../../../global/enum_constant_type';
 import { IUserRef } from '../allUser/typesAndConst';
 import { AddToCartValidation } from './validation.addToCart';
 
@@ -8,7 +8,7 @@ export type IAddToCartFilters = {
   searchTerm?: string;
   status?: I_STATUS;
   serialNumber?: number;
-  delete?: I_YN;
+  delete?: string;
   children?: string;
   cache?: string;
   isDelete?: string | boolean;

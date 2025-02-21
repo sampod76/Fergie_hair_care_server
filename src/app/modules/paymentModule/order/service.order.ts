@@ -232,7 +232,7 @@ const getDashboardStatusFromDB = async (
   req?: Request,
 ): Promise<IOrder[] | null> => {
   const query = {
-    isDelete: ENUM_YN.NO,
+    isDelete: false,
   } as any;
   if (
     user?.role !== ENUM_USER_ROLE.admin &&
@@ -368,7 +368,7 @@ const deleteOrderFromDB = async (
   //   _id: Schema.Types.ObjectId;
   // };
   const isExist = (await Order.aggregate([
-    { $match: { _id: new Types.ObjectId(id), isDelete: ENUM_YN.NO } },
+    { $match: { _id: new Types.ObjectId(id), isDelete: false } },
   ])) as IOrder[];
 
   if (!isExist.length) {

@@ -1,6 +1,6 @@
 import { Model, Types } from 'mongoose';
 
-import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { I_STATUS } from '../../../global/enum_constant_type';
 import { IFileAfterUpload } from '../../interface/fileUpload';
 export const DATA_TYPE_ARRAY = [
   'aboutUs',
@@ -27,7 +27,7 @@ export type IAllTextFieldFilters = {
   heading?: string;
   dataType?: IDataType;
   status?: I_STATUS;
-  delete?: I_YN;
+  delete?: string;
   isDelete?: boolean | string;
 };
 

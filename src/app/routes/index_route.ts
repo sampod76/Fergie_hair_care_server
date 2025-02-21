@@ -18,6 +18,9 @@ import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalU
 import { FavoriteProductRoute } from '../modules/favoriteProduct/route.favoriteProduct';
 import { FriendShipsRoute } from '../modules/messageingModules/friendship/friendship.route';
 import { ChatMessageRoute } from '../modules/messageingModules/message/messages.route';
+import { OrdersRoute } from '../modules/paymentModule/order/route.order';
+import { PaymentRoute } from '../modules/paymentModule/payment/payment.router';
+import { PaymentHistoryRoute } from '../modules/paymentModule/paymentHistory/route.paymentHistory';
 import { ProductCategoryRoute } from '../modules/productCategory/route.productCategory';
 import { ProductRoute } from '../modules/productModule/products/route.products';
 import { UserSaveProductRoute } from '../modules/productModule/userSaveProduct/route.userSaveProduct';
@@ -91,7 +94,18 @@ const moduleRoutes = [
     path: '/all-text-fields',
     route: AllTextFieldRoute,
   },
-
+  {
+    path: '/payment',
+    route: PaymentRoute,
+  },
+  {
+    path: '/payment-history',
+    route: PaymentHistoryRoute,
+  },
+  {
+    path: '/order',
+    route: OrdersRoute,
+  },
   {
     path: '/notification',
     route: NotificationRoute,

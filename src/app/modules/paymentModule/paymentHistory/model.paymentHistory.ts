@@ -20,6 +20,7 @@ const PaymentHistorySchema = new Schema<IPaymentHistory, PaymentHistoryModel>(
     payment_intent: String,
     status: String,
     payment_method_types: [String],
+    paymentBy: { type: String, enum: ['stripe', 'paypal', 'manual'] },
     //
     revenuecatPayment: Object,
     //

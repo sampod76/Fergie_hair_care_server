@@ -1,7 +1,7 @@
 import { Model, Types } from 'mongoose';
 
 import { z } from 'zod';
-import { I_STATUS, I_YN } from '../../../../global/enum_constant_type';
+import { I_STATUS } from '../../../../global/enum_constant_type';
 import { ICommonUser } from '../typesAndConst';
 import { I_ROLE_TYPE, IACCOUNT_TYPE } from '../user/user.interface';
 import { UserValidation } from '../user/user.validation';
@@ -15,7 +15,7 @@ export type IGeneralUserFilters = {
   countryName?: string;
   skills?: string;
   dateOfBirth?: string;
-  delete?: I_YN;
+  delete?: string;
   status?: I_STATUS;
   isDelete?: string | boolean;
   company?: I_ROLE_TYPE;

@@ -1,7 +1,6 @@
 import { Model, Types } from 'mongoose';
 import { z } from 'zod';
 
-import { I_YN } from '../../../../global/enum_constant_type';
 import { IUserRef } from '../../allUser/typesAndConst';
 import { I_OrderStatus, OrderValidation } from './validation.order';
 
@@ -15,7 +14,7 @@ export type IOrderFilters = {
 
   //
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   status?: string;
   isDelete?: string | boolean;
   //

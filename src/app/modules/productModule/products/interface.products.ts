@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { IUserRef } from '../../allUser/typesAndConst';
 
-import { I_STATUS, I_YN } from '../../../../global/enum_constant_type';
+import { I_STATUS } from '../../../../global/enum_constant_type';
 import { ProductValidation } from './validation.products';
 
 export type IProductFilters = {
@@ -12,7 +12,7 @@ export type IProductFilters = {
   status?: I_STATUS;
 
   serialNumber?: number;
-  delete?: I_YN;
+  delete?: string;
   children?: string;
   isDelete?: string | boolean;
   productCategoryId?: string;

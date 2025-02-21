@@ -1,6 +1,6 @@
 import { Model } from 'mongoose';
 import { z } from 'zod';
-import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
+import { I_STATUS } from '../../../global/enum_constant_type';
 import { AdminSettingValidation } from './validation.adminSetting';
 
 export type IAdminSettingFilters = {
@@ -8,7 +8,7 @@ export type IAdminSettingFilters = {
   title?: string;
   settingType?: string;
   status?: I_STATUS;
-  delete?: I_YN;
+  delete?: string;
   isDelete?: string | boolean;
 };
 //

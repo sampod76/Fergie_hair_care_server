@@ -18,7 +18,7 @@ export type IGroupsFilters = {
   //
   searchTerm?: string;
   needProperty?: string;
-  delete?: I_YN;
+  delete?: string;
   status?: I_STATUS;
   isDelete?: boolean | string;
   createdAtFrom?: string;
