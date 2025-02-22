@@ -28,6 +28,7 @@ export type IAddToCart = z.infer<
   z.infer<typeof AddToCartValidation.updateAddToCartZodSchema> & {
     isDelete: boolean;
     author: IUserRef;
+    quantity: number;
     oldRecord?: {
       refId: Types.ObjectId;
       collection?: string;

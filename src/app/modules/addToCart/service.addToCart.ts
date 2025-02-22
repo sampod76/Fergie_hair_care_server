@@ -29,11 +29,16 @@ const createAddToCartByDb = async (
       'author.userId': new Types.ObjectId(user.userId),
       productId: new Types.ObjectId(payload.productId),
       isDelete: false,
-    }).sort({ serialNumber: -1 }),
+    }),
   ]);
 
+  if (findAlreadyExists?.quantity === payload.quantity) {
+    return findAlreadyExists;
+  }
   if (findAlreadyExists) {
-    throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Product is already added ');
+    findAlreadyExists.quantity = payload.quantity;
+    await findAlreadyExists.save();
+    return findAlreadyExists;
   }
   const result = await AddToCart.create(payload);
   return result;

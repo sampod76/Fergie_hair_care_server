@@ -7,7 +7,7 @@ const createAddToCartBodyData = z.object({
   productTitle: z.string(),
   status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
   serialNumber: z.number().optional(),
-  quantity: z.number().optional(),
+  quantity: z.number({ required_error: 'Quantity is required' }),
 });
 const createAddToCartZodSchema = z.object({
   body: createAddToCartBodyData,

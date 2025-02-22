@@ -123,6 +123,14 @@ export class RedisAllQueryServiceOop extends RedisConnectionServiceOop {
     //console.log('🚀 ~ socket.on ~ getData:', getData);
     return getData;
   }
+  async getAnyDataByKey(key: string): Promise<Record<string, any> | null> {
+    const getValue = await this.getGlobalRedis().get(key);
+    if (typeof getValue === 'string') {
+      return JSON.parse(getValue);
+    } else {
+      return getValue;
+    }
+  }
 }
 export type IRedisSetter = {
   key: string;

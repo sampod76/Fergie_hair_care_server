@@ -5,6 +5,7 @@ import { paginationHelper } from '../../../helper/paginationHelper';
 import { IGenericResponse } from '../../interface/common';
 import { IPaginationOption } from '../../interface/pagination';
 
+import { JobsOptions } from 'bullmq';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
@@ -13,7 +14,10 @@ import {
   LookupAnyRoleDetailsReusable,
   LookupReusable,
 } from '../../../helper/lookUpResuable';
+import { UuidBuilder } from '../../../utils/uuidGenerator';
 import ApiError from '../../errors/ApiError';
+import { ENUM_QUEUE_NAME } from '../../queue/consent.queus';
+import { emailQueue } from '../../queue/jobs/emailQueues';
 import { IUserRef } from '../allUser/typesAndConst';
 import { RoutingReminder_SEARCHABLE_FIELDS } from './constant.RoutingReminder';
 import {
@@ -28,6 +32,27 @@ const createRoutingReminderByDb = async (
 ): Promise<IRoutingReminder | null> => {
   const user = req.user as IUserRef;
   const result = await RoutingReminder.create(payload);
+  const getDellaTime =
+    new Date(result.pickDate?.toString() as string).getTime() -
+    new Date().getTime(); //returns milliseconds
+  const delayTime =
+    getDellaTime > 5 * 60 * 1000 ? getDellaTime - 5 * 60 * 1000 : getDellaTime;
+  const jobOption: JobsOptions = {
+    // repeat: {
+    //   cron: '0 0 12 * * *', // every day at 12 PM
+    // },
+    jobId: new UuidBuilder().generateUuid(),
+    removeOnComplete: true, // remove,
+    removeOnFail: false, // remove
+    delay: delayTime, // delay
+    attempts: 3,
+    timestamp: new Date().getTime(), //as like createAt
+  };
+  const cornJob = await emailQueue.add(
+    ENUM_QUEUE_NAME.email,
+    result,
+    jobOption,
+  );
   return result;
 };
 
@@ -178,15 +203,7 @@ const getAllRoutingReminderFromDb = async (
     { $limit: Number(limit) || 10 },
   ];
   const collections: ILookupCollection<any>[] = []; // Use the correct type here
-  if (needProperty?.includes('productId')) {
-    const pipelineConnection: ILookupCollection<any> = {
-      connectionName: 'products',
-      idFiledName: 'productId',
-      pipeLineMatchField: '_id',
-      outPutFieldName: 'productDetails',
-    };
-    collections.push(pipelineConnection);
-  }
+
   if (needProperty && needProperty.includes('author')) {
     LookupAnyRoleDetailsReusable(pipeline, {
       collections: [

@@ -31,7 +31,7 @@ const RoutingReminderSchema = new Schema<
       lowercase: true,
     },
     pickDate: {
-      type: Date, // Allow different formats: string, datetime, or date
+      type: Date, // 2025:02:27
     },
     daysOfWeek: {
       type: [String],
@@ -39,7 +39,7 @@ const RoutingReminderSchema = new Schema<
       lowercase: true,
     },
     startTime: {
-      type: String,
+      type: String, // 17:50
     },
     endTime: {
       type: String,
@@ -51,6 +51,10 @@ const RoutingReminderSchema = new Schema<
     applicationStepsDetails: {
       type: String,
       maxlength: 5000,
+    },
+    cornJob: {
+      isActive: { type: Boolean, default: true },
+      jobId: String,
     },
     author: mongooseIUserRef,
     serialNumber: {

@@ -33,6 +33,10 @@ export type IRoutingReminder = z.infer<
   z.infer<typeof RoutingReminderValidation.updateRoutingReminder_BodyData> & {
     isDelete: boolean;
     author: IUserRef;
+    cornJob: {
+      jobId: string;
+      isActive: boolean;
+    };
   };
 
 export type RoutingReminderModel = Model<
