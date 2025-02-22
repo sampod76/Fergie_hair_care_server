@@ -10,11 +10,7 @@ const combinedGeneralUserZodData = UserValidation.generalUserZod_BodyData.merge(
 );
 
 export const zodCategoryChildrenObject = z.object({
-  label: z
-    .string({
-      required_error: 'Value is required',
-    })
-    .optional(),
+  label: z.string().optional(),
   value: z.string({
     required_error: 'Value is required',
   }),

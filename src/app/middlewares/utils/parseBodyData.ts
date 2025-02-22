@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express';
+import { RequestTo_Aws_Multer_FileDecodeAddBodyHandle } from '../../../helper/requestToFilesHandle';
 import ApiError from '../../errors/ApiError';
 import catchAsync from '../../share/catchAsync';
-import { RequestTo_Aws_Multer_FileDecodeAddBodyHandle } from '../../../helper/requestToFilesHandle';
 type IParseBodyDate = {
   isFile?: boolean;
   required_file_fields?: string[];

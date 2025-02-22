@@ -1,6 +1,8 @@
-import dayjs from 'dayjs';
+import { Job } from 'bullmq';
+import { ENUM_QUEUE_NAME } from './app/queue/consent.queus';
+import { emailQueue } from './app/queue/jobs/emailQueues';
+import { generateCronPattern } from './app/queue/utls.queue';
 import { createDirectories } from './utils/createDir';
-import { DateFormatterDayjsOop } from './utils/DateAllUtlsFuntion';
 
 const TestFile = async () => {
   try {
@@ -13,24 +15,22 @@ const TestFile = async () => {
 
 const asyncFunction = async () => {
   try {
-    const daleyTime =
-      new Date('2025-03-21T06:48:51.107+00:00').getTime() -
-      new Date().getTime();
-    console.log('🚀 ~ asyncFunction ~ daleyTime:', daleyTime);
-    const pickDateTime = dayjs(
-      `${'2025-03-21'} ${'17:30'}`,
-      'YYYY-MM-DD HH:mm',
+    const jobId = 'aa02e4b2-734d-482f-af57-4fb2a2f05cd';
+    await emailQueue.add(
+      ENUM_QUEUE_NAME.email,
+      { sampod: 'ds' },
+      { jobId: jobId },
     );
-    console.log(
-      '🚀 ~ asyncFunction ~ pickDateTime:',
-      pickDateTime.toISOString(),
-    );
-    const oopDate = new DateFormatterDayjsOop('2025-03-21T06:48:51.107+00:00');
-
-    console.log(
-      '🚀 ~ asyncFunction ~ pickDateTime:',
-      oopDate.replaceTime('17:50'),
-    );
+    const jobd = await Job.fromId(emailQueue, jobId);
+    // console.log(jobd, 'job');
+    // Example Usage
+    const pattern = generateCronPattern('13:25:45', [
+      'monday',
+      'wednesday',
+      'friday',
+      'saturday',
+    ]);
+    console.log(`Generated Cron Pattern: ${pattern}`);
   } catch (error) {
     console.log(error);
   }

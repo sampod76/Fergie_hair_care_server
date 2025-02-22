@@ -5,7 +5,7 @@ import { paginationHelper } from '../../../helper/paginationHelper';
 import { IGenericResponse } from '../../interface/common';
 import { IPaginationOption } from '../../interface/pagination';
 
-import { JobsOptions } from 'bullmq';
+import { Job, JobsOptions } from 'bullmq';
 import { Request } from 'express';
 import httpStatus from 'http-status';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
@@ -14,6 +14,7 @@ import {
   LookupAnyRoleDetailsReusable,
   LookupReusable,
 } from '../../../helper/lookUpResuable';
+import { DateFormatterDayjsOop } from '../../../utils/DateAllUtlsFuntion';
 import { UuidBuilder } from '../../../utils/uuidGenerator';
 import ApiError from '../../errors/ApiError';
 import { ENUM_QUEUE_NAME } from '../../queue/consent.queus';
@@ -25,34 +26,74 @@ import {
   IRoutingReminderFilters,
 } from './interface.RoutingReminder';
 import { RoutingReminder } from './model.RoutingReminder';
+import { RoutingReminderOop } from './utls.RoutingReminder';
+import { generateCronPattern } from '../../queue/utls.queue';
 
 const createRoutingReminderByDb = async (
   payload: IRoutingReminder,
   req: Request,
 ): Promise<IRoutingReminder | null> => {
-  const user = req.user as IUserRef;
-  const result = await RoutingReminder.create(payload);
-  const getDellaTime =
-    new Date(result.pickDate?.toString() as string).getTime() -
-    new Date().getTime(); //returns milliseconds
-  const delayTime =
-    getDellaTime > 5 * 60 * 1000 ? getDellaTime - 5 * 60 * 1000 : getDellaTime;
-  const jobOption: JobsOptions = {
-    // repeat: {
-    //   cron: '0 0 12 * * *', // every day at 12 PM
-    // },
-    jobId: new UuidBuilder().generateUuid(),
-    removeOnComplete: true, // remove,
-    removeOnFail: false, // remove
-    delay: delayTime, // delay
-    attempts: 3,
-    timestamp: new Date().getTime(), //as like createAt
-  };
-  const cornJob = await emailQueue.add(
-    ENUM_QUEUE_NAME.email,
-    result,
-    jobOption,
-  );
+  let result;
+  try {
+    const user = req.user as IUserRef;
+    //***********time************* */
+    const oopDate = new DateFormatterDayjsOop(
+      payload.pickDate?.toString() as string, // '2025-03-21T06:48:51.107+00:00'
+    );
+    const afterReplaceTime = oopDate.replaceTime(payload.startTime); //2025-02-22T09:45:29.358Z
+    const getDellaTime =
+      new Date(afterReplaceTime).getTime() - new Date().getTime(); //returns milliseconds
+    const delayTime =
+      getDellaTime > 5 * 60 * 1000
+        ? getDellaTime - 5 * 60 * 1000
+        : getDellaTime;
+    //***********end************* */
+    const jobId = new UuidBuilder().generateUuid();
+    const jobOption: JobsOptions = {
+      // repeat: {
+      //   pattern: '0 9 * * 6,0', // Corrected syntax for TypeScript
+      // },
+      jobId: jobId,
+      removeOnComplete: {
+        age: 3600, // keep up to 1 hour
+        count: 1000, // keep up to 1000 jobs
+      },
+      removeOnFail: {
+        age: 24 * 3600, // keep up to 24 hours
+      },
+      // delay: delayTime, // delay
+      attempts: 3,
+      timestamp: new Date().getTime(), //as like createAt
+    };
+    if (payload.scheduleType === 'week' && payload.daysOfWeek) {
+      const getCornPattern = generateCronPattern(
+        payload.startTime,
+        payload.daysOfWeek,
+      );
+      jobOption.repeat = {
+        pattern: getCornPattern,
+      };
+    } else {
+      jobOption.delay = delayTime;
+    }
+
+    payload = {
+      ...payload, //
+      cornJob: {
+        jobId: jobId,
+        isActive: true,
+      },
+    };
+    result = await RoutingReminder.create(payload);
+    const cornJob = await emailQueue.add(
+      ENUM_QUEUE_NAME.email,
+      result,
+      jobOption,
+    );
+  } catch (error: any) {
+    throw new ApiError(error?.statuscode || 400, error.message);
+  }
+
   return result;
 };
 
@@ -272,10 +313,9 @@ const updateRoutingReminderFromDb = async (
   req: Request,
 ): Promise<IRoutingReminder | null> => {
   const user = req.user as IUserRef;
-  const isExist = (await RoutingReminder.findById(id)) as IRoutingReminder & {
-    _id: Schema.Types.ObjectId;
-  };
-  if (!isExist || !isExist.isDelete) {
+  const redis = new RoutingReminderOop(id);
+  const isExist = await redis.getAndSetCase();
+  if (!isExist) {
     throw new ApiError(httpStatus.NOT_FOUND, 'RoutingReminder not found');
   }
   if (
@@ -287,7 +327,42 @@ const updateRoutingReminderFromDb = async (
   const result = await RoutingReminder.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
+  if (!result) {
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to update');
+  }
+  const jobd = await Job.fromId(emailQueue, result.cornJob.jobId);
+  await jobd?.remove();
 
+  const jobOption: JobsOptions = { ...jobd?.opts };
+  if (result.scheduleType === 'week' && result.daysOfWeek) {
+    const getCornPattern = generateCronPattern(
+      result.startTime,
+      result.daysOfWeek,
+    );
+    jobOption.repeat = {
+      pattern: getCornPattern,
+    };
+  } else {
+    //***********time************* */
+    const oopDate = new DateFormatterDayjsOop(
+      result.pickDate?.toString() as string, // '2025-03-21T06:48:51.107+00:00'
+    );
+    const afterReplaceTime = oopDate.replaceTime(result.startTime); //2025-02-22T09:45:29.358Z
+    const getDellaTime =
+      new Date(afterReplaceTime).getTime() - new Date().getTime(); //returns milliseconds
+    const delayTime =
+      getDellaTime > 5 * 60 * 1000
+        ? getDellaTime - 5 * 60 * 1000
+        : getDellaTime;
+    //***********end************* */
+    jobOption.delay = delayTime;
+  }
+
+  const cornJob = await emailQueue.add(
+    ENUM_QUEUE_NAME.email,
+    result,
+    jobOption,
+  );
   return result;
 };
 
@@ -313,12 +388,16 @@ const deleteRoutingReminderByIdFromDb = async (
 
   const result = await RoutingReminder.findOneAndUpdate(
     { _id: id },
-    { isDelete: true },
+    { isDelete: true, 'cornJob.isActive': false },
     { new: true, runValidators: true },
   );
+
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
   }
+  const jobd = await Job.fromId(emailQueue, result.cornJob.jobId);
+  await jobd?.remove();
+
   return result;
 };
 //

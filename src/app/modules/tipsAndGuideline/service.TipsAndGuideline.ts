@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { PipelineStage, Types } from 'mongoose';
+import { PipelineStage, Schema, Types } from 'mongoose';
 import { paginationHelper } from '../../../helper/paginationHelper';
 
 import { IGenericResponse } from '../../interface/common';
@@ -14,46 +14,30 @@ import {
   LookupReusable,
 } from '../../../helper/lookUpResuable';
 import ApiError from '../../errors/ApiError';
-import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
-import { RedisAllSetterServiceOop } from '../../redis/service.redis';
 import { IUserRef } from '../allUser/typesAndConst';
-import { AddToCart_SEARCHABLE_FIELDS } from './constant.addToCart';
-import { IAddToCart, IAddToCartFilters } from './interface.addToCart';
-import { AddToCart } from './model.addToCart';
-import { AddToCartOop } from './utls.addToCart';
+import { TipsAndGuideline_SEARCHABLE_FIELDS } from './constant.TipsAndGuideline';
+import {
+  ITipsAndGuideline,
+  ITipsAndGuidelineFilters,
+} from './interface.TipsAndGuideline';
+import { TipsAndGuideline } from './model.TipsAndGuideline';
 
-const createAddToCartByDb = async (
-  payload: IAddToCart,
+const createTipsAndGuidelineByDb = async (
+  payload: ITipsAndGuideline,
   req: Request,
-): Promise<IAddToCart | null> => {
+): Promise<ITipsAndGuideline | null> => {
   const user = req.user as IUserRef;
 
-  const [findAlreadyExists] = await Promise.all([
-    AddToCart.findOne({
-      'author.userId': new Types.ObjectId(user.userId),
-      productId: new Types.ObjectId(payload.productId),
-      isDelete: false,
-    }),
-  ]);
-
-  if (findAlreadyExists?.quantity === payload.quantity) {
-    return findAlreadyExists;
-  }
-  if (findAlreadyExists) {
-    findAlreadyExists.quantity = payload.quantity;
-    await findAlreadyExists.save();
-    return findAlreadyExists;
-  }
-  const result = await AddToCart.create(payload);
+  const result = await TipsAndGuideline.create(payload);
   return result;
 };
 
-//getAllAddToCartFromDb
-const getAllAddToCartFromDb = async (
-  filters: IAddToCartFilters,
+//getAllTipsAndGuidelineFromDb
+const getAllTipsAndGuidelineFromDb = async (
+  filters: ITipsAndGuidelineFilters,
   paginationOptions: IPaginationOption,
   req: Request,
-): Promise<IGenericResponse<IAddToCart[]>> => {
+): Promise<IGenericResponse<ITipsAndGuideline[]>> => {
   const user = req?.user as IUserRef;
   //****************search and filters start************/
   const {
@@ -75,7 +59,7 @@ const getAllAddToCartFromDb = async (
   const andConditions = [];
   if (searchTerm) {
     andConditions.push({
-      $or: AddToCart_SEARCHABLE_FIELDS.map(field => ({
+      $or: TipsAndGuideline_SEARCHABLE_FIELDS.map(field => ({
         [field]: {
           $regex: searchTerm,
           $options: 'i',
@@ -155,7 +139,7 @@ const getAllAddToCartFromDb = async (
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  // const result = await AddToCart.find(whereConditions)
+  // const result = await TipsAndGuideline.find(whereConditions)
   //   .populate('thumbnail')
   //   .sort(sortConditions)
   //   .skip(Number(skip))
@@ -196,11 +180,11 @@ const getAllAddToCartFromDb = async (
     });
   }
 
-  // const result = await AddToCart.aggregate(pipeline);
-  // const total = await AddToCart.countDocuments(whereConditions);
+  // const result = await TipsAndGuideline.aggregate(pipeline);
+  // const total = await TipsAndGuideline.countDocuments(whereConditions);
   const [result, total] = await Promise.all([
-    AddToCart.aggregate(pipeline),
-    AddToCart.countDocuments(whereConditions),
+    TipsAndGuideline.aggregate(pipeline),
+    TipsAndGuideline.countDocuments(whereConditions),
   ]);
   return {
     meta: {
@@ -212,42 +196,38 @@ const getAllAddToCartFromDb = async (
   };
 };
 
-// get single AddToCarte form db
-const getSingleAddToCartFromDb = async (
+// get single TipsAndGuidelinee form db
+const getSingleTipsAndGuidelineFromDb = async (
   id: string,
-  filters: IAddToCartFilters,
+  filters: ITipsAndGuidelineFilters,
   req: Request,
-): Promise<IAddToCart | null> => {
+): Promise<ITipsAndGuideline | null> => {
   const user = req.user as IUserRef;
   const pipeline: PipelineStage[] = [
     { $match: { _id: new Types.ObjectId(id), isDelete: false } },
     ///***************** */ images field ******start
   ];
-  const result = await AddToCart.aggregate(pipeline);
+  const result = await TipsAndGuideline.aggregate(pipeline);
   const dataReturn = result.length ? result[0] : null;
   if (!dataReturn) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'AddToCart not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'TipsAndGuideline not found');
   }
-  if (
-    dataReturn.author.userId.toString() !== user.userId.toString() &&
-    user.role !== ENUM_USER_ROLE.admin
-  ) {
-    throw new ApiError(httpStatus.FORBIDDEN, 'Not authorized to delete');
-  }
+
   return dataReturn;
 };
 
-// update AddToCarte form db
-const updateAddToCartFromDb = async (
+// update TipsAndGuidelinee form db
+const updateTipsAndGuidelineFromDb = async (
   id: string,
-  payload: Partial<IAddToCart>,
+  payload: Partial<ITipsAndGuideline>,
   req: Request,
-): Promise<IAddToCart | null> => {
+): Promise<ITipsAndGuideline | null> => {
   const user = req.user as IUserRef;
-  const cartOop = new AddToCartOop(id);
-  const isExist = await cartOop.getAndSetCase();
-  if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'AddToCart not found');
+  const isExist = (await TipsAndGuideline.findById(id)) as ITipsAndGuideline & {
+    _id: Schema.Types.ObjectId;
+  };
+  if (!isExist || !isExist.isDelete) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'TipsAndGuideline not found');
   }
   if (
     isExist.author.userId.toString() !== user.userId.toString() &&
@@ -255,25 +235,25 @@ const updateAddToCartFromDb = async (
   ) {
     throw new ApiError(httpStatus.FORBIDDEN, 'Not authorized to delete');
   }
-  const result = await AddToCart.findOneAndUpdate({ _id: id }, payload, {
+  const result = await TipsAndGuideline.findOneAndUpdate({ _id: id }, payload, {
     new: true,
   });
 
   return result;
 };
 
-// delete AddToCarte form db
-const deleteAddToCartByIdFromDb = async (
+// delete TipsAndGuidelinee form db
+const deleteTipsAndGuidelineByIdFromDb = async (
   id: string,
-  query: IAddToCartFilters,
+  query: ITipsAndGuidelineFilters,
   req: Request,
-): Promise<IAddToCart | null> => {
+): Promise<ITipsAndGuideline | null> => {
   const user = req.user as IUserRef;
-  const cartOop = new AddToCartOop(id);
-  const isExist = await cartOop.getAndSetCase();
-
+  const isExist = (await TipsAndGuideline.findById(id)) as ITipsAndGuideline & {
+    _id: Schema.Types.ObjectId;
+  };
   if (!isExist) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'AddToCart not found');
+    throw new ApiError(httpStatus.NOT_FOUND, 'TipsAndGuideline not found');
   }
   if (
     isExist.author.userId.toString() !== user.userId.toString() &&
@@ -282,7 +262,7 @@ const deleteAddToCartByIdFromDb = async (
     throw new ApiError(httpStatus.FORBIDDEN, 'Not authorized to delete');
   }
 
-  const result = await AddToCart.findOneAndUpdate(
+  const result = await TipsAndGuideline.findOneAndUpdate(
     { _id: id },
     { isDelete: true },
     { new: true, runValidators: true },
@@ -290,20 +270,16 @@ const deleteAddToCartByIdFromDb = async (
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Failed to delete');
   }
-  const setter = new RedisAllSetterServiceOop();
-  await setter.deleteAnyPattern(
-    `${ENUM_REDIS_KEY.RIS_AddToCart}${user.userId.toString()}:${id}`,
-  );
   return result;
 };
 //
-const updateAddToCartSerialNumberFromDb = async (
+const updateTipsAndGuidelineSerialNumberFromDb = async (
   payload: { _id: string; number: number }[],
-): Promise<IAddToCart[] | null> => {
+): Promise<ITipsAndGuideline[] | null> => {
   const premissAll: any = [];
   for (let i = 0; i < payload.length; i++) {
     premissAll.push(
-      AddToCart.findByIdAndUpdate(
+      TipsAndGuideline.findByIdAndUpdate(
         payload[i]._id,
         { serialNumber: payload[i].number },
         { new: true, runValidators: true },
@@ -315,12 +291,12 @@ const updateAddToCartSerialNumberFromDb = async (
   return result;
 };
 
-export const AddToCartService = {
-  createAddToCartByDb,
-  getAllAddToCartFromDb,
-  getSingleAddToCartFromDb,
-  updateAddToCartFromDb,
-  deleteAddToCartByIdFromDb,
+export const TipsAndGuidelineService = {
+  createTipsAndGuidelineByDb,
+  getAllTipsAndGuidelineFromDb,
+  getSingleTipsAndGuidelineFromDb,
+  updateTipsAndGuidelineFromDb,
+  deleteTipsAndGuidelineByIdFromDb,
   //
-  updateAddToCartSerialNumberFromDb,
+  updateTipsAndGuidelineSerialNumberFromDb,
 };

@@ -6,6 +6,8 @@ export enum ENUM_REDIS_SUBSCRIBE {
 
 export enum ENUM_REDIS_KEY {
   socket_user = 'socket:user:',
+  RIS_TipsAndGuideline = 'redis:TipsAndGuideline:',
+  RIS_RoutingReminder = 'redis:RoutingReminder:',
   socket_id_in_token = 'socket:id:token:',
   REDIS_IN_SAVE_FRIENDSHIP = 'redis:friendShip:',
   REDIS_IN_SAVE_ALL_DATA = 'redis:allData:',

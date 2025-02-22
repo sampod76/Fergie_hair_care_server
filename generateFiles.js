@@ -340,7 +340,8 @@ export const ${capitalize(folderName)} = model<I${capitalize(folderName)}, ${cap
 import express from 'express';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import authMiddleware from '../../middlewares/authMiddleware';
-
+import { uploadAwsS3Bucket } from '../aws/utls.aws';
+import parseBodyData from '../../middlewares/utils/parseBodyData';
 import { z } from 'zod';
 import validateRequestZod from '../../middlewares/validateRequestZod';
 import { ${capitalize(folderName)}Controller } from './controller.${capitalize(folderName)}';
@@ -365,7 +366,8 @@ router
       ENUM_USER_ROLE.superAdmin,
       ENUM_USER_ROLE.generalUser,
     ),
-
+uploadAwsS3Bucket.array('images'),
+    parseBodyData({}),
     validateRequestZod(
       ${capitalize(folderName)}Validation.create${capitalize(folderName)}ZodSchema,
     ),
@@ -403,7 +405,8 @@ router
       ENUM_USER_ROLE.superAdmin,
       ENUM_USER_ROLE.generalUser,
     ),
-
+uploadAwsS3Bucket.array('images'),
+    parseBodyData({}),
     validateRequestZod(
       ${capitalize(folderName)}Validation.update${capitalize(folderName)}ZodSchema,
     ),
@@ -782,6 +785,49 @@ export const ${capitalize(folderName)}Validation = {
   create${capitalize(folderName)}_BodyData,
   update${capitalize(folderName)}_BodyData,
 };
+
+`,
+  },
+  {
+    name: 'utls.ts',
+    getCode: folderName =>
+      `
+ import { Types } from 'mongoose';
+import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
+import {
+  RedisAllQueryServiceOop,
+  RedisAllSetterServiceOop,
+} from '../../redis/service.redis';
+import { I${capitalize(folderName)} } from './interface.${capitalize(folderName)}';
+import { ${capitalize(folderName)} } from './model.${capitalize(folderName)}';
+
+export class ${capitalize(folderName)}Oop {
+  private id: string;
+  cacheData: I${capitalize(folderName)} | null = null;
+  constructor(id: string) {
+    this.id = id.toString();
+  }
+  async getAndSetCase(patten?: string) {
+    const getCase = new RedisAllQueryServiceOop();
+    const key = patten || "{ENUM_REDIS_KEY.RIS_${capitalize(folderName)}}{this.id}";
+    const get${capitalize(folderName)} =await getCase.getAnyDataByKey(key);
+    if (get${capitalize(folderName)}) {
+      return get${capitalize(folderName)};
+    }
+    const cacheData = await ${capitalize(folderName)}.findOne({
+      _id: new Types.ObjectId(this.id),
+      isDelete: false,
+    });
+    if (!cacheData) {
+      return null;
+    }
+    this.cacheData = cacheData;
+    const setter = new RedisAllSetterServiceOop();
+    await setter.redisSetter([{ key: key, value: cacheData }]);
+    return cacheData;
+  }
+}
+
 
 `,
   },

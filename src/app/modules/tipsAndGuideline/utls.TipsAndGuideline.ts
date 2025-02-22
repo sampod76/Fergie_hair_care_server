@@ -4,23 +4,23 @@ import {
   RedisAllQueryServiceOop,
   RedisAllSetterServiceOop,
 } from '../../redis/service.redis';
-import { IAddToCart } from './interface.addToCart';
-import { AddToCart } from './model.addToCart';
+import { ITipsAndGuideline } from './interface.TipsAndGuideline';
+import { TipsAndGuideline } from './model.TipsAndGuideline';
 
-export class AddToCartOop {
+export class TipsAndGuidelineOop {
   private id: string;
-  cacheData: IAddToCart | null = null;
+  cacheData: ITipsAndGuideline | null = null;
   constructor(id: string) {
     this.id = id.toString();
   }
   async getAndSetCase(patten?: string) {
     const getCase = new RedisAllQueryServiceOop();
-    const key = patten || `${ENUM_REDIS_KEY.RIS_AddToCart}${this.id}`;
-    const getAddToCart = await getCase.getAnyDataByKey(key);
-    if (getAddToCart) {
-      return getAddToCart;
+    const key = patten || `${ENUM_REDIS_KEY.RIS_TipsAndGuideline}${this.id}`;
+    const getTipsAndGuideline = getCase.getAnyDataByKey(key);
+    if (getTipsAndGuideline) {
+      return getTipsAndGuideline;
     }
-    const cacheData = await AddToCart.findOne({
+    const cacheData = await TipsAndGuideline.findOne({
       _id: new Types.ObjectId(this.id),
       isDelete: false,
     });
