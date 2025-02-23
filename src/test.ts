@@ -1,7 +1,7 @@
 import { Job } from 'bullmq';
 import { ENUM_QUEUE_NAME } from './app/queue/consent.queus';
 import { emailQueue } from './app/queue/jobs/emailQueues';
-import { generateCronPattern } from './app/queue/utls.queue';
+import { CronPatternGenerator } from './app/queue/utls.queue';
 import { createDirectories } from './utils/createDir';
 
 const TestFile = async () => {
@@ -24,13 +24,13 @@ const asyncFunction = async () => {
     const jobd = await Job.fromId(emailQueue, jobId);
     // console.log(jobd, 'job');
     // Example Usage
-    const pattern = generateCronPattern('13:25:45', [
+    const pattern = new CronPatternGenerator('13:25:45', [
       'monday',
       'wednesday',
       'friday',
       'saturday',
     ]);
-    console.log(`Generated Cron Pattern: ${pattern}`);
+    console.log(`Generated Cron Pattern: ${pattern.generate()}`);
   } catch (error) {
     console.log(error);
   }

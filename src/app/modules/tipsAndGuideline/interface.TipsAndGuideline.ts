@@ -1,5 +1,4 @@
-
-      import { Model } from 'mongoose';
+import { Model } from 'mongoose';
 import { z } from 'zod';
 import { I_STATUS, I_YN } from '../../../global/enum_constant_type';
 import { IUserRef } from '../allUser/typesAndConst';
@@ -35,5 +34,3 @@ export type TipsAndGuidelineModel = Model<
   ITipsAndGuideline,
   Record<string, unknown>
 >;
-
-      

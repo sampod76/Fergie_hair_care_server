@@ -1,5 +1,4 @@
-
-      /* eslint-disable @typescript-eslint/ban-ts-comment */
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { PAGINATION_FIELDS } from '../../../global/constant/pagination';
@@ -67,11 +66,12 @@ const getSingleTipsAndGuideline = catchAsync(
 
     const filters = pick(req.query, TipsAndGuideline_FILTERABLE_FIELDS);
 
-    const result = await TipsAndGuidelineService.getSingleTipsAndGuidelineFromDb(
-      id,
-      filters,
-      req,
-    );
+    const result =
+      await TipsAndGuidelineService.getSingleTipsAndGuidelineFromDb(
+        id,
+        filters,
+        req,
+      );
 
     sendResponse<ITipsAndGuideline>(req, res, {
       success: true,
@@ -119,11 +119,12 @@ const updateTipsAndGuidelineSerialNumber = catchAsync(
 const deleteTipsAndGuideline = catchAsync(
   async (req: Request, res: Response) => {
     const { id } = req.params;
-    const result = await TipsAndGuidelineService.deleteTipsAndGuidelineByIdFromDb(
-      id,
-      req.query,
-      req,
-    );
+    const result =
+      await TipsAndGuidelineService.deleteTipsAndGuidelineByIdFromDb(
+        id,
+        req.query,
+        req,
+      );
     sendResponse<ITipsAndGuideline>(req, res, {
       success: true,
       statusCode: httpStatus.OK,
@@ -141,4 +142,3 @@ export const TipsAndGuidelineController = {
   //
   updateTipsAndGuidelineSerialNumber,
 };
-

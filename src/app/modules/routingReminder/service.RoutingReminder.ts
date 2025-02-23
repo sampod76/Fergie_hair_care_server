@@ -19,6 +19,7 @@ import { UuidBuilder } from '../../../utils/uuidGenerator';
 import ApiError from '../../errors/ApiError';
 import { ENUM_QUEUE_NAME } from '../../queue/consent.queus';
 import { emailQueue } from '../../queue/jobs/emailQueues';
+import { CronPatternGenerator } from '../../queue/utls.queue';
 import { IUserRef } from '../allUser/typesAndConst';
 import { RoutingReminder_SEARCHABLE_FIELDS } from './constant.RoutingReminder';
 import {
@@ -27,7 +28,6 @@ import {
 } from './interface.RoutingReminder';
 import { RoutingReminder } from './model.RoutingReminder';
 import { RoutingReminderOop } from './utls.RoutingReminder';
-import { generateCronPattern } from '../../queue/utls.queue';
 
 const createRoutingReminderByDb = async (
   payload: IRoutingReminder,
@@ -66,12 +66,12 @@ const createRoutingReminderByDb = async (
       timestamp: new Date().getTime(), //as like createAt
     };
     if (payload.scheduleType === 'week' && payload.daysOfWeek) {
-      const getCornPattern = generateCronPattern(
-        payload.startTime,
-        payload.daysOfWeek,
+      const getCornPattern = new CronPatternGenerator(
+        payload.startTime, //example: 13:25:45
+        payload.daysOfWeek, //monday,wednesday,friday
       );
       jobOption.repeat = {
-        pattern: getCornPattern,
+        pattern: getCornPattern.generate(), //45 25 13 * * 1,3,5,6
       };
     } else {
       jobOption.delay = delayTime;
@@ -335,12 +335,12 @@ const updateRoutingReminderFromDb = async (
 
   const jobOption: JobsOptions = { ...jobd?.opts };
   if (result.scheduleType === 'week' && result.daysOfWeek) {
-    const getCornPattern = generateCronPattern(
-      result.startTime,
-      result.daysOfWeek,
+    const getCornPattern = new CronPatternGenerator(
+      result.startTime, //example: 13:25:45
+      result.daysOfWeek, //monday,wednesday,friday
     );
     jobOption.repeat = {
-      pattern: getCornPattern,
+      pattern: getCornPattern.generate(), //45 25 13 * * 1,3,5,6
     };
   } else {
     //***********time************* */

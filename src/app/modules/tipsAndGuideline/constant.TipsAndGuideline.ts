@@ -1,4 +1,3 @@
-
 export const TipsAndGuideline_SEARCHABLE_FIELDS = ['productTitle'];
 export const TipsAndGuideline_FILTERABLE_FIELDS = [
   'searchTerm',
@@ -17,5 +16,3 @@ export const TipsAndGuideline_FILTERABLE_FIELDS = [
   'author.userId',
   'author.roleBaseUserId',
 ];
-
-      
