@@ -20,8 +20,9 @@ import ApiError from '../../errors/ApiError';
 import { ENUM_QUEUE_NAME } from '../../queue/consent.queus';
 import { emailQueue } from '../../queue/jobs/emailQueues';
 import { CronPatternGenerator } from '../../queue/utls.queue';
-import { IUserRef } from '../allUser/typesAndConst';
+import { IUserRef, IUserRefAndDetails } from '../allUser/typesAndConst';
 import { RoutingReminder_SEARCHABLE_FIELDS } from './constant.RoutingReminder';
+import { generateReminderEmail } from './emailTempleted';
 import {
   IRoutingReminder,
   IRoutingReminderFilters,
@@ -35,7 +36,7 @@ const createRoutingReminderByDb = async (
 ): Promise<IRoutingReminder | null> => {
   let result;
   try {
-    const user = req.user as IUserRef;
+    const user = req.user as IUserRefAndDetails;
     //***********time************* */
     const oopDate = new DateFormatterDayjsOop(
       payload.pickDate?.toString() as string, // '2025-03-21T06:48:51.107+00:00'
@@ -43,6 +44,7 @@ const createRoutingReminderByDb = async (
     const afterReplaceTime = oopDate.replaceTime(payload.startTime); //2025-02-22T09:45:29.358Z
     const getDellaTime =
       new Date(afterReplaceTime).getTime() - new Date().getTime(); //returns milliseconds
+
     const delayTime =
       getDellaTime > 5 * 60 * 1000
         ? getDellaTime - 5 * 60 * 1000
@@ -87,7 +89,10 @@ const createRoutingReminderByDb = async (
     result = await RoutingReminder.create(payload);
     const cornJob = await emailQueue.add(
       ENUM_QUEUE_NAME.email,
-      result,
+      {
+        receiver_email: user.details.email,
+        htmlContent: generateReminderEmail(result),
+      },
       jobOption,
     );
   } catch (error: any) {
@@ -312,7 +317,7 @@ const updateRoutingReminderFromDb = async (
   payload: Partial<IRoutingReminder>,
   req: Request,
 ): Promise<IRoutingReminder | null> => {
-  const user = req.user as IUserRef;
+  const user = req.user as IUserRefAndDetails;
   const redis = new RoutingReminderOop(id);
   const isExist = await redis.getAndSetCase();
   if (!isExist) {
@@ -360,7 +365,10 @@ const updateRoutingReminderFromDb = async (
 
   const cornJob = await emailQueue.add(
     ENUM_QUEUE_NAME.email,
-    result,
+    {
+      receiver_email: user.details.email,
+      htmlContent: generateReminderEmail(result),
+    },
     jobOption,
   );
   return result;

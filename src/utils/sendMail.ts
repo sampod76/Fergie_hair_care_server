@@ -28,6 +28,7 @@ export type IMailData = {
     reset_link?: string;
     time_out: string | Date;
   };
+  htmlContent?: string;
 };
 export const sendMailHelper = async (bodyData: IMailData) => {
   const {
@@ -44,6 +45,7 @@ export const sendMailHelper = async (bodyData: IMailData) => {
     dictionary,
     body_text,
     footer_text,
+    htmlContent,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     data,
   } = bodyData;
@@ -81,7 +83,7 @@ export const sendMailHelper = async (bodyData: IMailData) => {
   /* multipal email to sand same email because this fild accept . to:'sampodnath@gmail.com,sampodnath76@gmail.com' 
     to: data.receivers_Email.toString(),
     */
-  const htmlContent = `
+  const htmlContentMake = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -185,7 +187,7 @@ export const sendMailHelper = async (bodyData: IMailData) => {
     from: senderEmail || config.nodemailer.default_sender_email, //'mail@appdocudrive.com', //any email but last -> @yourdomain
     subject: subject,
     to: receiver_email || receivers_email?.toString(),
-    html: htmlContent,
+    html: htmlContent || htmlContentMake,
   });
 
   return returNTransport;

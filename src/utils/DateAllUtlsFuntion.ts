@@ -1,4 +1,6 @@
 import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
 export const DateToDateGetHours = (
   dateTime1: string | Date,
   dateTime2: string | Date,
@@ -76,13 +78,13 @@ export class DateFormatterDayjsOop {
     }
   }
   replaceTime(newTime: string) {
-    const dateToDayjS = dayjs(this.date); // Parse the existing datetime
-    const [hours, minutes, second] = newTime.split(':').map(Number); // Extract hours & minutes
+    const dateToDayjS = dayjs(this.date).utc(); // Ensure UTC
+    const [hours, minutes, second] = newTime.split(':').map(Number);
     const updatedDateTime = dateToDayjS
       .hour(hours)
       .minute(minutes)
-      .second(second ? second : 0)
-      .millisecond(0); // Update time
+      .second(second || 0)
+      .millisecond(0);
 
     return updatedDateTime.toISOString();
   }

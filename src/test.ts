@@ -1,8 +1,5 @@
-import { Job } from 'bullmq';
-import { ENUM_QUEUE_NAME } from './app/queue/consent.queus';
-import { emailQueue } from './app/queue/jobs/emailQueues';
-import { CronPatternGenerator } from './app/queue/utls.queue';
 import { createDirectories } from './utils/createDir';
+import { DateFormatterDayjsOop } from './utils/DateAllUtlsFuntion';
 
 const TestFile = async () => {
   try {
@@ -15,22 +12,17 @@ const TestFile = async () => {
 
 const asyncFunction = async () => {
   try {
-    const jobId = 'aa02e4b2-734d-482f-af57-4fb2a2f05cd';
-    await emailQueue.add(
-      ENUM_QUEUE_NAME.email,
-      { sampod: 'ds' },
-      { jobId: jobId },
-    );
-    const jobd = await Job.fromId(emailQueue, jobId);
     // console.log(jobd, 'job');
     // Example Usage
-    const pattern = new CronPatternGenerator('13:25:45', [
-      'monday',
-      'wednesday',
-      'friday',
-      'saturday',
-    ]);
-    console.log(`Generated Cron Pattern: ${pattern.generate()}`);
+    const oopDate = new DateFormatterDayjsOop(
+      '2025-02-23T14:30:00Z', // '2025-03-21T06:48:51.107+00:00'
+    );
+    const afterReplaceTime = oopDate.replaceTime('06:06'); //2025-02-22T09:45:29.358Z
+    console.log('🚀 ~ afterReplaceTime:', new Date(afterReplaceTime).getTime());
+    console.log(new Date().getTime());
+    const getDellaTime =
+      new Date(afterReplaceTime).getTime() - new Date().getTime(); //returns milliseconds
+    console.log('🚀 ~ getDellaTime:', getDellaTime);
   } catch (error) {
     console.log(error);
   }
