@@ -117,18 +117,23 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
     },
   },
 );
-
-CategorySchema.post('findOneAndDelete', async function (doc: ICategory) {
+// after findOneAndUpdate then data then call this hook
+CategorySchema.post('findOneAndDelete', async function (data: ICategory) {
   try {
-    if (!doc) {
+    if (!data) {
       console.log('No document found for deletion');
       return;
     }
+    //@ts-ignore
+    if (typeof data?.toObject === 'function') {
+      //@ts-ignore
+      data = data?.toObject();
+    }
     // Clear Redis Cache (if applicable)
     const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
-    if (doc?.categoryType) {
+    if (data?.categoryType) {
       const res2 = await redisClient.del(
-        ENUM_REDIS_KEY.RIS_All_Categories + `:${doc?.categoryType}`,
+        ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
       );
     }
   } catch (error: any) {
@@ -138,8 +143,13 @@ CategorySchema.post('findOneAndDelete', async function (doc: ICategory) {
 // after findOneAndUpdate then data then call this hook
 CategorySchema.post(
   'findOneAndUpdate',
-  async function (data: any & { _id: string }, next: any) {
+  async function (data: ICategory & { _id: string }, next: any) {
     try {
+      //@ts-ignore
+      if (typeof data?.toObject === 'function') {
+        //@ts-ignore
+        data = data?.toObject();
+      }
       const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
       if (data?.categoryType) {
         const res2 = await redisClient.del(
@@ -156,6 +166,12 @@ CategorySchema.post(
 //after save
 CategorySchema.post('save', async function (data: ICategory, next) {
   try {
+    //@ts-ignore
+    if (typeof data?.toObject === 'function') {
+      //@ts-ignore
+      data = data?.toObject();
+    }
+
     const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
     if (data?.categoryType) {
       const res2 = await redisClient.del(

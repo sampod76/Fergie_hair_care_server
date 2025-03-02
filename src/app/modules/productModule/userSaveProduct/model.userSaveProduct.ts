@@ -63,23 +63,6 @@ const UserSaveProductSchema = new Schema<
 
 UserSaveProductSchema.post('findOneAndDelete', async function () {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    /*  
-   const dataId = this.getFilter();
-    // console.log(dataId); // { _id: '6607a2b70d0b8a202a1b81b4' }
-    const res = await UserSaveProduct.findOne({ _id: dataId?._id }).lean();
-    if (res) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      //@ts-ignore
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { status, isDelete, createdAt, updatedAt, ...otherData } = res;
-      await TrashUserSaveProduct.create({
-        ...otherData,
-      });
-    } else {
-      throw new ApiError(400, 'Not found this item');
-    }
-       */
     const dataId = this.getFilter();
     // console.log(dataId); // { _id: '6607a2b70d0b8a202a1b81b4' }
     const redisSetterOop = new RedisAllSetterServiceOop();

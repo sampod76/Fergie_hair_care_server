@@ -69,6 +69,7 @@ const getAllCategoryFromDb = async (
 
   if (getRedis) {
     const redisData = JSON.parse(getRedis);
+
     return {
       meta: {
         page: 1,
@@ -79,7 +80,7 @@ const getAllCategoryFromDb = async (
     };
   }
   //***********cache end************* */
-  console.log('🚀 ~ getRedis:', getRedis);
+
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
       ? true
