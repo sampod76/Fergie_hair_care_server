@@ -10,6 +10,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node dist/server.js",
     "build": "tsc",
+    "createModule": "node generateFiles.js",
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
     "devpath": "ts-node-dev --respawn --transpile-only src/server.ts",
     "devmac": "ts-node-dev --respawn --transpile-only --exit-child --watch src src/server.ts",

@@ -72,7 +72,6 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
         },
         uid: {
           type: String,
-          trim: true,
         },
         children: {
           value: {
@@ -83,7 +82,6 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
           },
           uid: {
             type: String,
-            trim: true,
           },
           children: {
             value: {
@@ -94,7 +92,6 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
             },
             uid: {
               type: String,
-              trim: true,
             },
           },
         },

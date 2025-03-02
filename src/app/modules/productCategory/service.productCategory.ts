@@ -124,6 +124,7 @@ const getAllProductCategoryFromDb = async (
   if (sortBy && sortOrder) {
     sortConditions[sortBy] = sortOrder === 'asc' ? 1 : -1;
   }
+
   //****************pagination end ***************/
 
   const whereConditions =

@@ -118,26 +118,21 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
   },
 );
 
-CategorySchema.post('findOneAndDelete', async function () {
+CategorySchema.post('findOneAndDelete', async function (doc: ICategory) {
   try {
-    // eslint-disable-next-line @typescript-eslint/no-this-alias
-    // const dataId = this.getFilter();
-    // // console.log(dataId); // { _id: '6607a2b70d0b8a202a1b81b4' }
-    // const res = await Category.findOne({ _id: dataId?._id }).lean();
-    // if (res) {
-    //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //   //@ts-ignore
-    //   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    //   const { status, isDelete, createdAt, updatedAt, ...otherData } = res;
-    //   await TrashCategory.create({
-    //     ...otherData,
-    //   });
-    // } else {
-    //   throw new ApiError(400, 'Not found this item');
-    // }
+    if (!doc) {
+      console.log('No document found for deletion');
+      return;
+    }
+    // Clear Redis Cache (if applicable)
     const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
+    if (doc?.categoryType) {
+      const res2 = await redisClient.del(
+        ENUM_REDIS_KEY.RIS_All_Categories + `:${doc?.categoryType}`,
+      );
+    }
   } catch (error: any) {
-    // console.log('🚀 ~ error:', error);
+    console.error('Error in post-delete hook:', error);
   }
 });
 // after findOneAndUpdate then data then call this hook
@@ -158,7 +153,7 @@ CategorySchema.post(
     }
   },
 );
-
+//after save
 CategorySchema.post('save', async function (data: ICategory, next) {
   try {
     const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
@@ -167,6 +162,18 @@ CategorySchema.post('save', async function (data: ICategory, next) {
         ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
       );
     }
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// Before save
+CategorySchema.pre('save', async function (next) {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-this-alias
+    const data = this;
+    // console.log('🚀 ~ data:', data);
     next();
   } catch (error: any) {
     next(error);
