@@ -44,11 +44,24 @@ const createRoutingReminderByDb = async (
     const afterReplaceTime = oopDate.replaceTime(payload.startTime); //2025-02-22T09:45:29.358Z
     const getDellaTime =
       new Date(afterReplaceTime).getTime() - new Date().getTime(); //returns milliseconds
+    let delayTime;
+    if (getDellaTime > 2 * 24 * 60 * 60 * 1000) {
+      // 2 days left → Reminder 1 day before
+      delayTime = getDellaTime - 24 * 60 * 60 * 1000;
+    } else if (getDellaTime > 24 * 60 * 60 * 1000) {
+      // 1 day left → Reminder 6 hours before
+      delayTime = getDellaTime - 6 * 60 * 60 * 1000;
+    } else if (getDellaTime > 60 * 60 * 1000) {
+      // More than 1 hour left → Reminder 1 hour before
+      delayTime = getDellaTime - 60 * 60 * 1000;
+    } else if (getDellaTime > 5 * 60 * 1000) {
+      // More than 5 minutes left → Reminder 5 minutes before
+      delayTime = getDellaTime - 5 * 60 * 1000;
+    } else {
+      // Less than 5 minutes left → Immediate reminder
+      delayTime = getDellaTime;
+    }
 
-    const delayTime =
-      getDellaTime > 5 * 60 * 1000
-        ? getDellaTime - 5 * 60 * 1000
-        : getDellaTime;
     //***********end************* */
     const jobId = new UuidBuilder().generateUuid();
     const jobOption: JobsOptions = {
@@ -87,11 +100,18 @@ const createRoutingReminderByDb = async (
       },
     };
     result = await RoutingReminder.create(payload);
+    if (delayTime <= 0) {
+      console.log('Event has already passed, skipping reminder.');
+      return null;
+    }
     const cornJob = await emailQueue.add(
       ENUM_QUEUE_NAME.email,
       {
         receiver_email: user.details.email,
         htmlContent: generateReminderEmail(result),
+        notification: {
+          type: 'routingReminder',
+        },
       },
       jobOption,
     );
