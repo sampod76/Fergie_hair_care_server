@@ -26,21 +26,24 @@ const ServiceLoggerSchema = new Schema<IServiceLogger, ServiceLoggerModel>(
     logDate: Date,
     author: mongooseIUserRef,
     images: [mongooseFileSchema],
-    //
-    Wash_Day_Mood: categoryValue,
-    Choice_of_Treatment: categoryValue,
-    Post_Wash_Day_Style: categoryValue,
-    Hair_Health: categoryValue,
-    //logStyleArchive
-    What_Style_Did_You_Do: categoryValue,
-    Style_Rating: categoryValue,
-    Hair_Service_Quality: categoryValue,
-    Duration_of_style_wear: categoryValue,
-    Maintenance_Routine: categoryValue,
-    //logTrimTracker
-    Haircut_Type: categoryValue,
-    Length_Cut: categoryValue,
-    //
+    category: {
+      type: {
+        //
+        Wash_Day_Mood: categoryValue,
+        Choice_of_Treatment: categoryValue,
+        Post_Wash_Day_Style: categoryValue,
+        Hair_Health: categoryValue,
+        //logStyleArchive
+        What_Style_Did_You_Do: categoryValue,
+        Style_Rating: categoryValue,
+        Hair_Service_Quality: categoryValue,
+        Duration_of_style_wear: categoryValue,
+        Maintenance_Routine: categoryValue,
+        //logTrimTracker
+        Haircut_Type: categoryValue,
+        Length_Cut: categoryValue,
+      },
+    },
 
     serialNumber: {
       type: Number,

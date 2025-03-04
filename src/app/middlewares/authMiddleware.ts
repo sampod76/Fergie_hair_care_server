@@ -21,6 +21,7 @@ const cacheUser = async (token: string, data: any, ttl: number) => {
 };
 // Token verification with TTL calculation
 const verifyAndCacheToken = async (token: string, secret: Secret) => {
+  console.log('🚀 ~ verifyAndCacheToken ~ token:', token);
   const verifiedUser = jwtHelpers.verifyToken(token, secret);
   const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
   const llt = Math.max(verifiedUser.exp! - currentTimestampInSeconds, 0);
@@ -28,6 +29,9 @@ const verifyAndCacheToken = async (token: string, secret: Secret) => {
   if (llt > 0) {
     verifiedUser.status = ENUM_STATUS.ACTIVE;
     await cacheUser(token, verifiedUser, llt);
+  } else {
+    verifiedUser.status = ENUM_STATUS.BLOCK;
+    await cacheUser(token, verifiedUser, 0); // Blocked user will never expire
   }
   return verifiedUser;
 };

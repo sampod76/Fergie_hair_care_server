@@ -61,6 +61,7 @@ const TipsAndGuidelineSchema = new Schema<
     images: [mongooseFileSchema],
     serialNumber: {
       type: Number,
+      default: 1,
     },
     status: {
       type: String,

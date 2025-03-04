@@ -26,17 +26,19 @@ export const zodlogTrimTracker = z.object({
   Hair_Health: zodCategoryChildrenObject,
 });
 //************************************** */
-const createServiceLogger_BodyData = z
-  .object({
-    logType: z.enum(LOG_TYPE_ARRAY as [I_LogType]),
-    logDate: z.date().or(z.string().datetime()),
-    images: z.array(zodFileAfterUploadSchema),
-    status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
-    serialNumber: z.number().optional(),
-  })
-  .merge(zodlogWashDay.partial())
-  .merge(zodlogStyleArchive.partial())
-  .merge(zodlogTrimTracker.partial());
+const createServiceLogger_BodyData = z.object({
+  logType: z.enum(LOG_TYPE_ARRAY as [I_LogType]),
+  logDate: z.date().or(z.string().datetime()),
+  images: z.array(zodFileAfterUploadSchema),
+  status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
+  serialNumber: z.number().optional(),
+  category: z
+    .object({})
+    .merge(zodlogWashDay.partial())
+    .merge(zodlogStyleArchive.partial())
+    .merge(zodlogTrimTracker.partial()),
+});
+
 //**************************************** */
 const updateServiceLogger_BodyData = z.object({
   isDelete: z.boolean().optional(),

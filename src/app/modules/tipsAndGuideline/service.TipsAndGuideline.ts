@@ -5,7 +5,7 @@ import { paginationHelper } from '../../../helper/paginationHelper';
 import { IGenericResponse } from '../../interface/common';
 import { IPaginationOption } from '../../interface/pagination';
 
-import { Request } from 'express';
+import e, { Request } from 'express';
 import httpStatus from 'http-status';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import {
@@ -27,6 +27,14 @@ const createTipsAndGuidelineByDb = async (
   req: Request,
 ): Promise<ITipsAndGuideline | null> => {
   const user = req.user as IUserRef;
+  const serial = await TipsAndGuideline.findOne({
+    isDelete: false,
+  }).sort({ serialNumber: -1 });
+  if (!serial) {
+    payload.serialNumber = 1;
+  } else {
+    payload.serialNumber = serial?.serialNumber && serial?.serialNumber + 1;
+  }
 
   const result = await TipsAndGuideline.create(payload);
   return result;

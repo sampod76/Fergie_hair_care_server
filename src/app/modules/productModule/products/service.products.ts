@@ -3,6 +3,7 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import { PipelineStage, Schema, Types } from 'mongoose';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
+import { LookupReusable } from '../../../../helper/lookUpResuable';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
 import { IGenericResponse } from '../../../interface/common';
@@ -183,6 +184,18 @@ const getAllProductFromDb = async (
     ];
     pipeline.push(...favoriteShop);
   }
+  if (needProperty && needProperty.includes('productCategoryId')) {
+    LookupReusable(pipeline, {
+      collections: [
+        {
+          connectionName: 'productcategories',
+          idFiledName: 'productCategoryId',
+          pipeLineMatchField: '_id',
+          outPutFieldName: 'productCategoryDetails',
+        },
+      ],
+    });
+  }
   const [result, total] = await Promise.all([
     Product.aggregate(pipeline),
     Product.countDocuments(whereConditions),
@@ -293,7 +306,6 @@ const updateProductSerialNumberFromDb = async (
     );
   }
   const result = await Promise.all(premissAll);
-  // console.log('🚀 ~ result:', result);
   return result;
 };
 

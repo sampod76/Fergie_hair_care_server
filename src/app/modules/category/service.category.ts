@@ -153,7 +153,6 @@ const getAllCategoryFromDb = async (
   //****************pagination start **************/
   const { page, limit, skip, sortBy, sortOrder } =
     paginationHelper.calculatePagination(paginationOptions);
-  console.log('🚀 ~ skip:', skip);
 
   const sortConditions: { [key: string]: 1 | -1 } = {};
   if (sortBy && sortOrder) {
