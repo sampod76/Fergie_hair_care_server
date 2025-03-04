@@ -12,15 +12,14 @@ const createTipsAndGuideline_BodyData = z.object({
       doNot: z.array(z.object({ title: z.string() })),
     })
     .partial(),
-  category: z.array(
-    zodCategoryChildrenObject.merge(
-      z.object({
-        children: zodCategoryChildrenObject
-          .merge(z.object({ children: zodCategoryChildrenObject.optional() }))
-          .optional(),
-      }),
-    ),
+  category: zodCategoryChildrenObject.merge(
+    z.object({
+      children: zodCategoryChildrenObject
+        .merge(z.object({ children: zodCategoryChildrenObject.optional() }))
+        .optional(),
+    }),
   ),
+
   images: z.array(zodFileAfterUploadSchema).optional(),
   status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
   serialNumber: z.number().optional(),

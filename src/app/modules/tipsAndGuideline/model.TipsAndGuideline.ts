@@ -1,12 +1,12 @@
 import { Schema, model } from 'mongoose';
 
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
+import { mongooseFileSchema } from '../../../global/schema/global.schema';
 import { mongooseIUserRef } from '../allUser/typesAndConst';
 import {
   ITipsAndGuideline,
   TipsAndGuidelineModel,
 } from './interface.TipsAndGuideline';
-import { mongooseFileSchema } from '../../../global/schema/global.schema';
 
 const TipsAndGuidelineSchema = new Schema<
   ITipsAndGuideline,
@@ -19,8 +19,18 @@ const TipsAndGuidelineSchema = new Schema<
       do: [{ title: String }],
       doNot: [{ title: String }],
     },
-    category: [
-      {
+    category: {
+      value: {
+        type: String,
+      },
+      label: {
+        type: String,
+      },
+      uid: {
+        type: String,
+        trim: true,
+      },
+      children: {
         value: {
           type: String,
         },
@@ -42,21 +52,10 @@ const TipsAndGuidelineSchema = new Schema<
             type: String,
             trim: true,
           },
-          children: {
-            value: {
-              type: String,
-            },
-            label: {
-              type: String,
-            },
-            uid: {
-              type: String,
-              trim: true,
-            },
-          },
         },
       },
-    ],
+    },
+
     author: mongooseIUserRef,
     images: [mongooseFileSchema],
     serialNumber: {

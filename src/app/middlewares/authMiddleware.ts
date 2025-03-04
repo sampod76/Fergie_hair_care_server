@@ -21,7 +21,6 @@ const cacheUser = async (token: string, data: any, ttl: number) => {
 };
 // Token verification with TTL calculation
 const verifyAndCacheToken = async (token: string, secret: Secret) => {
-  console.log('🚀 ~ verifyAndCacheToken ~ token:', token);
   const verifiedUser = jwtHelpers.verifyToken(token, secret);
   const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
   const llt = Math.max(verifiedUser.exp! - currentTimestampInSeconds, 0);

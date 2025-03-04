@@ -2,7 +2,6 @@ import { Schema, model } from 'mongoose';
 
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../global/schema/global.schema';
-import { UuidBuilder } from '../../../utils/uuidGenerator';
 import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
 import { redisClient } from '../../redis/redis';
 import { CategoryModel, ICategory } from './interface.category';
@@ -82,10 +81,6 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
       trim: true,
       index: true,
       unique: true,
-      default: function () {
-        const uuidGenerate = new UuidBuilder();
-        return uuidGenerate.generateUuid();
-      },
     },
     image: mongooseFileSchema,
 

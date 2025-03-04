@@ -15,7 +15,7 @@ router
   .route('/')
   // This route is open
   .get(
-    authMiddleware(ENUM_USER_ROLE.admin),
+    authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.generalUser),
     TipsAndGuidelineController.getAllTipsAndGuideline,
   )
   .post(
@@ -42,7 +42,7 @@ router
   .route('/:id')
   // This route is open
   .get(
-    authMiddleware(ENUM_USER_ROLE.admin),
+    authMiddleware(ENUM_USER_ROLE.admin, ENUM_USER_ROLE.generalUser),
     TipsAndGuidelineController.getSingleTipsAndGuideline,
   )
   .patch(

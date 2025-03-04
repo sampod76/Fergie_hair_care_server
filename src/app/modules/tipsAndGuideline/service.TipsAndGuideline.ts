@@ -5,7 +5,7 @@ import { paginationHelper } from '../../../helper/paginationHelper';
 import { IGenericResponse } from '../../interface/common';
 import { IPaginationOption } from '../../interface/pagination';
 
-import e, { Request } from 'express';
+import { Request } from 'express';
 import httpStatus from 'http-status';
 import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import {
@@ -56,9 +56,9 @@ const getAllTipsAndGuidelineFromDb = async (
     ...filtersData
   } = filters;
   //***********cache start************* */
-  if (user.role !== ENUM_USER_ROLE.admin) {
-    filtersData['author.userId'] = user.userId.toString();
-  }
+  // if (user.role !== ENUM_USER_ROLE.admin) {
+  //   filtersData['author.userId'] = user.userId.toString();
+  // }
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
       ? true
