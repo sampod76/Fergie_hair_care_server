@@ -3,7 +3,6 @@ import { Types } from 'mongoose';
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Request } from 'express';
 import mongoose, { PipelineStage } from 'mongoose';
-import { ENUM_YN } from '../../../../global/enum_constant_type';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
 import { IGenericResponse } from '../../../interface/common';
@@ -162,9 +161,7 @@ const getAllPaymentHistoryFromDb = async (
       ? true
       : false
     : false;
-  filtersData.isRefund = filtersData.isRefund
-    ? filtersData.isRefund
-    : ENUM_YN.NO;
+  filtersData.isRefund = filtersData.isRefund ? filtersData.isRefund : false;
   const andConditions = [];
 
   if (searchTerm) {
@@ -191,6 +188,8 @@ const getAllPaymentHistoryFromDb = async (
           modifyFiled = {
             [field]: new Types.ObjectId(value),
           };
+        } else if (field === 'isRefund') {
+          modifyFiled = { ['refund.isRefund']: value };
         } else {
           modifyFiled = { [field]: value };
         }
@@ -364,9 +363,7 @@ const getAllTimeToGroupPaymentHistoryFromDb = async (
       ? true
       : false
     : false;
-  filtersData.isRefund = filtersData.isRefund
-    ? filtersData.isRefund
-    : ENUM_YN.NO;
+  filtersData.isRefund = filtersData.isRefund ? filtersData.isRefund : false;
   const andConditions = [];
   const removeTimeAndCondition = [];
   if (searchTerm) {
@@ -393,6 +390,8 @@ const getAllTimeToGroupPaymentHistoryFromDb = async (
           modifyFiled = {
             [field]: new Types.ObjectId(value),
           };
+        } else if (field === 'isRefund') {
+          modifyFiled = { ['refund.isRefund']: value };
         } else {
           modifyFiled = { [field]: value };
         }
