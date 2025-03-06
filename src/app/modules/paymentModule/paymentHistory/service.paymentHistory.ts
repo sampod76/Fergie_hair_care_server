@@ -358,6 +358,7 @@ const getAllTimeToGroupPaymentHistoryFromDb = async (
     createdAtTo,
     ...filtersData
   } = filters;
+
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
       ? true

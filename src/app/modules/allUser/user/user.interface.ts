@@ -36,6 +36,7 @@ export type IUserFilters = {
   needProperty?: string;
   verify?: string;
   socketStatus?: I_YN;
+  yearToQuery?: string;
   //
   latitude?: string;
   longitude?: string;

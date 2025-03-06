@@ -367,9 +367,15 @@ const dashboardUsersFromDB = async (
   filters: IUserFilters,
   paginationOptions: IPaginationOption,
   req: Request,
-): Promise<IGenericResponse<IUser[] | null>> => {
+): Promise<IGenericResponse<any | null>> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { searchTerm, needProperty, multipleRole, ...filtersData } = filters;
+  const {
+    searchTerm,
+    needProperty,
+    multipleRole,
+    yearToQuery = new Date().getFullYear(),
+    ...filtersData
+  } = filters;
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
       ? true
@@ -412,16 +418,95 @@ const dashboardUsersFromDB = async (
     { $match: whereConditions },
     {
       $group: {
-        _id: '$company',
+        _id: '$role',
         totalUsers: { $sum: 1 },
       },
     },
   ];
+  const pipeline2: PipelineStage[] = [
+    { $match: whereConditions },
+    {
+      $addFields: {
+        year: { $year: '$createdAt' },
+        monthNumber: { $month: '$createdAt' }, // Directly extract month number
+        amount: 1, // every user is one
+      },
+    },
+    {
+      $match: {
+        year: Number(yearToQuery),
+      },
+    },
+    {
+      $project: {
+        yearMonth: {
+          $dateToString: {
+            format: '%Y-%m',
+            date: '$createdAt',
+          },
+        },
+        amount: 1,
+        monthNumber: 1, // Include monthNumber for later use
+      },
+    },
+    {
+      $group: {
+        _id: '$yearMonth',
+        totalAmount: { $sum: '$amount' },
+        monthNumber: { $first: '$monthNumber' }, // Retain monthNumber
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: {
+          $let: {
+            vars: {
+              monthsInString: [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December',
+              ],
+            },
+            in: {
+              $arrayElemAt: [
+                '$$monthsInString',
+                { $subtract: ['$monthNumber', 1] },
+              ],
+            },
+          },
+        },
+        value: '$totalAmount',
+        serialNumber: '$monthNumber',
+      },
+    },
+    {
+      $sort: { serialNumber: 1 },
+    },
+  ];
 
-  const resultArray = [User.aggregate(pipeline)];
-  const result = await Promise.all(resultArray);
+  // const resultArray = [User.aggregate(pipeline), User.aggregate(pipeline2)];
+  // const result = await Promise.all(resultArray);
+  //@ts-ignore
+  const fetchData = await User.aggregate([
+    {
+      $facet: {
+        totalUser: pipeline,
+        userChart: pipeline2,
+      },
+    },
+  ]);
 
-  // const result = await User.aggregate(pipeline);
+  const result = fetchData[0];
   // const total = await User.countDocuments(whereConditions);
 
   return {
@@ -430,7 +515,7 @@ const dashboardUsersFromDB = async (
       limit,
       total: 0,
     },
-    data: result[0] as IUser[],
+    data: result,
   };
 };
 
