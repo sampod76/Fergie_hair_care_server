@@ -3,7 +3,7 @@ import { Schema, model } from 'mongoose';
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../global/schema/global.schema';
 import { mongooseIUserRef } from '../allUser/typesAndConst';
-import { LOG_TYPE_ARRAY } from './constant.serviceLogger';
+import { LOG_TYPE_ARRAY, ENUM_LOG_TYPE } from './constant.serviceLogger';
 import { IServiceLogger, ServiceLoggerModel } from './interface.serviceLogger';
 const categoryValue = new Schema({
   value: {
@@ -18,6 +18,20 @@ const categoryValue = new Schema({
     type: String,
     trim: true,
   },
+  children: {
+    value: {
+      type: String,
+      trim: true,
+    },
+    label: {
+      type: String,
+      trim: true,
+    },
+    uid: {
+      type: String,
+      trim: true,
+    },
+  },
 });
 
 const ServiceLoggerSchema = new Schema<IServiceLogger, ServiceLoggerModel>(
@@ -26,25 +40,48 @@ const ServiceLoggerSchema = new Schema<IServiceLogger, ServiceLoggerModel>(
     logDate: Date,
     author: mongooseIUserRef,
     images: [mongooseFileSchema],
-    category: {
-      type: {
-        //
-        Wash_Day_Mood: categoryValue,
-        Choice_of_Treatment: categoryValue,
-        Post_Wash_Day_Style: categoryValue,
-        Hair_Health: categoryValue,
-        //logStyleArchive
-        What_Style_Did_You_Do: categoryValue,
-        Style_Rating: categoryValue,
-        Hair_Service_Quality: categoryValue,
-        Duration_of_style_wear: categoryValue,
-        Maintenance_Routine: categoryValue,
-        //logTrimTracker
-        Haircut_Type: categoryValue,
-        Length_Cut: categoryValue,
-      },
+    // category: {
+    //   type: {
+    //     //
+    //     Wash_Day_Mood: categoryValue,
+    //     Choice_of_Treatment: categoryValue,
+    //     Post_Wash_Day_Style: categoryValue,
+    //     Hair_Health: categoryValue,
+    //     //logStyleArchive
+    //     What_Style_Did_You_Do: categoryValue,
+    //     Style_Rating: categoryValue,
+    //     Hair_Service_Quality: categoryValue,
+    //     Duration_of_style_wear: categoryValue,
+    //     Maintenance_Routine: categoryValue,
+    //     //logTrimTracker
+    //     Haircut_Type: categoryValue,
+    //     Length_Cut: categoryValue,
+    //   },
+    // },
+    categories: [categoryValue],
+    // logWashDay
+    productsUsed: {
+      type: String,
+      trim: true,
+      maxlength: 5000,
     },
-
+    hairHealth: {
+      type: String,
+      trim: true,
+      maxlength: 5000,
+    },
+    routineSteps: {
+      type: String,
+      trim: true,
+      maxlength: 5000,
+    },
+    //logTrim
+    currentHairLengthDetails: {
+      type: String,
+      trim: true,
+      maxlength: 5000,
+    },
+    //
     serialNumber: {
       type: Number,
     },

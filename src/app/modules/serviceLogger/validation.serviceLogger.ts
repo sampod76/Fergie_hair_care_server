@@ -4,9 +4,9 @@ import { zodFileAfterUploadSchema } from '../../../global/schema/global.schema';
 import { zodCategoryChildrenObject } from '../allUser/generalUser/validation.generalUser';
 import { I_LogType, LOG_TYPE_ARRAY } from './constant.serviceLogger';
 export const zodlogWashDay = z.object({
-  productsUsed: z.string().max(5000),
-  routineSteps: z.string().max(5000),
-  hairHealth: z.string().max(5000),
+  productsUsed: z.string().max(2000).optional(),
+  routineSteps: z.string().max(2000).optional(),
+  hairHealth: z.string().max(2000).optional(),
   //
   Wash_Day_Mood: zodCategoryChildrenObject,
   Choice_of_Treatment: zodCategoryChildrenObject,
@@ -24,20 +24,37 @@ export const zodlogTrimTracker = z.object({
   Haircut_Type: zodCategoryChildrenObject,
   Length_Cut: zodCategoryChildrenObject,
   Hair_Health: zodCategoryChildrenObject,
+  //
+  currentHairLengthDetails: z.string().max(2000).optional(),
 });
 //************************************** */
-const createServiceLogger_BodyData = z.object({
-  logType: z.enum(LOG_TYPE_ARRAY as [I_LogType]),
-  logDate: z.date().or(z.string().datetime()),
-  images: z.array(zodFileAfterUploadSchema),
-  status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
-  serialNumber: z.number().optional(),
-  category: z
-    .object({})
-    .merge(zodlogWashDay.partial())
-    .merge(zodlogStyleArchive.partial())
-    .merge(zodlogTrimTracker.partial()),
-});
+const createServiceLogger_BodyData = z
+  .object({
+    logType: z.enum(LOG_TYPE_ARRAY as [I_LogType]),
+    logDate: z.date().or(z.string().datetime()),
+    images: z.array(zodFileAfterUploadSchema),
+    status: z.enum(STATUS_ARRAY as [I_STATUS, ...I_STATUS[]]).optional(),
+    serialNumber: z.number().optional(),
+    categories: z.array(
+      zodCategoryChildrenObject
+        .merge(z.object({ children: zodCategoryChildrenObject }))
+        .deepPartial(),
+    ),
+
+    // category: z
+    //   .object({})
+    //   .merge(zodlogWashDay.partial())
+    //   .merge(zodlogStyleArchive.partial())
+    //   .merge(zodlogTrimTracker.partial()),
+  })
+  .merge(
+    zodlogWashDay.pick({
+      productsUsed: true,
+      routineSteps: true,
+      hairHealth: true,
+    }),
+  )
+  .merge(zodlogTrimTracker.pick({ currentHairLengthDetails: true }));
 
 //**************************************** */
 const updateServiceLogger_BodyData = z.object({

@@ -39,6 +39,7 @@ const getAllServiceLoggerFromDb = async (
   paginationOptions: IPaginationOption,
   req: Request,
 ): Promise<IGenericResponse<IServiceLogger[]>> => {
+  console.log(filters, 'filters');
   const user = req?.user as IUserRef;
   //****************search and filters start************/
   const {

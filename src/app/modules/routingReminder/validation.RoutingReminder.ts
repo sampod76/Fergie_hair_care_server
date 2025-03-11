@@ -26,7 +26,7 @@ const timeStringSchema = z.string().refine(
 
 const createRoutingReminder_BodyData = z.object({
   reminderType: z.enum(LOG_TYPE_ARRAY as [I_LogType]),
-  scheduleType: z.enum(['date', 'week']),
+  scheduleType: z.enum(['date', 'weekDay', 'weekCycle']),
   month: z.enum(Object.values(ENUM_MONTH) as [I_Month]).optional(),
   daysOfWeek: z
     .array(z.enum(Object.values(ENUM_DAYS_OF_WEEK) as [I_DayOfWeek]))
@@ -34,6 +34,9 @@ const createRoutingReminder_BodyData = z.object({
   pickDate: z
     .union([z.string(), z.string().datetime(), z.string().date()])
     .optional(),
+  //
+  cycleNumber: z.number().optional(),
+  //
   startTime: z.string({ required_error: 'Start time is required' }), // HH: MM   00-23: 00-59
   endTime: z.string({ required_error: 'End time is required' }),
   productUseDetails: z.string().max(5000),
@@ -73,7 +76,7 @@ const createRoutingReminderZodSchema = z
       if (body.scheduleType === 'date' && !body.pickDate) {
         throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Date must be required');
       }
-      if (body.scheduleType === 'week' && !body.daysOfWeek) {
+      if (body.scheduleType === 'weekDay' && !body.daysOfWeek) {
         throw new ApiError(
           httpStatus.NOT_ACCEPTABLE,
           'daysOfWeek must be required',

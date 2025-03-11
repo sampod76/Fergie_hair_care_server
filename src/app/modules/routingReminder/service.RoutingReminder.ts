@@ -19,7 +19,10 @@ import { UuidBuilder } from '../../../utils/uuidGenerator';
 import ApiError from '../../errors/ApiError';
 import { ENUM_QUEUE_NAME } from '../../queue/consent.queus';
 import { emailQueue } from '../../queue/jobs/emailQueues';
-import { CronPatternGenerator } from '../../queue/utls.queue';
+import {
+  AnyCornPatternGenerator,
+  CronPatternGenerator,
+} from '../../queue/utls.queue';
 import { IUserRef, IUserRefAndDetails } from '../allUser/typesAndConst';
 import { RoutingReminder_SEARCHABLE_FIELDS } from './constant.RoutingReminder';
 import { generateReminderEmail } from './emailTempleted';
@@ -80,13 +83,17 @@ const createRoutingReminderByDb = async (
       attempts: 3,
       timestamp: new Date().getTime(), //as like createAt
     };
-    if (payload.scheduleType === 'week' && payload.daysOfWeek) {
+    if (payload.scheduleType === 'weekDay' && payload.daysOfWeek) {
       const getCornPattern = new CronPatternGenerator(
         payload.startTime, //example: 13:25:45
         payload.daysOfWeek, //monday,wednesday,friday
       );
       jobOption.repeat = {
         pattern: getCornPattern.generate(), //45 25 13 * * 1,3,5,6
+      };
+    } else if (payload.scheduleType === 'weekCycle' && payload.cycleNumber) {
+      jobOption.repeat = {
+        every: payload.cycleNumber * 7 * 24 * 60 * 60 * 1000, // week to day convert then millisecond convert
       };
     } else {
       jobOption.delay = delayTime;
@@ -166,6 +173,7 @@ const getAllRoutingReminderFromDb = async (
     const condition = Object.entries(filtersData).map(
       //@ts-ignore
       ([field, value]: [keyof typeof filtersData, string]) => {
+        console.log('🚀 ~ field:', field, value);
         let modifyFiled;
         /* 
         if (field === 'userRoleBaseId' || field === 'referRoleBaseId') {
@@ -359,7 +367,7 @@ const updateRoutingReminderFromDb = async (
   await jobd?.remove();
 
   const jobOption: JobsOptions = { ...jobd?.opts };
-  if (result.scheduleType === 'week' && result.daysOfWeek) {
+  if (result.scheduleType === 'weekDay' && result.daysOfWeek) {
     const getCornPattern = new CronPatternGenerator(
       result.startTime, //example: 13:25:45
       result.daysOfWeek, //monday,wednesday,friday
@@ -367,19 +375,34 @@ const updateRoutingReminderFromDb = async (
     jobOption.repeat = {
       pattern: getCornPattern.generate(), //45 25 13 * * 1,3,5,6
     };
+  } else if (result.scheduleType === 'weekCycle' && result.cycleNumber) {
+    jobOption.repeat = {
+      every: result.cycleNumber * 7 * 24 * 60 * 60 * 1000, // week to day convert then millisecond convert
+    };
   } else {
-    //***********time************* */
     const oopDate = new DateFormatterDayjsOop(
-      result.pickDate?.toString() as string, // '2025-03-21T06:48:51.107+00:00'
+      payload.pickDate?.toString() as string, // '2025-03-21T06:48:51.107+00:00'
     );
     const afterReplaceTime = oopDate.replaceTime(result.startTime); //2025-02-22T09:45:29.358Z
     const getDellaTime =
       new Date(afterReplaceTime).getTime() - new Date().getTime(); //returns milliseconds
-    const delayTime =
-      getDellaTime > 5 * 60 * 1000
-        ? getDellaTime - 5 * 60 * 1000
-        : getDellaTime;
-    //***********end************* */
+    let delayTime;
+    if (getDellaTime > 2 * 24 * 60 * 60 * 1000) {
+      // 2 days left → Reminder 1 day before
+      delayTime = getDellaTime - 24 * 60 * 60 * 1000;
+    } else if (getDellaTime > 24 * 60 * 60 * 1000) {
+      // 1 day left → Reminder 6 hours before
+      delayTime = getDellaTime - 6 * 60 * 60 * 1000;
+    } else if (getDellaTime > 60 * 60 * 1000) {
+      // More than 1 hour left → Reminder 1 hour before
+      delayTime = getDellaTime - 60 * 60 * 1000;
+    } else if (getDellaTime > 5 * 60 * 1000) {
+      // More than 5 minutes left → Reminder 5 minutes before
+      delayTime = getDellaTime - 5 * 60 * 1000;
+    } else {
+      // Less than 5 minutes left → Immediate reminder
+      delayTime = getDellaTime;
+    }
     jobOption.delay = delayTime;
   }
 

@@ -761,11 +761,6 @@ const getAllChartOfValueFromDb = async (
   const whereConditions =
     andConditions.length > 0 ? { $and: andConditions } : {};
 
-  // const result = await PaymentHistory.find(whereConditions)
-  //   .populate('thumbnail')
-  //   .sort(sortConditions)
-  //   .skip(Number(skip))
-  //   .limit(Number(limit));
   const pipeline: PipelineStage[] = [
     { $match: whereConditions },
     {
