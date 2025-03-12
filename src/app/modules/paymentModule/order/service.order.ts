@@ -171,10 +171,11 @@ const getAllOrdersFromDB = async (
   }
   if (needProperty && needProperty.includes('productId')) {
     const pipelineConnection: ILookupCollection<IProduct> = {
-      connectionName: 'produces',
+      connectionName: 'products',
       idFiledName: '$productId',
       pipeLineMatchField: '$_id',
       outPutFieldName: 'productDetails',
+      project: { name: 1, images: 1, pricing: 1 },
     };
     collections.push(pipelineConnection);
   }

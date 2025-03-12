@@ -13,6 +13,10 @@ import {
   I_LogType,
   LOG_TYPE_ARRAY,
 } from '../serviceLogger/constant.serviceLogger';
+import {
+  ENUM_SCHEDULE_TYPE_ROUTING,
+  I_ScheduleType,
+} from './constant.RoutingReminder';
 const timeStringSchema = z.string().refine(
   time => {
     const regex = /^([01]?[0-9]|2[0-3]):[0-5][0-9](?::[0-5][0-9])?$/; // HH:MM or HH:MM:ss
@@ -26,7 +30,9 @@ const timeStringSchema = z.string().refine(
 
 const createRoutingReminder_BodyData = z.object({
   reminderType: z.enum(LOG_TYPE_ARRAY as [I_LogType]),
-  scheduleType: z.enum(['date', 'weekDay', 'weekCycle']),
+  scheduleType: z.enum(
+    Object.values(ENUM_SCHEDULE_TYPE_ROUTING) as [I_ScheduleType],
+  ),
   month: z.enum(Object.values(ENUM_MONTH) as [I_Month]).optional(),
   daysOfWeek: z
     .array(z.enum(Object.values(ENUM_DAYS_OF_WEEK) as [I_DayOfWeek]))

@@ -7,6 +7,7 @@ import {
 } from '../../../global/enums/globalEnums';
 import { mongooseIUserRef } from '../allUser/typesAndConst';
 import { LOG_TYPE_ARRAY } from '../serviceLogger/constant.serviceLogger';
+import { ENUM_SCHEDULE_TYPE_ROUTING } from './constant.RoutingReminder';
 import {
   IRoutingReminder,
   RoutingReminderModel,
@@ -23,7 +24,7 @@ const RoutingReminderSchema = new Schema<
     },
     scheduleType: {
       type: String,
-      enum: ['date', 'week'],
+      enum: Object.values(ENUM_SCHEDULE_TYPE_ROUTING),
     },
     month: {
       type: String,
@@ -37,6 +38,9 @@ const RoutingReminderSchema = new Schema<
       type: [String],
       enum: Object.values(ENUM_DAYS_OF_WEEK), // Enum array for days
       lowercase: true,
+    },
+    cycleNumber: {
+      type: Number,
     },
     startTime: {
       type: String, // 17:50

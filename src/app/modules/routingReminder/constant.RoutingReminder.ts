@@ -27,3 +27,11 @@ export const RoutingReminder_FILTERABLE_FIELDS = [
   'author.userId',
   'author.roleBaseUserId',
 ];
+
+export enum ENUM_SCHEDULE_TYPE_ROUTING {
+  date = 'date',
+  weekCycle = 'weekCycle',
+  weekDay = 'weekDay',
+}
+
+export type I_ScheduleType = keyof typeof ENUM_SCHEDULE_TYPE_ROUTING;

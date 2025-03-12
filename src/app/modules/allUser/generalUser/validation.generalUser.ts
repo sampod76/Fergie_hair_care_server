@@ -20,13 +20,15 @@ export const zodCategoryChildrenObject = z.object({
 
 const otherBodyData = z.object({
   category: z.array(
-    zodCategoryChildrenObject.merge(
-      z.object({
-        children: zodCategoryChildrenObject.merge(
-          z.object({ children: zodCategoryChildrenObject }),
-        ),
-      }),
-    ),
+    zodCategoryChildrenObject
+      .merge(
+        z.object({
+          children: zodCategoryChildrenObject
+            .merge(z.object({ children: zodCategoryChildrenObject }))
+            .optional(),
+        }),
+      )
+      .optional(),
   ),
   status: z.enum(STATUS_ARRAY as [I_STATUS]).optional(),
   isDelete: z.boolean().optional(),
