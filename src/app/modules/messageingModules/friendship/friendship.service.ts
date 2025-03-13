@@ -408,7 +408,7 @@ const getAllFriendShipsFromDB = async (
         pipeLineMatchField: '_id', //$_id
         outPutFieldName: 'details',
         margeInField: 'receiver',
-        project: { name: 1, profileImage: 1, email: 1 },
+        project: { name: 1, email: 1, profileImage: 1, userId: 1 },
       });
     }
     LookupAnyRoleDetailsReusable(pipeline, {

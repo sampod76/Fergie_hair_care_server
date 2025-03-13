@@ -306,6 +306,7 @@ const getAllPaymentHistoryFromDb = async (
         pipeLineMatchField: '_id',
         outPutFieldName: 'details',
         margeInField: 'author',
+        project: { name: 1, email: 1, profileImage: 1, userId: 1 },
       },
     ],
   });

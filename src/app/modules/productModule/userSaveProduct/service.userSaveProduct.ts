@@ -3,6 +3,11 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import { PipelineStage, Schema, Types } from 'mongoose';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
+import {
+  ILookupCollection,
+  LookupAnyRoleDetailsReusable,
+  LookupReusable,
+} from '../../../../helper/lookUpResuable';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
 import { IGenericResponse } from '../../../interface/common';
@@ -141,6 +146,37 @@ const getAllUserSaveProductFromDb = async (
     { $skip: Number(skip) || 0 },
     { $limit: Number(limit) || 10 },
   ];
+  const collections: ILookupCollection<any>[] = []; // Use the correct type here
+
+  if (needProperty && needProperty.includes('author')) {
+    LookupAnyRoleDetailsReusable(pipeline, {
+      collections: [
+        {
+          roleMatchFiledName: 'author.role',
+          idFiledName: '$author.roleBaseUserId',
+          pipeLineMatchField: '$_id',
+          outPutFieldName: 'details',
+          margeInField: 'author',
+          project: { name: 1, email: 1, profileImage: 1, userId: 1 },
+        },
+      ],
+    });
+  }
+  if (needProperty && needProperty.includes('productCategoryId')) {
+    const pipelineConnection: ILookupCollection<any> = {
+      connectionName: 'productcategories',
+      idFiledName: '$productCategoryId',
+      pipeLineMatchField: '$_id',
+      outPutFieldName: 'productCategoryDetails',
+    };
+    collections.push(pipelineConnection);
+  }
+  if (collections.length) {
+    // Use the collections in LookupReusable
+    LookupReusable<any, any>(pipeline, {
+      collections: collections,
+    });
+  }
   const [result, total] = await Promise.all([
     UserSaveProduct.aggregate(pipeline),
     UserSaveProduct.countDocuments(whereConditions),
