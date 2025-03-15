@@ -1,4 +1,4 @@
-name: education Backend CI/CD
+name: fergie Backend CI/CD
 
 on:
   push:
