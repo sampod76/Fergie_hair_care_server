@@ -26,9 +26,9 @@ module.exports = {
       // watch_options: {
       //   followSymlinks: false,
       // },
-      instances: '1', // you can use count of replica you application , 2 or 3 , but you can use max then count max cpu
+      instances: '6', // you can use count of replica you application , 2 or 3 , but you can use max then count max cpu
       exec_mode: 'cluster',
-      max_memory_restart: '1012M',
+      max_memory_restart: '7000M',
       env: {
         NODE_ENV: 'development',
         TS_NODE_PROJECT: 'tsconfig.json',
