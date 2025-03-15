@@ -16,8 +16,6 @@ const childCategorySchema = new Schema(
     uid: {
       type: String,
       trim: true,
-      index: true,
-      unique: true,
     },
     serialNumber: {
       type: Number,
@@ -33,8 +31,6 @@ const childCategorySchema = new Schema(
         uid: {
           type: String,
           trim: true,
-          index: true,
-          unique: true,
         },
         serialNumber: {
           type: Number,
@@ -47,7 +43,6 @@ const childCategorySchema = new Schema(
         isDelete: {
           type: Boolean,
           default: false,
-          index: true,
         },
       },
     ],
@@ -59,7 +54,6 @@ const childCategorySchema = new Schema(
     isDelete: {
       type: Boolean,
       default: false,
-      index: true,
     },
   },
   { _id: false },
@@ -70,7 +64,6 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
       type: String,
       required: true,
       trim: true,
-      index: true,
     },
     label: {
       type: String,
@@ -79,8 +72,6 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
     uid: {
       type: String,
       trim: true,
-      index: true,
-      unique: true,
     },
     image: mongooseFileSchema,
 
