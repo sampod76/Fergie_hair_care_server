@@ -79,7 +79,7 @@ jobs:
           fi
 
       - name: Change Directory
-        run: cd /home/sampod/server-runner/_work/Fergie_hair_care_server/Fergie_hair_care_server
+        run: cd /home/sampod/server-runner/_work/fergie_hair_care_server/fergie_hair_care_server
 
       - name: Unzip environment
         run: 7z x .env.zip -p"${{ secrets.ZIP_PASS }}" -o./ -y
