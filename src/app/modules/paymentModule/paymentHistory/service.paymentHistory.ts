@@ -9,6 +9,7 @@ import { IGenericResponse } from '../../../interface/common';
 import { IPaginationOption } from '../../../interface/pagination';
 // import { paymentQueue } from '../../../queue/jobs/paymentQueues';
 import httpStatus from 'http-status';
+import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { LookupAnyRoleDetailsReusable } from '../../../../helper/lookUpResuable';
 import { IUserRef } from '../../allUser/typesAndConst';
 import { ENUM_ORDER_STATUS } from '../order/constants.order';
@@ -144,6 +145,7 @@ const getAllPaymentHistoryFromDb = async (
   paginationOptions: IPaginationOption,
   req?: Request,
 ): Promise<IGenericResponse<IPaymentHistory[]>> => {
+  const user = req?.user as IUserRef;
   //****************search and filters start************/
   const {
     searchTerm,
@@ -162,6 +164,9 @@ const getAllPaymentHistoryFromDb = async (
       : false
     : false;
   filtersData.isRefund = filtersData.isRefund ? filtersData.isRefund : false;
+  if (user?.role !== ENUM_USER_ROLE.admin) {
+    filtersData['author.userId'] = user?.userId.toString();
+  }
   const andConditions = [];
 
   if (searchTerm) {

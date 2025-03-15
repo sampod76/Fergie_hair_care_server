@@ -32,7 +32,8 @@ const createOrder = catchAsync(async (req: Request, res: Response) => {
 
 //get all Orders
 const getAllOrders = catchAsync(async (req: Request, res: Response) => {
-  const user = req.user as IUserRefAndDetails;
+  const user = req?.user as IUserRefAndDetails;
+
   const filters = pick(req.query, OrderFilterableFields) as IOrderFilters;
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
 

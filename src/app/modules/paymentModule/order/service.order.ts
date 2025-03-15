@@ -42,6 +42,7 @@ const getAllOrdersFromDB = async (
     needProperty,
     ...filtersData
   } = filters;
+  console.log('🚀 ~ filters:', filters);
   filtersData.isDelete = filtersData.isDelete
     ? filtersData.isDelete == 'true'
       ? true

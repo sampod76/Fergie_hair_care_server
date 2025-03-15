@@ -52,8 +52,8 @@ export const sendMailHelper = async (bodyData: IMailData) => {
 
   const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
     secure: true,
+    port: 465,
     auth: {
       user: config.nodemailer.auth_user as string,
       pass: config.nodemailer.auth_pass as string,
@@ -66,8 +66,8 @@ export const sendMailHelper = async (bodyData: IMailData) => {
 
     /* //aws --> ses
     host: config.aws.ses.host,
-    port: 587,
     secure: false,
+    port: 587,
     auth: {
       user: config.aws.ses.smptUserName as string,
       pass: config.aws.ses.smptPassword as string,

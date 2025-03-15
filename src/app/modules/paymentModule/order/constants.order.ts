@@ -10,8 +10,8 @@ export const OrderSearchableFields = ['note'];
 
 export const OrderFilterableFields = [
   'myData',
-  'authorUserId',
-  'authorRoleBaseUserId',
+  'author.userId',
+  'author.roleBaseUserId',
   'packageId',
   'paymentId',
   'accessType',
