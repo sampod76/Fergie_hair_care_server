@@ -60,23 +60,23 @@ jobs:
       - name: Check Node.js version
         run: node -v
 
-      - name: Check if PM2 is installed
-        run: |
-          if ! command -v pm2 &> /dev/null; then
-            echo "PM2 not found, installing..."
-            npm install -g pm2
-          else
-            echo "PM2 is already installed."
-          fi
+      #   - name: Check if PM2 is installed
+      #     run: |
+      #       if ! command -v pm2 &> /dev/null; then
+      #         echo "PM2 not found, installing..."
+      #         npm install -g pm2
+      #       else
+      #         echo "PM2 is already installed."
+      #       fi
 
-      - name: Check if 7z is installed
-        run: |
-          if ! command -v 7z &> /dev/null; then
-            echo "7z not found, installing..."
-            sudo apt-get install p7zip-full
-          else
-            echo "7z is already installed."
-          fi
+      #   - name: Check if 7z is installed
+      #     run: |
+      #       if ! command -v 7z &> /dev/null; then
+      #         echo "7z not found, installing..."
+      #         sudo apt-get install p7zip-full
+      #       else
+      #         echo "7z is already installed."
+      #       fi
 
       - name: Change Directory
         run: cd /home/sampod/server-runner/_work/fergie_hair_care_server/fergie_hair_care_server
