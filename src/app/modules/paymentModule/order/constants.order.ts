@@ -19,11 +19,11 @@ export const OrderFilterableFields = [
   'fileType',
   'isTrial',
   /**
-   * @property {orderType} 
+   * @property {orderType}
    * @param {packageByPayment} - only package by payment and  ['paymentId']: { $exists: true },
    * @param {file} - He can purchase the file/or get it from a package only exist productId then accessthis,
-  
    */
+
   // always required filter
   'searchTerm',
   'delete', // for permanent delete
