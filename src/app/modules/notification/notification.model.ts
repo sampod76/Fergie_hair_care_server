@@ -36,6 +36,7 @@ const NotificationSchema = new Schema<INotification>(
     isDelete: {
       type: Boolean,
       default: false,
+      index: true,
     },
   },
   {

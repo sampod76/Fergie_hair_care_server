@@ -2,12 +2,12 @@ import httpStatus from 'http-status';
 import { Server, Socket } from 'socket.io';
 import { produceMessageByKafka } from '../../kafka/producer.kafka';
 import { IUserRef } from '../../modules/allUser/typesAndConst';
-import { IFriendShip } from '../../modules/messageing/friendship/friendship.interface';
-import { FriendShip } from '../../modules/messageing/friendship/friendship.models';
-import { IChatMessage } from '../../modules/messageing/message/messages.interface';
+import { IFriendShip } from '../../modules/messageingModules/friendship/friendship.interface';
+import { FriendShip } from '../../modules/messageingModules/friendship/friendship.models';
+import { IChatMessage } from '../../modules/messageingModules/message/messages.interface';
 import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
 import { redisClient } from '../../redis/redis';
-import { findAllSocketsIdsFromUserId } from '../../redis/service.redis';
+import { RedisAllQueryServiceOop } from '../../redis/service.redis';
 import { socketErrorHandler } from '../socket.service';
 import { ENUM_SOCKET_EMIT_ON_TYPE } from '../socketTypes';
 export const personalMessageSocket = (
@@ -134,7 +134,8 @@ export const personalMessageSocket = (
             );
           }
           // your single friend is running multiple devices in run same id. then all device in send message .
-          const findSocketIds = await findAllSocketsIdsFromUserId(
+          const redisOop = new RedisAllQueryServiceOop();
+          const findSocketIds = await redisOop.findAllSocketsIdsFromUserId(
             messageData.receiver.userId.toString(),
           );
 

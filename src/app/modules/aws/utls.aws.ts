@@ -10,10 +10,18 @@ import {
   S3Client,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import { Request } from 'express';
+import mime from 'mime-types';
+import multer from 'multer';
+import multerS3 from 'multer-s3';
 import path from 'path';
 import config from '../../../config';
+import { ENUM_MIMETYPE } from '../../../global/enums/globalEnums';
 import ApiError from '../../errors/ApiError';
 import { IAwsInputFile, IAwsOutputPreUrl } from './interface.AWS';
+
+//
+
 const s3Client = new S3Client({
   region: config.aws.s3.region, //us-east-1
   credentials: {
@@ -40,14 +48,11 @@ const putSingleImageObjectCommandToUrl = async (
   let filePath;
   // const modifyFileName = Date.now() + '-' + fileData.filename;
   const fileExt = path.extname(fileData.filename);
-  const sanitizedFileName = fileData.filename
-    .replace(fileExt, '') // Remove the file extension
-    .toLowerCase() // Convert to lowercase
-    .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except for spaces and hyphens
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .trim(); // Trim extra spaces for safety
-
-  const modifyFileName = `${sanitizedFileName}-${Date.now()}${fileExt}`;
+  const modifyFileName =
+    fileData.filename.replace(fileExt, '').toLowerCase().split(' ').join('-') +
+    '-' +
+    Date.now() +
+    fileExt;
 
   if (fileData.mimetype.includes('image')) {
     filePath = `upload/images/${modifyFileName}`;
@@ -68,9 +73,10 @@ const putSingleImageObjectCommandToUrl = async (
     ContentType: fileData.mimetype, //"image/jpeg"
   });
   //@ts-ignore
-  const url = await getSignedUrl(s3Client, commend /*  { expiresIn: 10000 } */); //100
+  const url = await getSignedUrl(s3Client, commend, { expiresIn: 500 }); //100
   const res: IAwsOutputPreUrl = {
-    url: url.split('?')[0],
+    url: config.aws.s3.cloudfrontCDN + '/' + filePath,
+    originalUrl: url.split('?')[0],
     pre_url: url,
     filename: fileData.filename,
     modifyFileName,
@@ -128,79 +134,89 @@ const deleteS3MultipleFiles = async (fileKeys: string[]) => {
   }
 };
 
-// const uploadAwsS3Bucket = multer({
-//   storage: multerS3({
-//     s3: s3Client,
-//     bucket: config.aws.s3.bucket as string, // Replace with your bucket name
-//     metadata: (req: Request, file, cb) => {
-//       cb(null, {
-//         fieldName: file.fieldname,
-//         authorUserId: req?.user?.userId || '',
-//         role: req?.user?.role || '',
-//       });
-//     },
+const uploadAwsS3Bucket = multer({
+  storage: multerS3({
+    s3: s3Client,
+    bucket: config.aws.s3.bucket as string, // Replace with your bucket name
+    metadata: (req: Request, file, cb) => {
+      cb(null, {
+        fieldName: file.fieldname,
+        authorUserId: req?.user?.userId || '',
+        role: req?.user?.role || '',
+      });
+    },
+    contentType: (req, file, cb) => {
+      // Force setting the content type based on the file's extension
+      const ext = path.extname(file.originalname).slice(1);
+      const mimeType = mime.lookup(ext) || 'application/octet-stream';
+      cb(null, mimeType);
+    },
 
-//     key: (req, file, cb) => {
-//       const allowedMimeTypes = [
-//         // 'image/jpg',
-//         // 'image/png',
-//         // 'image/jpeg',
-//         // 'image/heic',
-//         // 'image/heif',
-//         // 'image/gif',
-//         // 'image/avif',
-//         'application/pdf',
-//         'application/x-x509-ca-cert',
-//         'application/octet-stream',
-//         'application/pkix-cert',
-//         'application/pkcs8',
-//         'application/msword',
-//       ];
+    key: (req, file, cb) => {
+      const allowedMimeTypes = [
+        // 'image/jpg',
+        // 'image/png',
+        // 'image/jpeg',
+        // 'image/heic',
+        // 'image/heif',
+        // 'image/gif',
+        // 'image/avif',
+        ENUM_MIMETYPE.pdf,
+        // 'application/x-x509-ca-cert',
+        // 'application/octet-stream',
+        // 'application/pkix-cert',
+        // 'application/pkcs8',
+        ENUM_MIMETYPE.doc1,
+        ENUM_MIMETYPE.doc2,
+        ENUM_MIMETYPE.ppt1,
+        ENUM_MIMETYPE.ppt2,
+      ];
 
-//       if (
-//         !allowedMimeTypes.includes(file.mimetype) &&
-//         !file.mimetype.includes('image') // allow all image types
-//       ) {
-//         cb(
-//           new Error(
-//             'Only ' +
-//               allowedMimeTypes.map(type => type.split('/')[1]).join(', ') +
-//               'format is allowed!',
-//           ),
-//         );
-//       }
+      if (
+        !allowedMimeTypes.includes(file.mimetype as ENUM_MIMETYPE) &&
+        !file.mimetype.includes('image') // allow all image types
+      ) {
+        cb(
+          new Error(
+            'Only ' +
+              allowedMimeTypes.map(type => type.split('/')[1]).join(', ') +
+              ',image' +
+              'format is allowed!',
+          ),
+        );
+      }
 
-//       let filePath = '';
+      let filePath = '';
+      const fileExt = path.extname(file.originalname);
+      const modifyFileName =
+        file.originalname
+          .replace(fileExt, '')
+          .toLowerCase()
+          .split(' ')
+          .join('-') +
+        '-' +
+        Date.now() +
+        fileExt;
 
-//       const fileExt = path.extname(file.originalname);
-//       const sanitizedFileName = file.originalname
-//         .replace(fileExt, '') // Remove the file extension
-//         .toLowerCase() // Convert to lowercase
-//         .replace(/[^a-z0-9\s-]/g, '') // Remove special characters except for spaces and hyphens
-//         .replace(/\s+/g, '-') // Replace spaces with hyphens
-//         .trim(); // Trim extra spaces for safety
+      if (file.mimetype.includes('image')) {
+        filePath = `upload/images/${modifyFileName}`;
+      } else if (file.mimetype.includes('audio')) {
+        filePath = `upload/audios/${modifyFileName}`;
+      } else if (file.mimetype.includes('video')) {
+        filePath = `upload/videos/${modifyFileName}`;
+      } else if (file.mimetype.includes('application')) {
+        filePath = `upload/docs/${modifyFileName}`;
+      } else if (file.mimetype.includes('pdf')) {
+        filePath = `upload/pdfs/${modifyFileName}`;
+      } else {
+        filePath = `upload/others/${modifyFileName}`;
+      }
 
-//       const modifyFileName = `${sanitizedFileName}-${Date.now()}${fileExt}`;
-
-//       if (file.mimetype.includes('image')) {
-//         filePath = `upload/images/${modifyFileName}`;
-//       } else if (file.mimetype.includes('audio')) {
-//         filePath = `upload/audios/${modifyFileName}`;
-//       } else if (file.mimetype.includes('video')) {
-//         filePath = `upload/videos/${modifyFileName}`;
-//       } else if (file.mimetype.includes('application')) {
-//         filePath = `upload/docs/${modifyFileName}`;
-//       } else if (file.mimetype.includes('pdf')) {
-//         filePath = `upload/pdfs/${modifyFileName}`;
-//       } else {
-//         filePath = `upload/others/${modifyFileName}`;
-//       }
-
-//       cb(null, filePath);
-//     },
-//     // Add the tagging configuration here
-//   }),
-// });
+      cb(null, filePath);
+    },
+    // Add the tagging configuration here
+  }),
+});
 
 export {
   deleteS3MultipleFiles,
@@ -209,4 +225,5 @@ export {
   putSingleImageObjectCommandToUrl,
   //
   s3Client,
+  uploadAwsS3Bucket,
 };

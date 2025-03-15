@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import { I_VERIFY, VERIFY_ARRAY } from '../../typesAndConst';
 import { ENUM_COMPANY_TYPE } from '../user.constant';
-import { I_ROLE_TYPE } from '../user.interface';
 
 export const ROLE_TYPE_ARRAY = Object.values(ENUM_COMPANY_TYPE);
 
@@ -14,10 +13,4 @@ export const generalUserSchema = z.object({
     })
     .optional(),
   verify: z.enum(VERIFY_ARRAY as [I_VERIFY]).optional(),
-
-  company: z
-    .enum(ROLE_TYPE_ARRAY as [I_ROLE_TYPE], {
-      required_error: 'Role type is required',
-    })
-    .optional(), //because when tempuser create then set company
 });

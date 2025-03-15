@@ -2,10 +2,6 @@ import { createDirectories } from './utils/createDir';
 
 const TestFile = async () => {
   try {
-    // const res = await redisClient.set('test', 'sfsdjkfsd');
-    // console.log('🚀 ~ TestFile ~ res:', res);
-    // const res2 = await redisClient.get('test');
-    // console.log('🚀 ~ TestFile ~ res:', res2);
     createDirectories();
     await asyncFunction();
   } catch (error) {
@@ -15,7 +11,9 @@ const TestFile = async () => {
 
 const asyncFunction = async () => {
   try {
-    // console.log('first');
+    // const getPayment = await PaymentHistory.find();
+    // console.log('🚀 ~ asyncFunction ~ getPayment:', getPayment);
+
     return 1;
   } catch (error) {
     console.log(error);

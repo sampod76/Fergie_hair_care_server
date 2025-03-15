@@ -7,6 +7,8 @@ export const userFilterableFields = [
   'verify',
   'company',
   'authUserId',
+  'accountType',
+
   //
   'latitude',
   'longitude',

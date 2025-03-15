@@ -16,6 +16,7 @@ export const GeneralUserFilterableFields = [
   'skills',
   'dateOfBirth',
   'needProperty',
+  'accountType',
   'company',
   'verify',
   'createdAtFrom',

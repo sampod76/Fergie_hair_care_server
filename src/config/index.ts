@@ -83,34 +83,55 @@ export default {
     api_secret: process.env.CLOUDINARY_API_SECRET,
   },
   stripe: {
-    secret_key: process.env.STRIPE_SECRET_KEY,
-    publishable_key: process.env.STRIPE_PUBLISHABLE_KEY,
+    publishable_key:
+      process.env.NODE_ENV === 'development'
+        ? process.env.STRIPE_PUBLISHABLE_KEY_TEST
+        : process.env.STRIPE_PUBLISHABLE_KEY_PRODUCTION,
+    secret_key:
+      process.env.NODE_ENV === 'development'
+        ? process.env.STRIPE_SECRET_KEY_TEST
+        : process.env.STRIPE_SECRET_KEY_PRODUCTION,
   },
   payment_url: {
     stripe_success_url:
       process.env.NODE_ENV === 'development'
-        ? process.env.STRIPE_SUCCESS_URL_LOCAL
-        : process.env.STRIPE_SUCCESS_URL,
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.STRIPE_SUCCESS_URL_LOCAL}`
+        : `https://${process.env.LIVE_URL}/${process.env.STRIPE_SUCCLIVE_URLESS_URL}`,
+
     stripe_cancel_url:
       process.env.NODE_ENV === 'development'
-        ? process.env.STRIPE_CANCEL_URL_LOCAL
-        : process.env.STRIPE_CANCEL_URL,
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.STRIPE_CANCEL_URL_LOCAL}`
+        : `https://${process.env.LIVE_URL}/${process.env.STRIPE_CANCEL_URL}`,
+
     paypal_success_url:
       process.env.NODE_ENV === 'development'
-        ? process.env.PAYPAL_SUCCESS_URL_LOCAL
-        : process.env.PAYPAL_SUCCESS_URL,
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.PAYPAL_SUCCESS_URL_LOCAL}`
+        : `https://${process.env.LIVE_URL}/${process.env.PAYPAL_SUCCESS_URL}`,
+
     paypal_cancel_url:
       process.env.NODE_ENV === 'development'
-        ? process.env.PAYPAL_CANCEL_URL_LOCAL
-        : process.env.PAYPAL_CANCEL_URL,
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.PAYPAL_CANCEL_URL_LOCAL}`
+        : `https://${process.env.LIVE_URL}/${process.env.PAYPAL_CANCEL_URL}`,
   },
+
   paypal: {
-    client: process.env.PAYPAL_CLIENT_ID,
-    secret: process.env.PAYPAL_SECRET_KEY,
+    client:
+      process.env.NODE_ENV === 'development'
+        ? process.env.PAYPAL_CLIENT_ID
+        : process.env.PAYPAL_CLIENT_ID_LIVE,
+    secret:
+      process.env.NODE_ENV === 'development'
+        ? process.env.PAYPAL_SECRET_KEY
+        : process.env.PAYPAL_SECRET_KEY_LIVE,
+    mode:
+      process.env.NODE_ENV === 'development'
+        ? process.env.PAYPAL_MODE
+        : process.env.PAYPAL_MODE_LIVE,
   },
   nodemailer: {
     auth_user: process.env.NODEMAILER_AUTH_EMAIL,
     auth_pass: process.env.NODEMAILER_AUTH_PASS,
+    default_sender_email: process.env.DEFAULT_SENDER_EMAIL,
   },
   aws: {
     s3: {
@@ -119,6 +140,13 @@ export default {
       region: process.env.AWS_S3_REGION,
       bucket: process.env.AWS_S3_BUCKET_NAME,
       cloudfrontCDN: process.env.AWS_S3_CLOUDFRONT_CDN,
+    },
+    ses: {
+      userName: process.env.AWS_SES_USER_NAME,
+      smptUserName: process.env.AWS_SES_SMTP_USER_NAME,
+      smptPassword: process.env.AWS_SMS_SMTP_PASSWORD,
+      host: process.env.AWS_SES_HOST,
+      default_sender_email: process.env.DEFAULT_SENDER_EMAIL,
     },
   },
   api_response_language: process.env.API_RESPONSE_LANGUAGE,

@@ -28,7 +28,7 @@ export const sendNotificationFromDB = <T>(
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const socketIo: Server = global?.socketIo;
-  // console.log(payload, 'payload');
+
   if (socketIo) {
     payload.forEach(data => {
       if ('role' in data && data.role) {

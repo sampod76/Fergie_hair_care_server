@@ -8,13 +8,12 @@ import {
 
 import {
   ENUM_STATUS,
-  ENUM_YN,
-  I_YN,
   STATUS_ARRAY,
 } from '../../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../../global/schema/global.schema';
 import { LookupReusable } from '../../../../helper/lookUpResuable';
 import { ENUM_VERIFY, mongooseIUserRef, VERIFY_ARRAY } from '../typesAndConst';
+import { ENUM_ACCOUNT_TYPE, I_AccountTypeArray } from '../user/user.interface';
 import { GeneralUserModel, IGeneralUser } from './interface.generalUser';
 
 const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
@@ -22,15 +21,23 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
     userUniqueId: {
       type: String,
       required: true,
-      // unique: true,
+      //
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
     },
     email: {
       type: String,
       required: true,
       lowercase: true,
-      // unique: true,
+      //
       trim: true,
-      index: true,
+    },
+    accountType: {
+      type: String,
+      enum: I_AccountTypeArray,
+      default: ENUM_ACCOUNT_TYPE.custom,
     },
     authUserId: {
       type: Schema.Types.ObjectId,
@@ -55,7 +62,41 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
       type: Date,
       trim: true,
     },
-
+    category: [
+      {
+        value: {
+          type: String,
+        },
+        label: {
+          type: String,
+        },
+        uid: {
+          type: String,
+        },
+        children: {
+          value: {
+            type: String,
+          },
+          label: {
+            type: String,
+          },
+          uid: {
+            type: String,
+          },
+          children: {
+            value: {
+              type: String,
+            },
+            label: {
+              type: String,
+            },
+            uid: {
+              type: String,
+            },
+          },
+        },
+      },
+    ],
     // gender: {
     //   type: String,
     //   enum: GENDER_ARRAY,
@@ -75,7 +116,6 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
     isDelete: {
       type: Boolean,
       default: false,
-      index: true,
     },
   },
   {
@@ -89,7 +129,7 @@ const GeneralSchema = new Schema<IGeneralUser, GeneralUserModel>(
 GeneralSchema.statics.isGeneralUserExistMethod = async function (
   id: string,
   option?: Partial<{
-    isDelete: I_YN;
+    isDelete: boolean;
     populate: boolean;
     needProperty?: string[];
   }>,
@@ -100,7 +140,7 @@ GeneralSchema.statics.isGeneralUserExistMethod = async function (
       {
         $match: {
           _id: new Types.ObjectId(id),
-          isDelete: option?.isDelete || ENUM_YN.NO,
+          isDelete: option?.isDelete || false,
         },
       },
       {
@@ -113,7 +153,7 @@ GeneralSchema.statics.isGeneralUserExistMethod = async function (
       {
         $match: {
           _id: new Types.ObjectId(id),
-          isDelete: option.isDelete || ENUM_YN.NO,
+          isDelete: option.isDelete || false,
         },
       },
     ];
@@ -121,8 +161,8 @@ GeneralSchema.statics.isGeneralUserExistMethod = async function (
       collections: [
         {
           connectionName: 'users',
-          idFiledName: 'email',
-          pipeLineMatchField: 'email',
+          idFiledName: 'userId',
+          pipeLineMatchField: '_id',
           outPutFieldName: 'userDetails',
         },
       ],

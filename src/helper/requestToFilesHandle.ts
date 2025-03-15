@@ -6,7 +6,6 @@ import {
   IFileAfterUpload,
   IMulterUploadFile,
 } from '../app/interface/fileUpload';
-import { ImgbbUploader } from '../app/middlewares/uploadImgBB';
 import { FileUploadHelper } from '../app/middlewares/uploderCloudinary';
 import config from '../config';
 import { bytesToKbAndMb } from '../utils/bytesTokbAndMb';
@@ -37,7 +36,6 @@ import { bytesToKbAndMb } from '../utils/bytesTokbAndMb';
    */
 
 export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
-  // console.log(req.file, 'req.file');
   try {
     const file = req.file as IMulterUploadFile;
     // const d = new makeImage(file);
@@ -109,7 +107,6 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
       }
       req.body = bodyData;
     } else if (req.files) {
-      // console.log(req.files, 'req.files');
       if (req.files instanceof Array && req.files?.length) {
         //---imagbb---
         let images: IMulterUploadFile[] = [];
@@ -153,7 +150,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
           } else if (!obj[file.fieldname]?.length) {
             obj[file.fieldname] = [];
           }
-          // console.log(allModifyFiles, 'allModifyFiles');
+
           if (file?.mimetype?.includes('image')) {
             // console.log(file, 'file dd');
             //@ts-ignore
@@ -233,7 +230,6 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
         Object.entries(obj).forEach(([key, value]) => {
           req.body[key] = value;
         });
-        console.log(req.body, 'req.body');
       } else {
         //field type object in fields array
         const bodyData = { ...req.body };
@@ -355,6 +351,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `images/${file?.filename}`,
                           platform: 'server',
                         };
@@ -364,6 +361,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `pdfs/${file?.filename}`,
                           platform: 'server',
                         };
@@ -373,6 +371,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `audios/${file?.filename}`,
                           platform: 'server',
                         };
@@ -382,6 +381,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `videos/${file?.filename}`,
                           platform: 'server',
                         };
@@ -391,6 +391,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `docs/${file?.filename}`,
                           platform: 'server',
                         };
@@ -400,6 +401,7 @@ export const RequestToFileDecodeAddBodyHandle = async (req: Request) => {
                       : {
                           mimetype: file?.mimetype,
                           filename: file?.filename,
+                          name: file?.filename,
                           server_url: `others/${file?.filename}`,
                           platform: 'server',
                         };
@@ -435,8 +437,10 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
       bodyData[file.fieldname] = {
         mimetype: file.mimetype,
         filename: file.originalname,
+        name: file.originalname,
         path: file.key,
-        url: file.location,
+        url: config.aws.s3.cloudfrontCDN + '/' + file.key,
+        originalUrl: file.location,
         cdn: config.aws.s3.cloudfrontCDN,
         platform: 'aws',
       } as IFileAfterUpload;
@@ -461,8 +465,10 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
           obj[file.fieldname].push({
             mimetype: file.mimetype,
             filename: file.originalname,
+            name: file.originalname,
             path: file.key,
-            url: file.location,
+            url: config.aws.s3.cloudfrontCDN + '/' + file.key,
+            originalUrl: file.location,
             cdn: config.aws.s3.cloudfrontCDN,
             platform: 'aws',
           });
@@ -489,8 +495,10 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
                 (file: IAws_MulterUploadFile) => ({
                   mimetype: file.mimetype,
                   filename: file.originalname,
+                  name: file.originalname,
                   path: file.key,
-                  url: file.location,
+                  url: config.aws.s3.cloudfrontCDN + '/' + file.key,
+                  originalUrl: file.location,
                   cdn: config.aws.s3.cloudfrontCDN,
                   platform: 'aws',
                 }),
@@ -503,6 +511,7 @@ export const RequestTo_Aws_Multer_FileDecodeAddBodyHandle = async (
         req.body = bodyData;
       }
     }
+
     // requestToDeleteFile(req);
   } catch (error: any) {
     throw new ApiError(400, error?.message || 'Invalid Set body value');

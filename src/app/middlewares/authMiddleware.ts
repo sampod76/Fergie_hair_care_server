@@ -3,12 +3,37 @@ import { NextFunction, Request, Response } from 'express';
 import httpStatus from 'http-status';
 import { Secret } from 'jsonwebtoken';
 import config from '../../config';
+import { ENUM_STATUS } from '../../global/enum_constant_type';
 import { jwtHelpers } from '../../helper/jwtHelpers';
 import ApiError from '../errors/ApiError';
 import { validateUserInDbOrRedis } from '../modules/allUser/user/user.utils';
 import { redisClient } from '../redis/redis';
 // Dedicated Redis service
+const getUserFromCache = async (token: string) => {
+  const cachedUser = await redisClient.get(token);
+  return cachedUser ? JSON.parse(cachedUser) : null;
+};
+//
+const cacheUser = async (token: string, data: any, ttl: number) => {
+  if (ttl > 0) {
+    await redisClient.set(token, JSON.stringify(data), 'EX', ttl);
+  }
+};
+// Token verification with TTL calculation
+const verifyAndCacheToken = async (token: string, secret: Secret) => {
+  const verifiedUser = jwtHelpers.verifyToken(token, secret);
+  const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
+  const llt = Math.max(verifiedUser.exp! - currentTimestampInSeconds, 0);
 
+  if (llt > 0) {
+    verifiedUser.status = ENUM_STATUS.ACTIVE;
+    await cacheUser(token, verifiedUser, llt);
+  } else {
+    verifiedUser.status = ENUM_STATUS.BLOCK;
+    await cacheUser(token, verifiedUser, 0); // Blocked user will never expire
+  }
+  return verifiedUser;
+};
 const authMiddleware =
   (...requiredRoles: string[]) =>
   async (req: Request, res: Response, next: NextFunction) => {
@@ -26,6 +51,10 @@ const authMiddleware =
           token,
           config.jwt.secret as Secret,
         );
+      }
+
+      if (verifiedUser?.status && verifiedUser?.status !== ENUM_STATUS.ACTIVE) {
+        throw new ApiError(httpStatus.FORBIDDEN, 'forbidden access');
       }
       req.user = verifiedUser;
 
@@ -49,28 +78,7 @@ const authMiddleware =
   };
 
 export default authMiddleware;
-const cacheUser = async (token: string, data: any, ttl: number) => {
-  if (ttl > 0) {
-    await redisClient.set(token, JSON.stringify(data), 'EX', ttl);
-  }
-};
 
-const getUserFromCache = async (token: string) => {
-  const cachedUser = await redisClient.get(token);
-  return cachedUser ? JSON.parse(cachedUser) : null;
-};
-
-// Token verification with TTL calculation
-const verifyAndCacheToken = async (token: string, secret: Secret) => {
-  const verifiedUser = jwtHelpers.verifyToken(token, secret);
-  const currentTimestampInSeconds = Math.floor(Date.now() / 1000);
-  const llt = Math.max(verifiedUser.exp! - currentTimestampInSeconds, 0);
-
-  if (llt > 0) {
-    await cacheUser(token, verifiedUser, llt);
-  }
-  return verifiedUser;
-};
 /* 
 
 import { NextFunction, Request, Response } from 'express';

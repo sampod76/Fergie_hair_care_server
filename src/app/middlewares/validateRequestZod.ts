@@ -7,6 +7,7 @@ const validateRequestZod =
   (schema: AnyZodObject | ZodEffects<AnyZodObject>) =>
   async (req: Request, res: Response, next: NextFunction) => {
     if (config.env !== 'production') {
+      console.log('req---body ---.', JSON.stringify(req.body), '---body end--');
       console.log('req---body ---.', req.body, '---body end--');
     }
 

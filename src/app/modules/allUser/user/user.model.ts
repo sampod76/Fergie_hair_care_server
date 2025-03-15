@@ -7,11 +7,8 @@ import config from '../../../../config';
 import {
   ENUM_SOCKET_STATUS,
   ENUM_STATUS,
-  ENUM_YN,
-  I_YN,
   SOCKET_STATUS_ARRAY,
   STATUS_ARRAY,
-  YN_ARRAY,
 } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { mongooseLocationSchema } from '../../../../global/schema/global.schema';
@@ -25,9 +22,13 @@ import { redisClient } from '../../../redis/redis';
 
 import { GeneralUser } from '../generalUser/model.generalUser';
 import { ENUM_VERIFY, VERIFY_ARRAY } from '../typesAndConst';
-import { ENUM_COMPANY_TYPE } from './user.constant';
-import { IUser, USER_ROLE_ARRAY, UserModel } from './user.interface';
-import { ROLE_TYPE_ARRAY } from './zod/generalUser.zod';
+import {
+  ENUM_ACCOUNT_TYPE,
+  I_AccountTypeArray,
+  IUser,
+  USER_ROLE_ARRAY,
+  UserModel,
+} from './user.interface';
 
 const userSchema = new Schema<IUser, UserModel>(
   {
@@ -53,7 +54,11 @@ const userSchema = new Schema<IUser, UserModel>(
       enum: USER_ROLE_ARRAY,
       default: ENUM_USER_ROLE.generalUser,
     },
-
+    accountType: {
+      type: String,
+      enum: I_AccountTypeArray,
+      default: ENUM_ACCOUNT_TYPE.custom,
+    },
     password: {
       type: String,
       required: true,
@@ -100,9 +105,9 @@ const userSchema = new Schema<IUser, UserModel>(
       },
     },
     isDelete: {
-      type: String,
-      enum: YN_ARRAY,
-      default: ENUM_YN.NO,
+      type: Boolean,
+
+      default: false,
       index: true,
     },
   },
@@ -117,7 +122,7 @@ const userSchema = new Schema<IUser, UserModel>(
 userSchema.statics.isUserFindMethod = async function (
   query: { id?: string; email?: string; company?: string },
   option?: {
-    isDelete?: I_YN;
+    isDelete?: boolean;
     populate?: boolean;
     password?: boolean;
     needProperty?: string[];
@@ -130,20 +135,18 @@ userSchema.statics.isUserFindMethod = async function (
   } else if (query.email) {
     match.email = query.email;
   }
-  if (query.company) {
-    match.company = query.company;
-  }
+
   //
   if (option?.isDelete) {
     match.isDelete = option.isDelete;
   } else {
-    match.isDelete = ENUM_YN.NO;
+    match.isDelete = false;
   }
   const project: any = { __v: 0, password: 0, secret: 0 };
   if (option?.password) {
     delete project.password;
   }
-  console.log(match, 'match');
+
   //general perpose
   if (!option?.populate) {
     const result = await User.aggregate([
@@ -168,8 +171,8 @@ userSchema.statics.isUserFindMethod = async function (
       collections: [
         {
           roleMatchFiledName: 'role',
-          idFiledName: '$email',
-          pipeLineMatchField: '$email',
+          idFiledName: '$_id',
+          pipeLineMatchField: '$userId',
           outPutFieldName: 'roleInfo',
         },
       ],
@@ -204,8 +207,6 @@ userSchema.pre('save', async function (next) {
     if (user.role === ENUM_USER_ROLE.generalUser) {
       roleUser = await GeneralUser.findOne({ email: user.email });
     } else if (user.role === ENUM_USER_ROLE.admin) {
-      roleUser = await Admin.findOne({ email: user.email });
-    } else if (user.role === ENUM_USER_ROLE.vendor) {
       roleUser = await Admin.findOne({ email: user.email });
     }
 
@@ -296,16 +297,11 @@ const tempUserSchema = new Schema(
       enum: USER_ROLE_ARRAY,
       default: ENUM_USER_ROLE.generalUser,
     },
-    company: {
-      type: String,
-      enum: ROLE_TYPE_ARRAY,
-      default: ENUM_COMPANY_TYPE.companyOne,
-    },
 
     isEmailVerify: {
       type: String,
-      enum: YN_ARRAY,
-      default: ENUM_YN.NO,
+
+      default: false,
     },
     authentication: {
       type: {
@@ -325,9 +321,8 @@ const tempUserSchema = new Schema(
       default: ENUM_STATUS.ACTIVE,
     },
     isDelete: {
-      type: String,
-      enum: YN_ARRAY,
-      default: ENUM_YN.NO,
+      type: Boolean,
+      default: false,
       index: true,
     },
   },

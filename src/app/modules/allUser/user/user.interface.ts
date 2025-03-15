@@ -15,18 +15,28 @@ export type I_USER_ROLE = keyof typeof ENUM_USER_ROLE;
 //
 export type I_ROLE_TYPE = keyof typeof ENUM_COMPANY_TYPE;
 //
+//
+export enum ENUM_ACCOUNT_TYPE {
+  custom = 'custom',
+  google = 'google',
+  apple = 'apple',
+}
+export type IACCOUNT_TYPE = keyof typeof ENUM_ACCOUNT_TYPE;
+export const I_AccountTypeArray = Object.values(ENUM_ACCOUNT_TYPE);
+//
 export type IUserFilters = {
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   role?: I_USER_ROLE;
   company?: I_ROLE_TYPE;
   multipleRole?: I_USER_ROLE[];
   status?: I_STATUS;
-  isDelete?: I_YN;
+  isDelete?: string | boolean;
   authUserId?: string;
   needProperty?: string;
   verify?: string;
   socketStatus?: I_YN;
+  yearToQuery?: string;
   //
   latitude?: string;
   longitude?: string;
@@ -57,6 +67,7 @@ export type IUser = {
     timeOut: string;
     status: I_STATUS;
   };
+  accountType?: string;
   secret: string;
   location?: ILocation;
   status: I_STATUS;
@@ -65,7 +76,7 @@ export type IUser = {
   };
   verify: I_VERIFY;
   socketStatus: I_SOCKET_STATUS;
-  isDelete: I_YN;
+  isDelete: boolean;
 } & TempUserBody;
 
 export type ITempUser = {
@@ -76,7 +87,7 @@ export type UserModel = {
   isUserFindMethod(
     query: { id?: string; email?: string; company?: string },
     option: {
-      isDelete?: I_YN;
+      isDelete?: boolean;
       populate?: boolean;
       password?: boolean;
       needProperty?: string[];

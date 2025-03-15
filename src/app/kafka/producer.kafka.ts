@@ -24,7 +24,7 @@ export const produceMessageByKafka = async (message: string) => {
   const producer = await createProducer();
   // console.log('🚀 ~ eachMessage: ~ data:', message);
   await producer.send({
-    topic: ENUM_KAFKA_TOPIC.MESSAGE,
+    topic: ENUM_KAFKA_TOPIC.message,
     messages: [
       { key: 'message:' + uuidv4(), value: message, partition: 0 },
       //   { key: 'message:' + uuidv4(), value: 'Hello, Kafka!', partition: 0 },

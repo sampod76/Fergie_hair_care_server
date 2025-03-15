@@ -8,7 +8,7 @@ import { NextFunction } from 'express';
 import http, { Server } from 'http';
 import { Server as SocketServer } from 'socket.io';
 import { kafkaInit } from './app/kafka/kafka';
-import { RedisRunFunction } from './app/redis/service.redis';
+import { RedisConnectionServiceOop } from './app/redis/service.redis';
 import { errorLogger, logger } from './app/share/logger';
 import config from './config/index';
 import socketConnection from './sockit';
@@ -21,9 +21,7 @@ process.on('uncaughtException', error => {
   process.exit(1);
 });
 // database connection
-
 let server: Server; // এটা তারা বুঝায় সার্ভার কোন এক্টিভিটি আছে কিনা
-
 // const httpServer = http.createServer(app);
 const httpServer = http.createServer(); // ! are you use multiple connections 1. server is run 5000 port -> socket is run 5001 then use
 // Create Redis clients using ioredis
@@ -103,7 +101,8 @@ async function connection() {
     //!------Redis-------
     // const sub = await subRedis.subscribe(...subscribeArray);
     // console.log('🚀 ~ RedisRunFunction ~ sub:', sub);
-    await RedisRunFunction();
+    const redisOop = new RedisConnectionServiceOop();
+    await redisOop.RedisRunFunction();
     //!-------- socket connection---------
     await socketConnection(io);
     //!-----kafka--init----

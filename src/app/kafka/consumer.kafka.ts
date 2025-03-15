@@ -1,16 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 
+import config from '../../config';
+import { FriendShip } from '../modules/messageingModules/friendship/friendship.models';
+import { GroupMessageService } from '../modules/messageingModules/groupMessage/service.groupMessage';
+import { ChatMessageService } from '../modules/messageingModules/message/messages.service';
+import { logger } from '../share/logger';
 import { ENUM_KAFKA_TOPIC } from './consent.kafka';
 import { kafkaClient } from './kafka';
-import config from '../../config';
-import { ChatMessageService } from '../modules/messageing/message/messages.service';
-import { GroupMessageService } from '../modules/messageing/groupMessage/service.groupMessage';
-import { FriendShip } from '../modules/messageing/friendship/friendship.models';
-import { logger } from '../share/logger';
 
 export const consumerKafka = async () => {
   const topics = [
-    ENUM_KAFKA_TOPIC.MESSAGE,
+    ENUM_KAFKA_TOPIC.message,
     ENUM_KAFKA_TOPIC.groupMessage,
     ENUM_KAFKA_TOPIC.friendShipUpdateSortList,
   ];
@@ -31,7 +31,7 @@ export const consumerKafka = async () => {
     autoCommit: false,
     eachMessage: async ({ topic, partition, message, heartbeat, pause }) => {
       try {
-        if (topic === ENUM_KAFKA_TOPIC.MESSAGE) {
+        if (topic === ENUM_KAFKA_TOPIC.message) {
           if (message.value) {
             const data = JSON.parse(message.value?.toString());
             const result = await ChatMessageService.createChatMessage(data);
@@ -84,7 +84,7 @@ export const consumerKafka = async () => {
           pause();
           setTimeout(() => {
             console.log('Resuming consumer...');
-            // consumer.resume([{ topic: ENUM_KAFKA_TOPIC.MESSAGE }]);
+            // consumer.resume([{ topic: ENUM_KAFKA_TOPIC.message }]);
             consumer.resume(
               topics.map(singleTopic => ({ topic: singleTopic })),
             );
@@ -104,7 +104,7 @@ import { ChatMessageService } from '../modules/message/messages.service';
 export const consumerKafka = async () => {
   const consumer = kafkaClient.consumer({ groupId: 'message' });
   await consumer.connect();
-  await consumer.subscribe({ topic: ENUM_KAFKA_TOPIC.MESSAGE, fromBeginning: true });
+  await consumer.subscribe({ topic: ENUM_KAFKA_TOPIC.message, fromBeginning: true });
 
   await consumer.run({
     eachBatchAutoResolve: false, // Disable automatic offset commit
@@ -137,7 +137,7 @@ export const consumerKafka = async () => {
           pause();
           setTimeout(() => {
             console.log('Resuming consumer...');
-            consumer.resume([{ topic: ENUM_KAFKA_TOPIC.MESSAGE }]);
+            consumer.resume([{ topic: ENUM_KAFKA_TOPIC.message }]);
           }, 60 * 1000); // Resume after 60 seconds
         } else {
           // Handle other errors, possibly with retries or alerting

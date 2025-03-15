@@ -13,9 +13,20 @@ import { adminRoutes } from '../modules/allUser/admin/admin.route';
 
 import { AdminSettingRoute } from '../modules/adminSetting/route.adminSetting';
 
+import { AddToCartRoute } from '../modules/addToCart/route.addToCart';
 import { GeneralUserRoutes } from '../modules/allUser/generalUser/route.generalUser';
-import { FriendShipsRoute } from '../modules/messageing/friendship/friendship.route';
-import { ChatMessageRoute } from '../modules/messageing/message/messages.route';
+import { FavoriteProductRoute } from '../modules/favoriteProduct/route.favoriteProduct';
+import { FriendShipsRoute } from '../modules/messageingModules/friendship/friendship.route';
+import { ChatMessageRoute } from '../modules/messageingModules/message/messages.route';
+import { OrdersRoute } from '../modules/paymentModule/order/route.order';
+import { PaymentRoute } from '../modules/paymentModule/payment/payment.router';
+import { PaymentHistoryRoute } from '../modules/paymentModule/paymentHistory/route.paymentHistory';
+import { ProductCategoryRoute } from '../modules/productCategory/route.productCategory';
+import { ProductRoute } from '../modules/productModule/products/route.products';
+import { UserSaveProductRoute } from '../modules/productModule/userSaveProduct/route.userSaveProduct';
+import { RoutingReminderRoute } from '../modules/routingReminder/route.RoutingReminder';
+import { ServiceLoggerRoute } from '../modules/serviceLogger/route.serviceLogger';
+import { TipsAndGuidelineRoute } from '../modules/tipsAndGuideline/route.TipsAndGuideline';
 
 const router = express.Router();
 
@@ -47,7 +58,39 @@ const moduleRoutes = [
     path: '/category',
     route: CategoryRoute,
   },
+  {
+    path: '/products-category',
+    route: ProductCategoryRoute,
+  },
+  {
+    path: '/products',
+    route: ProductRoute,
+  },
+  {
+    path: '/user-save-products',
+    route: UserSaveProductRoute,
+  },
+  {
+    path: '/add-to-cart',
+    route: AddToCartRoute,
+  },
+  {
+    path: '/favorite-products',
+    route: FavoriteProductRoute,
+  },
+  {
+    path: '/service-logger',
+    route: ServiceLoggerRoute,
+  },
+  {
+    path: '/routing-reminder',
+    route: RoutingReminderRoute,
+  },
 
+  {
+    path: '/tips-guideline',
+    route: TipsAndGuidelineRoute,
+  },
   {
     path: '/friend-ship',
     route: FriendShipsRoute,
@@ -61,7 +104,18 @@ const moduleRoutes = [
     path: '/all-text-fields',
     route: AllTextFieldRoute,
   },
-
+  {
+    path: '/payment',
+    route: PaymentRoute,
+  },
+  {
+    path: '/payment-history',
+    route: PaymentHistoryRoute,
+  },
+  {
+    path: '/order',
+    route: OrdersRoute,
+  },
   {
     path: '/notification',
     route: NotificationRoute,

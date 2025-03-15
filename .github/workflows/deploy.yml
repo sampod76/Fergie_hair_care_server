@@ -1,0 +1,102 @@
+name: education Backend CI/CD
+
+on:
+  push:
+    branches: ['main']
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.x
+
+      - name: Check if Yarn is installed
+        run: |
+          if ! command -v yarn &> /dev/null; then
+            echo "Yarn not found, installing..."
+            npm install -g yarn
+          else
+            echo "Yarn is already installed."
+          fi
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.yarn/cache
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Clean Install Dependencies
+        run: yarn install --check-files
+
+      - name: Build the project
+        run: yarn build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-output
+          path: . # Adjust if build output is in a specific folder
+
+  deploy:
+    # needs: build
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: 23.x
+          cache: 'yarn'
+
+      - name: Check Node.js version
+        run: node -v
+
+      - name: Check if PM2 is installed
+        run: |
+          if ! command -v pm2 &> /dev/null; then
+            echo "PM2 not found, installing..."
+            npm install -g pm2
+          else
+            echo "PM2 is already installed."
+          fi
+
+      - name: Check if 7z is installed
+        run: |
+          if ! command -v 7z &> /dev/null; then
+            echo "7z not found, installing..."
+            sudo apt-get install p7zip-full
+          else
+            echo "7z is already installed."
+          fi
+
+      - name: Change Directory
+        run: cd /home/sampod/server-runner/_work/Fergie_hair_care_server/Fergie_hair_care_server
+
+      - name: Unzip environment
+        run: 7z x .env.zip -p"${{ secrets.ZIP_PASS }}" -o./ -y
+
+      - name: Install Dependencies
+        run: yarn install --check-files
+
+      - name: Build the Project
+        run: yarn build
+
+      - name: Check if server is running and restart or start accordingly
+        run: |
+          # Check if the process is running
+          if pm2 list | grep -q "server"; then
+            echo "server is already running, restarting it..."
+            pm2 restart server
+          else
+            echo "server is not running, starting it..."
+            pm2 start ecosystem.config.js --env production
+          fi

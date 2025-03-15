@@ -1,34 +1,102 @@
-import mongoose, { Schema, model } from 'mongoose';
+import { Schema, model } from 'mongoose';
 
 import { ENUM_STATUS, STATUS_ARRAY } from '../../../global/enum_constant_type';
 import { mongooseFileSchema } from '../../../global/schema/global.schema';
-import ApiError from '../../errors/ApiError';
+import { ENUM_REDIS_KEY } from '../../redis/consent.redis';
+import { redisClient } from '../../redis/redis';
 import { CategoryModel, ICategory } from './interface.category';
+const childCategorySchema = new Schema(
+  {
+    value: {
+      type: String,
+    },
+    label: {
+      type: String,
+    },
+    uid: {
+      type: String,
+      trim: true,
+      index: true,
+      unique: true,
+    },
+    serialNumber: {
+      type: Number,
+    },
+    children: [
+      {
+        value: {
+          type: String,
+        },
+        label: {
+          type: String,
+        },
+        uid: {
+          type: String,
+          trim: true,
+          index: true,
+          unique: true,
+        },
+        serialNumber: {
+          type: Number,
+        },
+        status: {
+          type: String,
+          enum: STATUS_ARRAY,
+          default: ENUM_STATUS.ACTIVE,
+        },
+        isDelete: {
+          type: Boolean,
+          default: false,
+          index: true,
+        },
+      },
+    ],
+    status: {
+      type: String,
+      enum: STATUS_ARRAY,
+      default: ENUM_STATUS.ACTIVE,
+    },
+    isDelete: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+  },
+  { _id: false },
+);
 const CategorySchema = new Schema<ICategory, CategoryModel>(
   {
-    title: {
+    value: {
       type: String,
       required: true,
       trim: true,
       index: true,
     },
-    subTitle: {
+    label: {
       type: String,
     },
+    children: [childCategorySchema],
+    uid: {
+      type: String,
+      trim: true,
+      index: true,
+      unique: true,
+    },
     image: mongooseFileSchema,
+
     serialNumber: {
       type: Number,
-      default: 9999,
+      default: 0,
     },
     status: {
       type: String,
       enum: STATUS_ARRAY,
       default: ENUM_STATUS.ACTIVE,
     },
-
     isDelete: {
       type: Boolean,
       default: false,
+      index: true,
     },
     //--- for --TrashCategory---
     oldRecord: {
@@ -44,33 +112,79 @@ const CategorySchema = new Schema<ICategory, CategoryModel>(
     },
   },
 );
+// after findOneAndUpdate then data then call this hook
+CategorySchema.post('findOneAndDelete', async function (data: ICategory) {
+  try {
+    if (!data) {
+      console.log('No document found for deletion');
+      return;
+    }
+    //@ts-ignore
+    if (typeof data?.toObject === 'function') {
+      //@ts-ignore
+      data = data?.toObject();
+    }
+    // Clear Redis Cache (if applicable)
+    const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
+    if (data?.categoryType) {
+      const res2 = await redisClient.del(
+        ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
+      );
+    }
+  } catch (error: any) {
+    console.error('Error in post-delete hook:', error);
+  }
+});
+// after findOneAndUpdate then data then call this hook
+CategorySchema.post(
+  'findOneAndUpdate',
+  async function (data: ICategory & { _id: string }, next: any) {
+    try {
+      //@ts-ignore
+      if (typeof data?.toObject === 'function') {
+        //@ts-ignore
+        data = data?.toObject();
+      }
+      const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
+      if (data?.categoryType) {
+        const res2 = await redisClient.del(
+          ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
+        );
+      }
+      // console.log('update');
+      next();
+    } catch (error: any) {
+      next(error);
+    }
+  },
+);
+//after save
+CategorySchema.post('save', async function (data: ICategory, next) {
+  try {
+    //@ts-ignore
+    if (typeof data?.toObject === 'function') {
+      //@ts-ignore
+      data = data?.toObject();
+    }
 
-CategorySchema.pre('findOneAndDelete', async function (next) {
+    const res = await redisClient.del(ENUM_REDIS_KEY.RIS_All_Categories);
+    if (data?.categoryType) {
+      const res2 = await redisClient.del(
+        ENUM_REDIS_KEY.RIS_All_Categories + `:${data?.categoryType}`,
+      );
+    }
+    next();
+  } catch (error: any) {
+    next(error);
+  }
+});
+
+// Before save
+CategorySchema.pre('save', async function (next) {
   try {
     // eslint-disable-next-line @typescript-eslint/no-this-alias
-    const dataId = this.getFilter();
-    //  console.log(dataId); //{ _id: '6607a2b70d0b8a202a1b81b4' }
-    const { _id, ...data } = (await this.model
-      .findOne({ _id: dataId?._id })
-      .lean()) as { _id: mongoose.Schema.Types.ObjectId; data: any };
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    //@ts-ignore
-    if (!data?.oldRecord?.refId) {
-      if (_id) {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        //@ts-ignore
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { status, isDelete, createdAt, updatedAt, ...otherData } = data;
-        await TrashCategory.create({
-          ...otherData,
-          oldRecord: { refId: _id, collection: 'categories' },
-        });
-        // or
-        // const result = await DeleteCategory.create(data);
-      } else {
-        throw new ApiError(400, 'Not found this item');
-      }
-    }
+    const data = this;
+    // console.log('🚀 ~ data:', data);
     next();
   } catch (error: any) {
     next(error);

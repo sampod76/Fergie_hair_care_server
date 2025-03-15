@@ -17,7 +17,7 @@ import {
 } from '../../../utils/cryptoEncryptDecrypt';
 import { sendMailHelper } from '../../../utils/sendMail';
 import ApiError from '../../errors/ApiError';
-import { IEmployeeUser } from '../allUser/employee/interface.employee';
+import { IGeneralUser } from '../allUser/generalUser/interface.generalUser';
 import { ENUM_VERIFY, IUserRefAndDetails } from '../allUser/typesAndConst';
 import { IUser } from '../allUser/user/user.interface';
 import { User } from '../allUser/user/user.model';
@@ -38,7 +38,7 @@ const loginUser = async (
   const isUserExist = (await User.isUserFindMethod(
     { email },
     { populate: true, password: true },
-  )) as IUser & { roleInfo: IEmployeeUser };
+  )) as IUser & { roleInfo: IGeneralUser };
   // console.log('🚀 ~ isUserExist:', isUserExist);
   if (!isUserExist) {
     throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'User does not exist');
@@ -116,6 +116,77 @@ const loginOutFromDb = async (
   // const result = await UserLoginHistory.findByIdAndDelete(id);
 
   return result;
+};
+const loginUserBySocialMedia = async (payload: {
+  email: string;
+}): Promise<ILoginUserResponse | any> => {
+  const { email } = payload;
+
+  const isUserExist = await User.isUserFindMethod(
+    { email },
+    { populate: true },
+  );
+
+  if (!isUserExist) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'User does not exist');
+  } else if (isUserExist.isDelete === true) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'The account is deleted');
+  } else if (isUserExist.status === ENUM_STATUS.INACTIVE) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Your account is inactive');
+  } else if (isUserExist.status === ENUM_STATUS.BLOCK) {
+    throw new ApiError(httpStatus.NOT_FOUND, `Your account is blocked`);
+  } else if (isUserExist.verify !== ENUM_VERIFY.ACCEPT) {
+    throw new ApiError(
+      httpStatus.FORBIDDEN,
+      `User is ${isUserExist.verify} state`,
+    );
+  }
+
+  //create access token & refresh token
+  const { role, _id, roleInfo, userUniqueId, roleType, author } =
+    isUserExist as any;
+
+  const accessToken = jwtHelpers.createToken(
+    {
+      role,
+      userId: _id,
+      roleBaseUserId: roleInfo._id,
+      roleType,
+      authorUserId: isUserExist?.authUserId,
+      // profileImage: roleInfo.profileImage,
+      // name: roleInfo.name,
+    },
+    config.jwt.secret as Secret,
+    config.jwt.expires_in as string,
+  );
+
+  const refreshToken = jwtHelpers.createToken(
+    {
+      role,
+      userId: _id,
+      roleBaseUserId: roleInfo._id,
+      roleType,
+      authorUserId: isUserExist?.authUserId,
+    },
+    config.jwt.refresh_secret as Secret,
+    config.jwt.refresh_expires_in as string,
+  );
+
+  return {
+    accessToken,
+    refreshToken,
+    userData: {
+      role,
+      roleBaseUserId: roleInfo._id,
+      userId: _id,
+      userUniqueId,
+      roleType,
+      authorUserId: isUserExist?.authUserId,
+      email,
+      name: roleInfo.name,
+      profileImage: roleInfo.profileImage,
+    },
+  };
 };
 const enableTwoFactorAuthFromDb = async (
   data: { password: string },
@@ -475,4 +546,6 @@ export const AuthService = {
   //
   enableTwoFactorAuthFromDb,
   verifyTwoFactorAuthFromDb,
+  //
+  loginUserBySocialMedia,
 };

@@ -5,10 +5,9 @@ import { I_STATUS, STATUS_ARRAY } from '../../../../global/enum_constant_type';
 import { zodFileAfterUploadSchema } from '../../../../global/schema/global.schema';
 import ApiError from '../../../errors/ApiError';
 import { I_VERIFY, VERIFY_ARRAY } from '../typesAndConst';
-import { I_ROLE_TYPE, I_USER_ROLE, USER_ROLE_ARRAY } from './user.interface';
+import { I_USER_ROLE, USER_ROLE_ARRAY } from './user.interface';
 
-import { ENUM_USER_ROLE } from '../../../../global/enums/users';
-import { ROLE_TYPE_ARRAY, generalUserSchema } from './zod/generalUser.zod';
+import { generalUserSchema } from './zod/generalUser.zod';
 import { vendorUserSchema } from './zod/vendorUserZod';
 
 const authData = z.object({
@@ -66,7 +65,6 @@ const createUserZodSchema = z
       authData: authData,
       admin: adminZod_BodyData.optional(),
       generalUser: generalUserZod_BodyData.optional(),
-      vendor: vendorUserZod_BodyData.optional(),
     }),
   })
   .refine(
@@ -104,29 +102,14 @@ const updateUserZodSchema = z.object({
   }),
 });
 
-const tempUser = z
-  .object({
-    body: z.object({
-      email: z.string({ required_error: 'email is required' }),
-      role: z.enum([...USER_ROLE_ARRAY] as [I_USER_ROLE, ...I_USER_ROLE[]], {
-        required_error: 'role is required',
-      }),
-      company: z
-        .enum(ROLE_TYPE_ARRAY as [I_ROLE_TYPE], {
-          required_error: 'company is required',
-        })
-        .optional(),
+const tempUser = z.object({
+  body: z.object({
+    email: z.string({ required_error: 'email is required' }),
+    role: z.enum([...USER_ROLE_ARRAY] as [I_USER_ROLE, ...I_USER_ROLE[]], {
+      required_error: 'role is required',
     }),
-  })
-  .superRefine((val, ctx) => {
-    if (val.body.role === ENUM_USER_ROLE.generalUser) {
-      if (!val.body.company)
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: 'company is required',
-        });
-    }
-  });
+  }),
+});
 
 export const UserValidation = {
   createUserZodSchema,

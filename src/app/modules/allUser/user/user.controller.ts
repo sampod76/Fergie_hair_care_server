@@ -9,7 +9,7 @@ import { PAGINATION_FIELDS } from '../../../../global/constant/pagination';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { jwtHelpers } from '../../../../helper/jwtHelpers';
 import ApiError from '../../../errors/ApiError';
-import { findAllSocketsIdsFromUserId } from '../../../redis/service.redis';
+import { RedisAllQueryServiceOop } from '../../../redis/service.redis';
 import catchAsync from '../../../share/catchAsync';
 import pick from '../../../share/pick';
 import sendResponse from '../../../share/sendResponse';
@@ -56,6 +56,7 @@ const createUser = catchAsync(async (req: Request, res: Response) => {
 });
 const createUserTempUser = catchAsync(async (req: Request, res: Response) => {
   const data = req.body;
+
   let user;
   //! ------ validate admin or super admin -----if create admin or supper admin create then must be send token
   if (data.role === ENUM_USER_ROLE.admin) {
@@ -88,8 +89,18 @@ const createUserTempUser = catchAsync(async (req: Request, res: Response) => {
     data: { _id: result?._id },
   });
 });
-
+const createUserByGoogle = catchAsync(async (req: Request, res: Response) => {
+  //------------------------------------------
+  const result = await UserService.createUserByGooglefromDb(req.body, req);
+  sendResponse<IUser>(req, res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User created successfully',
+    data: result,
+  });
+});
 const getAllUsers = catchAsync(async (req: Request, res: Response) => {
+  console.log(req.path);
   const filters = pick(req.query, userFilterableFields);
   const paginationOptions = pick(req.query, PAGINATION_FIELDS);
   const result = await UserService.getAllUsersFromDB(
@@ -150,7 +161,8 @@ const getSingleUser = catchAsync(async (req: Request, res: Response) => {
 });
 const isOnline = catchAsync(async (req: Request, res: Response) => {
   const userId = req.params.userid;
-  const result = await findAllSocketsIdsFromUserId(userId);
+  const redisOop = new RedisAllQueryServiceOop();
+  const result = await redisOop.findAllSocketsIdsFromUserId(userId);
   sendResponse<any>(req, res, {
     statusCode: httpStatus.OK,
     success: true,
@@ -181,4 +193,6 @@ export const UserController = {
   isOnline,
   //
   dashboardUsers,
+  //
+  createUserByGoogle,
 };

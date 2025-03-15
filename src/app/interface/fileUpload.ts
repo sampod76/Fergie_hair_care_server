@@ -36,6 +36,7 @@ export type IFileAfterUpload = {
   mimetype: string;
   server_url?: string;
   filename?: string;
+  name?: string;
   uid?: string;
   path?: string;
   url?: string;
@@ -43,7 +44,7 @@ export type IFileAfterUpload = {
   durl?: string;
   platform: IImagePlatform;
   cdn?: string; //https://www.youtube.com/watch?v=kbI7kRWAU-w
-  // fileId: Types.ObjectId | string | IFileUploade;
+  // productId: Types.ObjectId | string | IFileUploade;
 };
 
 /* 

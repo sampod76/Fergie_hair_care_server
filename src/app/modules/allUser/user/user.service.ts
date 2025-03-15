@@ -4,7 +4,7 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 import mongoose, { PipelineStage, Schema, Types } from 'mongoose';
 import { z } from 'zod';
-import { ENUM_STATUS, ENUM_YN } from '../../../../global/enum_constant_type';
+import { ENUM_STATUS } from '../../../../global/enum_constant_type';
 import { ENUM_USER_ROLE } from '../../../../global/enums/users';
 import { paginationHelper } from '../../../../helper/paginationHelper';
 import ApiError from '../../../errors/ApiError';
@@ -17,11 +17,15 @@ import { LookupAnyRoleDetailsReusable } from '../../../../helper/lookUpResuable'
 import { ENUM_QUEUE_NAME } from '../../../queue/consent.queus';
 import { emailQueue } from '../../../queue/jobs/emailQueues';
 
+import { AuthService } from '../../auth/auth.service';
 import { GeneralUser } from '../generalUser/model.generalUser';
-import { IUserRefAndDetails } from '../typesAndConst';
-import { Vendor } from '../vendor/model.vendor';
 import { userSearchableFields } from './user.constant';
-import { ITempUser, IUser, IUserFilters } from './user.interface';
+import {
+  ENUM_ACCOUNT_TYPE,
+  ITempUser,
+  IUser,
+  IUserFilters,
+} from './user.interface';
 import { TempUser, User } from './user.model';
 import { generateUserId } from './user.utils';
 import { UserValidation } from './user.validation';
@@ -29,11 +33,9 @@ const createUser = async (
   data: any,
   req: Request,
 ): Promise<IUser | null | any> => {
-  const user = req.user as IUserRefAndDetails;
   // auto generated incremental id
   const authData = data?.authData as z.infer<typeof UserValidation.authData> & {
     userUniqueId: string;
-    company: string;
   };
   const roleData = data[authData?.role];
   // default password
@@ -60,9 +62,7 @@ const createUser = async (
     throw new ApiError(httpStatus.BAD_REQUEST, 'OTP has expired');
   }
   //--add company in verifyTempUser
-  authData.company = verifyTempUser.company;
-  roleData.company = verifyTempUser.company;
-  //
+
   const session = await mongoose.startSession();
   let createdUser;
   let roleCreate;
@@ -77,16 +77,13 @@ const createUser = async (
     if (Array.isArray(createdUser) && !createdUser?.length) {
       throw new ApiError(400, 'Failed to create user');
     }
+    roleData.userId = createdUser[0]._id;
     if (authData?.role === ENUM_USER_ROLE.admin) {
       roleCreate = await Admin.create([{ ...roleData, ...authData }], {
         session,
       });
     } else if (authData?.role === ENUM_USER_ROLE.generalUser) {
       roleCreate = await GeneralUser.create([{ ...roleData, ...authData }], {
-        session,
-      });
-    } else if (authData?.role === ENUM_USER_ROLE.vendor) {
-      roleCreate = await Vendor.create([{ ...roleData, ...authData }], {
         session,
       });
     }
@@ -119,7 +116,7 @@ const createTempUserFromDb = async (
   req: Request,
 ): Promise<IUser | null> => {
   const previousUser = await User.findOne({ email: user.email?.toLowerCase() });
-  if (previousUser?.isDelete === ENUM_YN.YES) {
+  if (previousUser?.isDelete === true) {
     throw new ApiError(
       400,
       'The account associated with this email is deleted. Please choose another email.',
@@ -161,6 +158,72 @@ const createTempUserFromDb = async (
   });
   return createdUser;
 };
+const createUserByGooglefromDb = async (
+  data: any,
+  req: Request,
+): Promise<IUser | null | any> => {
+  // auto generated incremental id
+  const authData = data?.authData as z.infer<typeof UserValidation.authData> & {
+    userUniqueId: string;
+    accountType: string;
+  };
+
+  const roleData = data[authData?.role];
+  if (authData?.role !== ENUM_USER_ROLE.generalUser) {
+    throw new ApiError(
+      httpStatus.NOT_ACCEPTABLE,
+      'Only vendor allowed google login',
+    );
+  }
+  const findUser = await User.findOne({ email: authData?.email });
+  if (findUser) {
+    if (findUser?.isDelete === true) {
+      throw new ApiError(409, 'User already delete');
+    }
+    if (findUser.accountType === ENUM_ACCOUNT_TYPE.google) {
+      const loginDetails = await AuthService.loginUserBySocialMedia({
+        email: findUser?.email,
+      });
+
+      return loginDetails;
+    }
+    throw new ApiError(409, 'User already registered with google');
+  }
+  //--add roleType in verifyTempUser
+  authData.accountType = ENUM_ACCOUNT_TYPE.google;
+  //
+  roleData.accountType = ENUM_ACCOUNT_TYPE.google;
+  //
+  const session = await mongoose.startSession();
+  let createdUser;
+  let roleCreate;
+  try {
+    session.startTransaction();
+    const id = await generateUserId();
+    authData.userUniqueId =
+      authData?.role?.toUpperCase()?.slice(0, 2) + '-' + id;
+    createdUser = await User.create([{ ...authData }], { session });
+    if (Array.isArray(createdUser) && !createdUser?.length) {
+      throw new ApiError(400, 'Failed to create user');
+    }
+    roleCreate = await GeneralUser.create([{ ...roleData, ...authData }], {
+      session,
+    });
+    if (Array.isArray(roleCreate) && !roleCreate.length) {
+      throw new ApiError(400, 'Failed to create role user');
+    }
+    await session.commitTransaction();
+    await session.endSession();
+  } catch (error: any) {
+    await session.abortTransaction();
+    await session.endSession();
+    throw new Error(error?.message);
+  }
+  const loginDetails = await AuthService.loginUserBySocialMedia({
+    email: roleData?.email,
+  });
+  return loginDetails;
+};
 
 const getAllUsersFromDB = async (
   filters: IUserFilters,
@@ -178,8 +241,10 @@ const getAllUsersFromDB = async (
   } = filters;
 
   filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete
-    : ENUM_YN.NO;
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
 
   const andConditions = [];
 
@@ -269,8 +334,8 @@ const getAllUsersFromDB = async (
       collections: [
         {
           roleMatchFiledName: 'role',
-          idFiledName: '$email',
-          pipeLineMatchField: '$email',
+          idFiledName: '$userId',
+          pipeLineMatchField: '$_id',
           outPutFieldName: 'roleInfo',
         },
       ],
@@ -302,12 +367,20 @@ const dashboardUsersFromDB = async (
   filters: IUserFilters,
   paginationOptions: IPaginationOption,
   req: Request,
-): Promise<IGenericResponse<IUser[] | null>> => {
+): Promise<IGenericResponse<any | null>> => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { searchTerm, needProperty, multipleRole, ...filtersData } = filters;
+  const {
+    searchTerm,
+    needProperty,
+    multipleRole,
+    yearToQuery = new Date().getFullYear(),
+    ...filtersData
+  } = filters;
   filtersData.isDelete = filtersData.isDelete
-    ? filtersData.isDelete
-    : ENUM_YN.NO;
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
 
   const andConditions = [];
 
@@ -345,16 +418,95 @@ const dashboardUsersFromDB = async (
     { $match: whereConditions },
     {
       $group: {
-        _id: '$company',
+        _id: '$role',
         totalUsers: { $sum: 1 },
       },
     },
   ];
+  const pipeline2: PipelineStage[] = [
+    { $match: whereConditions },
+    {
+      $addFields: {
+        year: { $year: '$createdAt' },
+        monthNumber: { $month: '$createdAt' }, // Directly extract month number
+        amount: 1, // every user is one
+      },
+    },
+    {
+      $match: {
+        year: Number(yearToQuery),
+      },
+    },
+    {
+      $project: {
+        yearMonth: {
+          $dateToString: {
+            format: '%Y-%m',
+            date: '$createdAt',
+          },
+        },
+        amount: 1,
+        monthNumber: 1, // Include monthNumber for later use
+      },
+    },
+    {
+      $group: {
+        _id: '$yearMonth',
+        totalAmount: { $sum: '$amount' },
+        monthNumber: { $first: '$monthNumber' }, // Retain monthNumber
+      },
+    },
+    {
+      $project: {
+        _id: 0,
+        month: {
+          $let: {
+            vars: {
+              monthsInString: [
+                'January',
+                'February',
+                'March',
+                'April',
+                'May',
+                'June',
+                'July',
+                'August',
+                'September',
+                'October',
+                'November',
+                'December',
+              ],
+            },
+            in: {
+              $arrayElemAt: [
+                '$$monthsInString',
+                { $subtract: ['$monthNumber', 1] },
+              ],
+            },
+          },
+        },
+        value: '$totalAmount',
+        serialNumber: '$monthNumber',
+      },
+    },
+    {
+      $sort: { serialNumber: 1 },
+    },
+  ];
 
-  const resultArray = [User.aggregate(pipeline)];
-  const result = await Promise.all(resultArray);
+  // const resultArray = [User.aggregate(pipeline), User.aggregate(pipeline2)];
+  // const result = await Promise.all(resultArray);
+  //@ts-ignore
+  const fetchData = await User.aggregate([
+    {
+      $facet: {
+        totalUser: pipeline,
+        userChart: pipeline2,
+      },
+    },
+  ]);
 
-  // const result = await User.aggregate(pipeline);
+  const result = fetchData[0];
   // const total = await User.countDocuments(whereConditions);
 
   return {
@@ -363,7 +515,7 @@ const dashboardUsersFromDB = async (
       limit,
       total: 0,
     },
-    data: result[0] as IUser[],
+    data: result,
   };
 };
 
@@ -504,7 +656,7 @@ const deleteUserFromDB = async (
     session.startTransaction();
     data = await User.findOneAndUpdate(
       { _id: id },
-      { isDelete: ENUM_YN.YES },
+      { isDelete: true },
       { new: true, runValidators: true, session },
     );
     if (!data?._id) {
@@ -514,7 +666,7 @@ const deleteUserFromDB = async (
     if (data?.role === ENUM_USER_ROLE.generalUser) {
       roleUser = await GeneralUser.findOneAndUpdate(
         { email: data?.email },
-        { isDelete: ENUM_YN.YES },
+        { isDelete: true },
         { runValidators: true, new: true },
       );
     } else if (
@@ -523,7 +675,7 @@ const deleteUserFromDB = async (
     ) {
       roleUser = await Admin.findOneAndUpdate(
         { email: data?.email },
-        { isDelete: ENUM_YN.YES },
+        { isDelete: true },
         { runValidators: true, new: true },
       );
     }
@@ -551,4 +703,5 @@ export const UserService = {
   createTempUserFromDb,
   //
   dashboardUsersFromDB,
+  createUserByGooglefromDb,
 };

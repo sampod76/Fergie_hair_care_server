@@ -9,7 +9,7 @@ import { Request } from 'express';
 import httpStatus from 'http-status';
 
 import ApiError from '../../errors/ApiError';
-import { ALL_TEXT_FIELD_SEARCHABLE_FIELDS } from './consent.AllTextField';
+import { ALL_TEXT_FIELD_SEARCHABLE_FIELDS } from './constant.AllTextField';
 import { IAllTextField, IAllTextFieldFilters } from './interface.AllTextField';
 import { AllTextField } from './model.AllTextField';
 

@@ -329,7 +329,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
             },
           ],
 
-          employeeInfo: [
+          generalUserInfo: [
             {
               $match: {
                 [roleMatchFiledName]: ENUM_USER_ROLE.generalUser,
@@ -338,7 +338,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
             //!--------------generalUser-------start----------
             {
               $lookup: {
-                from: 'employees',
+                from: 'generalusers',
                 let: {
                   id: idFiledName.includes('$')
                     ? idFiledName
@@ -386,63 +386,6 @@ export const LookupAnyRoleDetailsReusable = <T>(
               $unwind: `$${outPutFieldName}`,
             },
           ],
-          hradminInfo: [
-            {
-              $match: {
-                [roleMatchFiledName]: ENUM_USER_ROLE.vendor,
-              },
-            },
-            //!--------------hostUser-------start----------
-            {
-              $lookup: {
-                from: 'hradmins',
-                let: {
-                  id: idFiledName.includes('$')
-                    ? idFiledName
-                    : `$${idFiledName}`,
-                },
-                pipeline: [
-                  {
-                    $match: {
-                      $expr: {
-                        $eq: [
-                          pipeLineMatchField
-                            ? pipeLineMatchField.includes('$')
-                              ? pipeLineMatchField
-                              : `$${pipeLineMatchField}`
-                            : '_id',
-                          '$$id',
-                        ],
-                      },
-                      // Additional filter conditions for collection2
-                    },
-                  },
-                  // Additional stages for collection2
-                  { $project: modifyProject },
-                ],
-                as: 'hradminsDetails',
-              },
-            },
-
-            //মনে রাখতে হবে যদি এটি দেওয়া না হয় তাহলে সে যখন কোন একটি ক্যাটাগরির থাম্বেল না পাবে সে তাকে দেবে না
-            {
-              $addFields: {
-                [outPutFieldName]: {
-                  $cond: {
-                    if: { $eq: [{ $size: '$hradminsDetails' }, 0] },
-                    then: [{}],
-                    else: '$hradminsDetails',
-                  },
-                },
-              },
-            },
-            {
-              $project: { hradminsDetails: 0 },
-            },
-            {
-              $unwind: `$${outPutFieldName}`,
-            },
-          ],
         },
       },
       {
@@ -451,8 +394,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
             $concatArrays: [
               '$superAdminInfo',
               '$adminInfo',
-              '$hradminInfo',
-              '$employeeInfo',
+              '$generalUserInfo',
             ], // Concatenate arrays into a single array
           },
         },
@@ -653,7 +595,7 @@ export const LookupAnyRoleDetailsReusable = <T>(
           hostUserInfo: [
             {
               $match: {
-                role: ENUM_USER_ROLE.vendor,
+                role:  
               },
             },
             //!--------------hostUser-------start----------

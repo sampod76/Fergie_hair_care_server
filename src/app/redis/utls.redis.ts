@@ -1,4 +1,32 @@
-import { redisClient } from './redis';
+import { Request } from 'express';
+
+export class CacheKeyGenerator {
+  readonly baseUrl: string;
+  readonly params: Record<string, any> = {};
+  constructor(req: Request) {
+    // any / to replace : --> /api/v1/users/123 to api:v1:users:123
+    const path = req.originalUrl.replace(/\?.*$/, '');
+    // this.baseUrl = req.path.replace(/^\/+|\/$/g, '').replace(/\//g, ':');
+    this.baseUrl = path.replace(/^\/+|\/$/g, '').replace(/\//g, ':');
+    Object.entries(req.query).forEach(([key, value]) => {
+      if (value && Boolean(value)) {
+        this.params[key] = value;
+      }
+    });
+  }
+  public generateSortParams(): string {
+    return Object.keys(this.params)
+      .sort()
+      .map(key => `${key}=${this.params[key]}`)
+      .join('&');
+  }
+  public generateKey(): string {
+    const sortParams = this.generateSortParams();
+    return sortParams ? `${this.baseUrl}:${sortParams}` : this.baseUrl;
+  }
+}
+
+/* import { redisClient } from './redis';
 
 export async function deleteAllKeys(pattern: string) {
   let cursor = '0';
@@ -62,3 +90,4 @@ export const redisSetter = async <T>(
     throw new Error(error.message);
   }
 };
+ */

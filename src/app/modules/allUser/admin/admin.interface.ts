@@ -1,20 +1,23 @@
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
+import { I_STATUS } from '../../../../global/enum_constant_type';
 import { ICommonUser } from '../typesAndConst';
 import { I_USER_ROLE } from '../user/user.interface';
-import { I_STATUS, I_YN } from '../../../../global/enum_constant_type';
 
 export type IAdminFilters = {
   searchTerm?: string;
-  delete?: I_YN;
+  delete?: string;
   role?: I_USER_ROLE;
   multipleRole?: I_USER_ROLE[];
   status?: I_STATUS;
-  isDelete?: I_YN;
+  isDelete?: string | boolean;
   author?: string;
 };
 
-export type IAdmin = ICommonUser;
+export type IAdmin = ICommonUser & {
+  authUserId: string | Types.ObjectId;
+  userId: string | Types.ObjectId;
+};
 export type AdminModel = {
   isAdminExistMethod(
     email: string,
