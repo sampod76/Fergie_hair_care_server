@@ -227,7 +227,7 @@ const getAllRoutingReminderFromDb = async (
       const pickDateToModify = new Date(timeTo.setHours(23, 59, 59, 999));
       condition.push({
         //@ts-ignore
-        createdAt: {
+        pickDate: {
           //@ts-ignore
           $gte: new Date(pickDateFrom),
           $lte: new Date(pickDateToModify),
@@ -236,7 +236,7 @@ const getAllRoutingReminderFromDb = async (
     } else if (pickDateFrom && pickDateTo) {
       condition.push({
         //@ts-ignore
-        createdAt: {
+        pickDate: {
           //@ts-ignore
           $gte: new Date(pickDateFrom),
           $lte: new Date(pickDateTo),
