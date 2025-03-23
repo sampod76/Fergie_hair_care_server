@@ -95,22 +95,22 @@ export default {
   payment_url: {
     stripe_success_url:
       process.env.NODE_ENV === 'development'
-        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.STRIPE_SUCCESS_URL_LOCAL}`
-        : `https://${process.env.LIVE_URL}/${process.env.STRIPE_SUCCLIVE_URLESS_URL}`,
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.STRIPE_SUCCESS_URL}`
+        : `https://${process.env.LIVE_URL}/${process.env.STRIPE_SUCCESS_URL}`,
 
     stripe_cancel_url:
       process.env.NODE_ENV === 'development'
-        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.STRIPE_CANCEL_URL_LOCAL}`
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.STRIPE_CANCEL_URL}`
         : `https://${process.env.LIVE_URL}/${process.env.STRIPE_CANCEL_URL}`,
 
     paypal_success_url:
       process.env.NODE_ENV === 'development'
-        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.PAYPAL_SUCCESS_URL_LOCAL}`
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.PAYPAL_SUCCESS_URL}`
         : `https://${process.env.LIVE_URL}/${process.env.PAYPAL_SUCCESS_URL}`,
 
     paypal_cancel_url:
       process.env.NODE_ENV === 'development'
-        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.PAYPAL_CANCEL_URL_LOCAL}`
+        ? `http://${process.env.LOCAL_URL}:${process.env.PORT}/${process.env.PAYPAL_CANCEL_URL}`
         : `https://${process.env.LIVE_URL}/${process.env.PAYPAL_CANCEL_URL}`,
   },
 
