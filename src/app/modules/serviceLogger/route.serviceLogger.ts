@@ -3,7 +3,9 @@ import { ENUM_USER_ROLE } from '../../../global/enums/users';
 import authMiddleware from '../../middlewares/authMiddleware';
 
 import { z } from 'zod';
+import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
+import { uploadAwsS3Bucket } from '../aws/utls.aws';
 import { ServiceLoggerController } from './controller.serviceLogger';
 import { ServiceLoggerValidation } from './validation.serviceLogger';
 
@@ -26,7 +28,8 @@ router
       ENUM_USER_ROLE.superAdmin,
       ENUM_USER_ROLE.generalUser,
     ),
-
+    uploadAwsS3Bucket.array('images'),
+    parseBodyData({}),
     validateRequestZod(ServiceLoggerValidation.createServiceLoggerZodSchema),
     ServiceLoggerController.createServiceLogger,
   );
@@ -62,7 +65,8 @@ router
       ENUM_USER_ROLE.superAdmin,
       ENUM_USER_ROLE.generalUser,
     ),
-
+    uploadAwsS3Bucket.array('images'),
+    parseBodyData({}),
     validateRequestZod(ServiceLoggerValidation.updateServiceLoggerZodSchema),
     ServiceLoggerController.updateServiceLogger,
   )
