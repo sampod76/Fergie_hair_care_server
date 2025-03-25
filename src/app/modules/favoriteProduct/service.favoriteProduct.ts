@@ -32,11 +32,11 @@ const createFavoriteProductByDb = async (
       'author.userId': new Types.ObjectId(user.userId),
       productId: new Types.ObjectId(payload.productId),
       isDelete: false,
-    }).sort({ serialNumber: -1 }),
+    }),
   ]);
 
   if (findAlreadyExists) {
-    throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'Product is already added ');
+    return await FavoriteProduct.findByIdAndDelete(findAlreadyExists._id);
   }
   const result = await FavoriteProduct.create(payload);
   return result;
@@ -242,7 +242,7 @@ const updateFavoriteProductFromDb = async (
   const isExist = (await FavoriteProduct.findById(id)) as IFavoriteProduct & {
     _id: Schema.Types.ObjectId;
   };
-  if (!isExist || !isExist.isDelete) {
+  if (!isExist || isExist.isDelete) {
     throw new ApiError(httpStatus.NOT_FOUND, 'FavoriteProduct not found');
   }
   if (

@@ -279,7 +279,7 @@ const updateServiceLoggerFromDb = async (
   const isExist = (await ServiceLogger.findById(id)) as IServiceLogger & {
     _id: Schema.Types.ObjectId;
   };
-  if (!isExist || !isExist.isDelete) {
+  if (!isExist || isExist.isDelete) {
     throw new ApiError(httpStatus.NOT_FOUND, 'ServiceLogger not found');
   }
   if (

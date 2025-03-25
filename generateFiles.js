@@ -673,7 +673,7 @@ const update${capitalize(folderName)}FromDb = async (
   const isExist = (await ${capitalize(folderName)}.findById(id)) as I${capitalize(folderName)} & {
     _id: Schema.Types.ObjectId;
   };
-  if (!isExist || !isExist.isDelete) {
+  if (!isExist || isExist.isDelete) {
     throw new ApiError(httpStatus.NOT_FOUND, '${capitalize(folderName)} not found');
   }
   if (

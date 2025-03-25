@@ -231,11 +231,13 @@ const updateTipsAndGuidelineFromDb = async (
   payload: Partial<ITipsAndGuideline>,
   req: Request,
 ): Promise<ITipsAndGuideline | null> => {
+  console.log('🚀 ~ id:', id);
   const user = req.user as IUserRef;
   const isExist = (await TipsAndGuideline.findById(id)) as ITipsAndGuideline & {
     _id: Schema.Types.ObjectId;
   };
-  if (!isExist || !isExist.isDelete) {
+  console.log('🚀 ~ isExist ~ isExist:', isExist);
+  if (!isExist || isExist.isDelete) {
     throw new ApiError(httpStatus.NOT_FOUND, 'TipsAndGuideline not found');
   }
   if (
