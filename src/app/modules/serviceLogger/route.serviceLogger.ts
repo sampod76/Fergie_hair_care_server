@@ -7,6 +7,7 @@ import parseBodyData from '../../middlewares/utils/parseBodyData';
 import validateRequestZod from '../../middlewares/validateRequestZod';
 import { uploadAwsS3Bucket } from '../aws/utls.aws';
 import { ServiceLoggerController } from './controller.serviceLogger';
+import { IServiceLogger } from './interface.serviceLogger';
 import { ServiceLoggerValidation } from './validation.serviceLogger';
 
 const router = express.Router();
@@ -30,6 +31,17 @@ router
     ),
     uploadAwsS3Bucket.array('images'),
     parseBodyData({}),
+    (req, res, next) => {
+      const payload = req.body as IServiceLogger;
+      if (typeof payload.categories === 'string') {
+        payload.categories = JSON.parse(payload.categories);
+      }
+      if (typeof payload.images === 'string') {
+        payload.images = JSON.parse(payload.images);
+      }
+      console.log('🚀 ~ payload:', payload);
+      next();
+    },
     validateRequestZod(ServiceLoggerValidation.createServiceLoggerZodSchema),
     ServiceLoggerController.createServiceLogger,
   );

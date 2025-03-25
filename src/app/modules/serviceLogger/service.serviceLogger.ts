@@ -29,6 +29,8 @@ const createServiceLoggerByDb = async (
 ): Promise<IServiceLogger | null> => {
   const user = req.user as IUserRef;
 
+  console.log('🚀 ~ payload:', payload);
+
   const result = await ServiceLogger.create(payload);
   return result;
 };
@@ -39,7 +41,7 @@ const getAllServiceLoggerFromDb = async (
   paginationOptions: IPaginationOption,
   req: Request,
 ): Promise<IGenericResponse<IServiceLogger[]>> => {
-  console.log(filters, 'filters');
+  // console.log(filters, 'filters');
   const user = req?.user as IUserRef;
   //****************search and filters start************/
   const {
