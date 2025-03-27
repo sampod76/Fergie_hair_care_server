@@ -204,6 +204,140 @@ const getAllTipsAndGuidelineFromDb = async (
     data: result,
   };
 };
+//getAllMyTipsAndGuidelineFromDb
+const getAllMyTipsAndGuidelineFromDb = async (
+  filters: ITipsAndGuidelineFilters,
+  paginationOptions: IPaginationOption,
+  req: Request,
+): Promise<IGenericResponse<ITipsAndGuideline[]>> => {
+  const user = req?.user as IUserRef;
+  //****************search and filters start************/
+  const {
+    searchTerm,
+    createdAtFrom,
+    createdAtTo,
+    needProperty,
+    ...filtersData
+  } = filters;
+  //***********cache start************* */
+  // if (user.role !== ENUM_USER_ROLE.admin) {
+  //   filtersData['author.userId'] = user.userId.toString();
+  // }
+  filtersData.isDelete = filtersData.isDelete
+    ? filtersData.isDelete == 'true'
+      ? true
+      : false
+    : false;
+  const andConditions = [];
+  if (searchTerm) {
+    andConditions.push({
+      $or: TipsAndGuideline_SEARCHABLE_FIELDS.map(field => ({
+        [field]: {
+          $regex: searchTerm,
+          $options: 'i',
+        },
+      })),
+    });
+  }
+
+  if (Object.keys(filtersData).length) {
+    const condition = Object.entries(filtersData).map(
+      //@ts-ignore
+      ([field, value]: [keyof typeof filtersData, string]) => {
+        let modifyFiled;
+        /* 
+        if (field === 'userRoleBaseId' || field === 'referRoleBaseId') {
+        modifyFiled = { [field]: new Types.ObjectId(value) };
+        } else {
+         modifyFiled = { [field]: value };
+         } 
+       */
+        if (
+          field === 'author.userId' ||
+          field === 'author.roleBaseUserId' ||
+          field === 'productId'
+        ) {
+          modifyFiled = {
+            [field]: new Types.ObjectId(value),
+          };
+        } else {
+          modifyFiled = { [field]: value };
+        }
+        // console.log(modifyFiled);
+        return modifyFiled;
+      },
+    );
+    //
+    if (createdAtFrom && !createdAtTo) {
+      const timeTo = new Date(createdAtFrom);
+      const createdAtToModify = new Date(timeTo.setHours(23, 59, 59, 999));
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          //@ts-ignore
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtToModify),
+        },
+      });
+    } else if (createdAtFrom && createdAtTo) {
+      condition.push({
+        //@ts-ignore
+        createdAt: {
+          //@ts-ignore
+          $gte: new Date(createdAtFrom),
+          $lte: new Date(createdAtTo),
+        },
+      });
+    }
+
+    //
+    andConditions.push({
+      $and: condition,
+    });
+  }
+
+  //****************search and filters end**********/
+
+  //****************pagination start **************/
+  const { page, limit, skip, sortBy, sortOrder } =
+    paginationHelper.calculatePagination(paginationOptions);
+
+  const sortConditions: { [key: string]: 1 | -1 } = {};
+  if (sortBy && sortOrder) {
+    sortConditions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+  }
+  //****************pagination end ***************/
+
+  const whereConditions =
+    andConditions.length > 0 ? { $and: andConditions } : {};
+
+  // const result = await TipsAndGuideline.find(whereConditions)
+  //   .populate('thumbnail')
+  //   .sort(sortConditions)
+  //   .skip(Number(skip))
+  //   .limit(Number(limit));
+  const pipeline: PipelineStage[] = [
+    { $match: whereConditions },
+    { $sort: sortConditions },
+    { $skip: Number(skip) || 0 },
+    { $limit: Number(limit) || 10 },
+  ];
+
+  // const result = await TipsAndGuideline.aggregate(pipeline);
+  // const total = await TipsAndGuideline.countDocuments(whereConditions);
+  const [result, total] = await Promise.all([
+    TipsAndGuideline.aggregate(pipeline),
+    TipsAndGuideline.countDocuments(whereConditions),
+  ]);
+  return {
+    meta: {
+      page,
+      limit,
+      total,
+    },
+    data: result,
+  };
+};
 
 // get single TipsAndGuidelinee form db
 const getSingleTipsAndGuidelineFromDb = async (
@@ -231,12 +365,11 @@ const updateTipsAndGuidelineFromDb = async (
   payload: Partial<ITipsAndGuideline>,
   req: Request,
 ): Promise<ITipsAndGuideline | null> => {
-  console.log('🚀 ~ id:', id);
   const user = req.user as IUserRef;
   const isExist = (await TipsAndGuideline.findById(id)) as ITipsAndGuideline & {
     _id: Schema.Types.ObjectId;
   };
-  console.log('🚀 ~ isExist ~ isExist:', isExist);
+
   if (!isExist || isExist.isDelete) {
     throw new ApiError(httpStatus.NOT_FOUND, 'TipsAndGuideline not found');
   }
@@ -310,4 +443,5 @@ export const TipsAndGuidelineService = {
   deleteTipsAndGuidelineByIdFromDb,
   //
   updateTipsAndGuidelineSerialNumberFromDb,
+  getAllMyTipsAndGuidelineFromDb,
 };

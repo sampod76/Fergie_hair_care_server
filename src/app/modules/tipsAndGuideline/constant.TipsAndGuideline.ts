@@ -13,6 +13,7 @@ export const TipsAndGuideline_FILTERABLE_FIELDS = [
   'createdAtFrom',
   'createdAtTo',
   //
+  'myTips',
   'author.userId',
   'author.roleBaseUserId',
 ];
