@@ -14,7 +14,7 @@ import {
   LookupReusable,
 } from '../../../helper/lookUpResuable';
 import ApiError from '../../errors/ApiError';
-import { IUserRef } from '../allUser/typesAndConst';
+import { IUserRef, IUserRefAndDetails } from '../allUser/typesAndConst';
 import { TipsAndGuideline_SEARCHABLE_FIELDS } from './constant.TipsAndGuideline';
 import {
   ITipsAndGuideline,
@@ -46,12 +46,13 @@ const getAllTipsAndGuidelineFromDb = async (
   paginationOptions: IPaginationOption,
   req: Request,
 ): Promise<IGenericResponse<ITipsAndGuideline[]>> => {
-  const user = req?.user as IUserRef;
+  const user = req?.user as IUserRefAndDetails;
   //****************search and filters start************/
   const {
     searchTerm,
     createdAtFrom,
     createdAtTo,
+    myTips,
     needProperty,
     ...filtersData
   } = filters;
@@ -75,6 +76,32 @@ const getAllTipsAndGuidelineFromDb = async (
       })),
     });
   }
+  // if (myTips === 'true') {
+  //   const userGenerler = (await GeneralUserService.getSingleGeneralUserFromDB(
+  //     user.roleBaseUserId.toString(),
+  //     req,
+  //   )) as IGeneralUser;
+  //   const getUids = (obj: any) => {
+  //     let uids = [obj.uid]; // Start with the current uid
+  //     if (obj.children) {
+  //       // If there are children, recursively get their uids as well
+  //       uids = uids.concat(getUids(obj.children));
+  //     }
+  //     return uids;
+  //   };
+  //   const uids = getUids(userGenerler.category);
+  //   andConditions.push({
+  //     $or: uids.map((field, i) => {
+  //       if (i)
+  //       return {
+  //         [field]: {
+  //           $regex: searchTerm,
+  //           $options: 'i',
+  //         },
+  //       };
+  //     }),
+  //   });
+  // }
 
   if (Object.keys(filtersData).length) {
     const condition = Object.entries(filtersData).map(
@@ -216,6 +243,7 @@ const getAllMyTipsAndGuidelineFromDb = async (
     searchTerm,
     createdAtFrom,
     createdAtTo,
+    myTips,
     needProperty,
     ...filtersData
   } = filters;

@@ -12,7 +12,12 @@ import { IGenericResponse } from '../../../interface/common';
 import { IPaginationOption } from '../../../interface/pagination';
 
 import { LookupReusable } from '../../../../helper/lookUpResuable';
-import { ENUM_VERIFY, IUserRef } from '../typesAndConst';
+import { ENUM_REDIS_KEY } from '../../../redis/consent.redis';
+import {
+  RedisAllQueryServiceOop,
+  RedisAllSetterServiceOop,
+} from '../../../redis/service.redis';
+import { ENUM_VERIFY, IUserRef, IUserRefAndDetails } from '../typesAndConst';
 import { User } from '../user/user.model';
 import { GeneralUserSearchableFields } from './constant.generalUser';
 import { IGeneralUser, IGeneralUserFilters } from './interface.generalUser';
@@ -245,11 +250,38 @@ const getSingleGeneralUserFromDB = async (
   id: string,
   req: Request,
 ): Promise<IGeneralUser | null> => {
-  const user = await GeneralUser.isGeneralUserExistMethod(id, {
-    populate: true,
-  });
-
-  return user;
+  const user = req.user as IUserRefAndDetails;
+  const oopDec = new RedisAllQueryServiceOop();
+  const getGeneralUser = await oopDec.getAnyDataByKey(
+    ENUM_REDIS_KEY.RIS_RoleBaseUserId + id,
+  );
+  let userData;
+  if (!getGeneralUser) {
+    const user = await GeneralUser.isGeneralUserExistMethod(id, {
+      populate: true,
+    });
+    if (user) {
+      const redisOopSetter = new RedisAllSetterServiceOop();
+      const seter = await redisOopSetter.redisSetter([
+        {
+          key: ENUM_REDIS_KEY.RIS_RoleBaseUserId + id,
+          value: JSON.stringify(user),
+          ttl: 1 * 60 * 60, // 24 hour
+        },
+      ]);
+      // console.log(seter);
+    }
+    userData = user as IGeneralUser;
+  } else {
+    userData = getGeneralUser as IGeneralUser;
+  }
+  if (
+    userData._id.toString() !== user.roleBaseUserId.toString() &&
+    user.role !== ENUM_USER_ROLE.admin
+  ) {
+    throw new ApiError(403, 'forbidden access');
+  }
+  return userData;
 };
 
 const deleteGeneralUserFromDB = async (

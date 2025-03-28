@@ -41,7 +41,11 @@ export class RedisConnectionServiceOop {
 
 export class RedisAllQueryServiceOop extends RedisConnectionServiceOop {
   constructor(redis?: Redis) {
-    super(redis);
+    if (redis) {
+      super(redis);
+    } else {
+      super();
+    }
   }
   async findDataByUserIdAndSocketId(userId: string, socketId: string) {
     const getUsers = await this.getGlobalRedis().get(
@@ -139,7 +143,11 @@ export type IRedisSetter = {
 }[];
 export class RedisAllSetterServiceOop extends RedisConnectionServiceOop {
   constructor(redis?: Redis) {
-    super(redis);
+    if (redis) {
+      super(redis);
+    } else {
+      super();
+    }
   }
 
   // Method to set multiple Redis keys and values using the redisSetter function
