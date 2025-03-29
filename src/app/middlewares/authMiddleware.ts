@@ -54,7 +54,7 @@ const authMiddleware =
       }
 
       if (verifiedUser?.status && verifiedUser?.status !== ENUM_STATUS.ACTIVE) {
-        throw new ApiError(httpStatus.FORBIDDEN, 'forbidden access');
+        throw new ApiError(httpStatus.FORBIDDEN, `Your account is not active`);
       }
       req.user = verifiedUser;
 

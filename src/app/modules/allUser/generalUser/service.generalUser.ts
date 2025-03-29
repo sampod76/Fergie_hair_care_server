@@ -317,7 +317,7 @@ const deleteGeneralUserFromDB = async (
       isExist[0].password &&
       !(await bcrypt.compare(req.body?.password, isExist[0].password))
     ) {
-      throw new ApiError(httpStatus.UNAUTHORIZED, 'Password is incorrect');
+      throw new ApiError(httpStatus.FORBIDDEN, 'Password is incorrect');
     }
   }
 
